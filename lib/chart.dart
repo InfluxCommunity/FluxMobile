@@ -100,7 +100,9 @@ class _ChartState extends State<Chart> {
             show: false,
           ),
           backgroundColor: Colors.black,
-          
+          titlesData: FlTitlesData(
+            bottomTitles: SideTitles(showTitles: false),
+          ),
         ),
       ),
     );
