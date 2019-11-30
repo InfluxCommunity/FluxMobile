@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rapido/rapido.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'dashboard_cell.dart';
 
 class Dashboard extends StatefulWidget {
   final Document userDoc;
@@ -26,7 +27,6 @@ class _DashboardState extends State<Dashboard> {
     String url =
         "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/dashboards/${widget.id}";
     url += "?orgID=${widget.userDoc["orgId"]}";
-    print(url);
     Response response = await get(
       url,
       headers: {
@@ -35,13 +35,12 @@ class _DashboardState extends State<Dashboard> {
       },
     );
     if (response.statusCode != 200) {
-      print("WARNING: ${response.statusCode}: ${response.body}");
+      print(
+          "WARNING: Failed to retrieve dashboard: $url ${response.statusCode}: ${response.body}");
       return;
     }
-
     setState(() {
       cellsObj = json.decode(response.body)["cells"];
-      print(cellsObj);
     });
   }
 
@@ -55,7 +54,11 @@ class _DashboardState extends State<Dashboard> {
           : ListView.builder(
               itemCount: cellsObj.length,
               itemBuilder: (context, index) {
-                return Text(cellsObj[index]["id"]);
+                return DashboardCell(
+                  cellId: cellsObj[index]["id"],
+                  userDoc: widget.userDoc,
+                  dashboardId: widget.id,
+                );
               }),
     );
   }
