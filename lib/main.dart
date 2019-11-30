@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rapido/rapido.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'dashboard.dart';
 
 void main() => runApp(MyApp());
 
@@ -81,6 +82,12 @@ class _MyHomePageState extends State<MyHomePage> {
       emptyListWidget: Center(
         child: userDocs.length == 0 ? needLoginPrompt : loadingPrompt,
       ),
+      onItemTap: (Document dashboardDoc) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (BuildContext context) {
+          return Dashboard(userDoc: userDocs[0], id: dashboardDoc["id"]);
+        }));
+      },
     );
   }
 
@@ -93,7 +100,6 @@ class _MyHomePageState extends State<MyHomePage> {
     String url =
         "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/dashboards";
     url += "?orgID=${userDocs[0]["orgId"]}";
-    print("Getting Dashboard data from: $url");
     Response response = await get(
       url,
       headers: {
@@ -104,19 +110,15 @@ class _MyHomePageState extends State<MyHomePage> {
     if (response.statusCode == 200) {
       var returnedObj = json.decode(response.body);
       List<dynamic> dashboardsObj = returnedObj["dashboards"];
-      print(response.body);
-      dashboardsObj.forEach((dynamic dashboardObj) {
-       
-          dashboardsList.add(Document(initialValues: {
-            "name": dashboardObj["name"],
-            "description": dashboardObj["description"],
-            "id": dashboardObj["id"],
-          }));
       
+      dashboardsObj.forEach((dynamic dashboardObj) {
+        dashboardsList.add(Document(initialValues: {
+          "name": dashboardObj["name"],
+          "description": dashboardObj["description"],
+          "id": dashboardObj["id"],
+        }));
       });
-      setState(() {
-        
-      });
+      setState(() {});
     } else {
       print("ERROR: ${response.statusCode}: ${response.body}");
     }
