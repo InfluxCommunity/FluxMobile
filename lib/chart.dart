@@ -73,7 +73,7 @@ class _ChartState extends State<Chart> {
   @override
   Widget build(BuildContext context) {
     if (lineSpots.length == 0) {
-      return Center(child: Text("waiting for data"));
+      return Center(child: CircularProgressIndicator());
     }
     List<LineChartBarData> lineChartBarDataList = [];
     lineSpots.forEach((List<FlSpot> spots) {
@@ -97,13 +97,10 @@ class _ChartState extends State<Chart> {
         LineChartData(
           lineBarsData: lineChartBarDataList,
           gridData: FlGridData(
-              drawVerticalGrid: true,
-              verticalInterval: 100.0,
-              horizontalInterval: 1.0),
-          backgroundColor: Colors.black,
-          titlesData: FlTitlesData(
-            bottomTitles: SideTitles(showTitles: false),
+            show: false,
           ),
+          backgroundColor: Colors.black,
+          
         ),
       ),
     );
