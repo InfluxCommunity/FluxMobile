@@ -65,54 +65,47 @@ class _ChartState extends State<Chart> {
             );
           } catch (Exception) {}
         });
+        lineSpots.add(spots);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
-    // if (rowsAsListOfValues == []) {
-    //   return Text("nada");
-    // } else {
-    //   List<FlSpot> spots = [];
-    //   double i = 1.0;
-    //   rowsAsListOfValues.forEach((List<dynamic> row) {
-    //     if (i != 1.0) {
-    //       try {
-    //         double y = double.parse(row[6].toString());
-    //         spots.add(FlSpot(i, y));
-    //       } catch (Exception) {}
-    //     }
-    //     i++;
-    //   });
-    //   LineChartData chartOptions = LineChartData(
-    //     lineBarsData: [
-    //       LineChartBarData(
-    //           spots: spots,
-    //           dotData: FlDotData(show: false),
-    //           colors: [Colors.green],
-    //           barWidth: 0.5,
-    //           belowBarData: BarAreaData(show: true, colors: [
-    //             Colors.green.withOpacity(.4),
-    //           ])),
-    //     ],
-    //     gridData: FlGridData(
-    //         drawVerticalGrid: true,
-    //         verticalInterval: 100.0,
-    //         horizontalInterval: 1.0),
-    //     backgroundColor: Colors.black,
-    //     titlesData: FlTitlesData(
-    //       bottomTitles: SideTitles(showTitles: false),
-    //     ),
-    //   );
-
-    //   return Container(
-    //     constraints: BoxConstraints.expand(),
-    //     child: LineChart(
-    //       chartOptions,
-    //     ),
-    //   );
-    // }
+    if (lineSpots.length == 0) {
+      return Center(child: Text("waiting for data"));
+    }
+    List<LineChartBarData> lineChartBarDataList = [];
+    lineSpots.forEach((List<FlSpot> spots) {
+      lineChartBarDataList.add(
+        LineChartBarData(
+          spots: spots,
+          dotData: FlDotData(show: false),
+          colors: [Colors.green],
+          barWidth: 0.5,
+          belowBarData: BarAreaData(
+            show: true,
+            colors: [
+              Colors.green.withOpacity(.4),
+            ],
+          ),
+        ),
+      );
+    });
+    return Container(
+      child: LineChart(
+        LineChartData(
+          lineBarsData: lineChartBarDataList,
+          gridData: FlGridData(
+              drawVerticalGrid: true,
+              verticalInterval: 100.0,
+              horizontalInterval: 1.0),
+          backgroundColor: Colors.black,
+          titlesData: FlTitlesData(
+            bottomTitles: SideTitles(showTitles: false),
+          ),
+        ),
+      ),
+    );
   }
 }
