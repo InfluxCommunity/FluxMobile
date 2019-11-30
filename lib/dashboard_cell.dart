@@ -48,6 +48,7 @@ class _DashboardCellState extends State<DashboardCell> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Card(
         child: cellObj == null
             ? Center(child: Text("Loading Cell ..."))
@@ -56,7 +57,7 @@ class _DashboardCellState extends State<DashboardCell> {
                   Text(cellObj["name"]),
                   Chart(
                     userDoc: widget.userDoc,
-                    queries: cellObj["queries"],
+                    queries: cellObj["properties"]["queries"],
                   )
                 ],
               ));

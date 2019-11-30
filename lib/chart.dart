@@ -6,9 +6,9 @@ import 'package:rapido/rapido.dart';
 
 class Chart extends StatefulWidget {
   final Document userDoc;
-  final List<String> queries;
+  final List<dynamic> queries;
 
-  const Chart({Key key, this.userDoc, this.queries})
+  const Chart({Key key, @required this.userDoc, @required this.queries})
       : super(key: key);
   @override
   _ChartState createState() => _ChartState();
@@ -28,8 +28,7 @@ class _ChartState extends State<Chart> {
     String url = "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/query";
     url += "?org=${widget.userDoc["org"]}";
 
-    widget.queries.forEach((String query) async {
-      List<Map<String, dynamic>> lineData = [];
+    widget.queries.forEach((dynamic queryObj) async {
       Response response = await post(
         url,
         headers: {
@@ -37,22 +36,34 @@ class _ChartState extends State<Chart> {
           "Accept": "application/csv",
           "Content-type": "application/vnd.flux",
         },
-        body:
-            "from (bucket: \"air-5m\") |> range(start: -2d, stop: -1d) |> yield()",
+        body: queryObj["text"],
       );
-
+      if (response.statusCode != 200) {
+        print(
+            "WARNING Failed to execute query: $url: ${response.statusCode}: ${response.body}");
+        print(queryObj["text"]);
+      }
       setState(() {
         CsvToListConverter converter = CsvToListConverter();
         List<List<dynamic>> rows = converter.convert(response.body);
         List<dynamic> keys = rows[0];
-        print("************");
-        print(keys);
 
         rows.removeAt(0);
-        int measurementColumn = keys.indexOf("_measurement");
+        print(keys);
+        print("${rows[0]}");
+        int valueColumn = keys.indexOf("_value");
+        int timeColumn = keys.indexOf("_time");
+
         List<FlSpot> spots = [];
         rows.forEach((List<dynamic> row) {
-           spots.add(FlSpot(0, row[measurementColumn]));
+          try {
+            DateTime t = DateTime.parse(row[timeColumn]);
+            double time = double.parse(t.millisecondsSinceEpoch.toString());
+            double value = double.parse(row[valueColumn].toString());
+            spots.add(
+              FlSpot(time, value),
+            );
+          } catch (Exception) {}
         });
       });
     });
