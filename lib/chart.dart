@@ -80,7 +80,7 @@ class _ChartState extends State<Chart> {
         LineChartBarData lineChartBarData = LineChartBarData(
           spots: spots,
           dotData: FlDotData(show: false),
-          colors: [Color(hexStringToHexInt(color["hex"] + "FF"))],
+          colors: [Color(hexStringToHexInt(color["hex"]))],
           barWidth: 0.5,
           
         );
