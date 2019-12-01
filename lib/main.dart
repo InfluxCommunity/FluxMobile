@@ -32,6 +32,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Text loadingPrompt = Text("Loading Dashboards ...");
   Text needLoginPrompt = Text("Click the Little Person Icon to Log in");
 
+  String errorMessage = "";
+
   DocumentList dashboardsList = DocumentList(
     "Dasbhoards",
     persistenceProvider: null,
@@ -80,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
             })
       ],
       emptyListWidget: Center(
-        child: userDocs.length == 0 ? needLoginPrompt : loadingPrompt,
+        child: errorMessage != "" ? Text(errorMessage) : (userDocs.length == 0 ? needLoginPrompt : loadingPrompt),
       ),
       onItemTap: (Document dashboardDoc) {
         Navigator.push(context,
@@ -93,7 +95,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   loadDashboardList() async {
     if (userDocs.length == 0) {
-      print("WARNING: Tried to load dashboards when user data was not set.");
+      setState(() {
+        dashboardsList.clear();
+        errorMessage = "WARNING: Tried to load dashboards when user data was not set.";
+      });
       return;
     }
 
@@ -110,17 +115,46 @@ class _MyHomePageState extends State<MyHomePage> {
     if (response.statusCode == 200) {
       var returnedObj = json.decode(response.body);
       List<dynamic> dashboardsObj = returnedObj["dashboards"];
-      
-      dashboardsObj.forEach((dynamic dashboardObj) {
-        dashboardsList.add(Document(initialValues: {
-          "name": dashboardObj["name"],
-          "description": dashboardObj["description"],
-          "id": dashboardObj["id"],
-        }));
+
+      setState(() {
+        dashboardsList.clear();
+        errorMessage = "";
+        dashboardsObj.forEach((dynamic dashboardObj) {
+          dashboardsList.add(Document(initialValues: {
+            "name": dashboardObj["name"],
+            "description": dashboardObj["description"],
+            "id": dashboardObj["id"],
+          }));
+        });
       });
-      setState(() {});
     } else {
-      print("ERROR: ${response.statusCode}: ${response.body}");
+      setState(() {
+        dashboardsList.clear();
+        errorMessage = "Dashboard retrieval error:\n\n${requestError(response)}";
+      });
     }
+  }
+
+  requestError(Response response) {
+    var responseAsJson = {};
+    try {
+      responseAsJson = json.decode(response.body);
+    } catch (e) {
+      // response was not JSON
+    }
+
+    String info = "";
+
+    if (response.statusCode == 401) {
+      info = "invalid credentials";
+    } else if (responseAsJson["code"] is String) {
+      info = "${responseAsJson["code"]}";
+    }
+
+    if (responseAsJson["message"] is String) {
+      info += "; details: ${responseAsJson["message"]}";
+    }
+
+    return info;
   }
 }
