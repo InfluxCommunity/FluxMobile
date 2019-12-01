@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     userDocs = DocumentList(
       "InfluxDBUser",
-      labels: {"Organization": "org", "OrgId": "orgId", "Token": "token"},
+      labels: {"Organization": "org", "OrgId": "orgId", "Token": "token", "Base URL": "url"},
       onLoadComplete: ((DocumentList loadedList) {
         setState(() {});
         if (userDocs.length > 0) {

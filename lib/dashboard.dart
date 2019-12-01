@@ -25,7 +25,7 @@ class _DashboardState extends State<Dashboard> {
 
   getDashboardData() async {
     String url =
-        "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/dashboards/${widget.id}";
+        "${widget.userDoc["url"]}/api/v2/dashboards/${widget.id}";
     url += "?orgID=${widget.userDoc["orgId"]}";
     Response response = await get(
       url,

@@ -27,7 +27,7 @@ class _DashboardCellState extends State<DashboardCell> {
 
   setDashboardCellData() async {
     String url =
-        "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/dashboards/${widget.dashboardId}/cells/${widget.cellId}/view";
+        "${widget.userDoc["url"]}/api/v2/dashboards/${widget.dashboardId}/cells/${widget.cellId}/view";
     url += "?orgID=${widget.userDoc["orgId"]}";
     Response response = await get(
       url,
