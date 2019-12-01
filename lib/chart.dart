@@ -21,19 +21,17 @@ class _ChartState extends State<Chart> {
   @override
   void initState() {
     super.initState();
-    getDataSync();
+    _buildChart();
   }
 
-  getDataSync() async {
+  _buildChart() async {
     List<dynamic> queries = widget.cellProperties["queries"];
 
     List<dynamic> colors = widget.cellProperties["colors"];
     int lineIndex = 0;
 
     queries.forEach((dynamic queryObj) async {
-      Response response = await _requestQueryResults(queryObj);
-
-      setState(() {
+      _requestQueryResults(queryObj).then((Response response) {
         List<String> tables = _tablesFromResponse(response);
 
         tables.forEach((String table) {
@@ -52,9 +50,10 @@ class _ChartState extends State<Chart> {
             dynamic color = colors[lineIndex];
             LineChartBarData lineChartBarData =
                 _createBarData(spots, Color(_hexStringToHexInt(color["hex"])));
-
-            lines.add(lineChartBarData);
-            lineIndex += 1;
+            setState(() {
+              lines.add(lineChartBarData);
+              lineIndex += 1;
+            });
           }
         });
       });
