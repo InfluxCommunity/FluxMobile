@@ -49,17 +49,25 @@ class _DashboardCellState extends State<DashboardCell> {
   @override
   Widget build(BuildContext context) {
     
-    return Card(
-        child: cellObj == null
-            ? Center(child: Text("Loading Cell ..."))
-            : Column(
-                children: <Widget>[
-                  Text(cellObj["name"]),
-                  Chart(
-                    userDoc: widget.userDoc,
-                    queries: cellObj["properties"]["queries"],
-                  )
-                ],
-              ));
+    return Container(
+      child: Card(
+          child: cellObj == null
+              ? Center(child: Text("Loading Cell ..."))
+              : Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(cellObj["name"]),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Chart(
+                        userDoc: widget.userDoc,
+                        cellProperties: cellObj["properties"],
+                      ),
+                    )
+                  ],
+                )),
+    );
   }
 }

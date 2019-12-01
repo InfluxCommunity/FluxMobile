@@ -6,9 +6,9 @@ import 'package:rapido/rapido.dart';
 
 class Chart extends StatefulWidget {
   final Document userDoc;
-  final List<dynamic> queries;
+  final dynamic cellProperties;
 
-  const Chart({Key key, @required this.userDoc, @required this.queries})
+  const Chart({Key key, @required this.userDoc, @required this.cellProperties})
       : super(key: key);
   @override
   _ChartState createState() => _ChartState();
@@ -16,7 +16,9 @@ class Chart extends StatefulWidget {
 
 class _ChartState extends State<Chart> {
   String responseString = "initalizing ...";
-  List<List<FlSpot>> lineSpots = [];
+  List<LineChartBarData> lines = [];
+
+
 
   @override
   void initState() {
@@ -28,7 +30,12 @@ class _ChartState extends State<Chart> {
     String url = "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/query";
     url += "?org=${widget.userDoc["org"]}";
 
-    widget.queries.forEach((dynamic queryObj) async {
+    List<dynamic> queries = widget.cellProperties["queries"];
+    List<dynamic> colors = widget.cellProperties["colors"];
+
+    int lineIndex = 0;
+
+    queries.forEach((dynamic queryObj) async {
       Response response = await post(
         url,
         headers: {
@@ -55,6 +62,7 @@ class _ChartState extends State<Chart> {
         int timeColumn = keys.indexOf("_time");
 
         List<FlSpot> spots = [];
+          List<List<FlSpot>> lineSpots = [];
         rows.forEach((List<dynamic> row) {
           try {
             DateTime t = DateTime.parse(row[timeColumn]);
@@ -66,36 +74,39 @@ class _ChartState extends State<Chart> {
           } catch (Exception) {}
         });
         lineSpots.add(spots);
+        dynamic color = colors[lineIndex];
+        print("**********");
+        print(color);
+        LineChartBarData lineChartBarData = LineChartBarData(
+          spots: spots,
+          dotData: FlDotData(show: false),
+          colors: [Color(hexStringToHexInt(color["hex"] + "FF"))],
+          barWidth: 0.5,
+          
+        );
+        lines.add(lineChartBarData);
       });
+      lineIndex  += 1; 
     });
   }
 
+ int hexStringToHexInt(String hex) {
+  hex = hex.replaceFirst('#', '');
+  hex = hex.length == 6 ? 'ff' + hex : hex;
+  int val = int.parse(hex, radix: 16);
+  return val;
+}
   @override
   Widget build(BuildContext context) {
-    if (lineSpots.length == 0) {
+
+    if (lines.length == 0) {
       return Center(child: CircularProgressIndicator());
     }
-    List<LineChartBarData> lineChartBarDataList = [];
-    lineSpots.forEach((List<FlSpot> spots) {
-      lineChartBarDataList.add(
-        LineChartBarData(
-          spots: spots,
-          dotData: FlDotData(show: false),
-          colors: [Colors.green],
-          barWidth: 0.5,
-          belowBarData: BarAreaData(
-            show: true,
-            colors: [
-              Colors.green.withOpacity(.4),
-            ],
-          ),
-        ),
-      );
-    });
+   
     return Container(
       child: LineChart(
         LineChartData(
-          lineBarsData: lineChartBarDataList,
+          lineBarsData: lines,
           gridData: FlGridData(
             show: false,
           ),
