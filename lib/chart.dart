@@ -22,67 +22,37 @@ class _ChartState extends State<Chart> {
   void initState() {
     super.initState();
     getDataSync();
-  } 
+  }
 
   getDataSync() async {
-    String url = "${widget.userDoc["url"]}/api/v2/query";
-    url += "?org=${widget.userDoc["org"]}";
-
     List<dynamic> queries = widget.cellProperties["queries"];
-    print("----------------");
-    print(widget.cellProperties["colors"]);
-    print("****************");
 
     List<dynamic> colors = widget.cellProperties["colors"];
-    int lineIndex = 0; 
+    int lineIndex = 0;
 
     queries.forEach((dynamic queryObj) async {
-      Response response = await post(
-        url,
-        headers: {
-          "Authorization": "Token ${widget.userDoc["token"]}",
-          "Accept": "application/csv",
-          "Content-type": "application/vnd.flux",
-        },
-        body: queryObj["text"],
-      );
-      if (response.statusCode != 200) {
-        print(
-            "WARNING Failed to execute query: $url: ${response.statusCode}: ${response.body}");
-        print(queryObj["text"]);
-      }
+      Response response = await _requestQueryResults(queryObj);
+
       setState(() {
-        String body = response.body;
-        List<String> tables = body.split("\r\n\r\n");
+        List<String> tables = _tablesFromResponse(response);
+
         tables.forEach((String table) {
           CsvToListConverter converter = CsvToListConverter();
           List<List<dynamic>> rows = converter.convert(table);
-     
-          if (rows.length != 0) { 
-            List<dynamic> keys = rows[0];
-            rows.removeAt(0);
+
+          if (rows.length != 0) {
+            List keys = _extractAndRemoveKeysFromTable(rows);
+
             int valueColumn = keys.indexOf("_value");
             int timeColumn = keys.indexOf("_time");
-            List<FlSpot> spots = [];
-            List<List<FlSpot>> lineSpots = [];
-            rows.forEach((List<dynamic> row) {
-              try {
-                DateTime t = DateTime.parse(row[timeColumn]);
-                double time = double.parse(t.millisecondsSinceEpoch.toString());
-                double value = double.parse(row[valueColumn].toString());
-                spots.add(
-                  FlSpot(time, value),
-                );
-              } catch (Exception) {}
-            });
-            lineSpots.add(spots);
+
+            List<FlSpot> spots =
+                _createLineDataFromTableRows(rows, timeColumn, valueColumn);
+
             dynamic color = colors[lineIndex];
-            LineChartBarData lineChartBarData = LineChartBarData(
-              spots: spots,
-              dotData: FlDotData(show: false),
-              colors: [Color(hexStringToHexInt(color["hex"]))],
-              barWidth: 0.5,
-            );
+            LineChartBarData lineChartBarData =
+                _createBarData(spots, Color(_hexStringToHexInt(color["hex"])));
+
             lines.add(lineChartBarData);
             lineIndex += 1;
           }
@@ -91,7 +61,69 @@ class _ChartState extends State<Chart> {
     });
   }
 
-  int hexStringToHexInt(String hex) {
+  LineChartBarData _createBarData(List<FlSpot> spots, Color color) {
+    return LineChartBarData(
+      spots: spots,
+      dotData: FlDotData(show: false),
+      colors: [color],
+      barWidth: 0.5,
+    );
+  }
+
+  List<FlSpot> _createLineDataFromTableRows(
+      List<List> rows, int timeColumn, int valueColumn) {
+    List<FlSpot> spots = [];
+    rows.forEach((List<dynamic> row) {
+      try {
+        _addFlSpotFromRow(row, timeColumn, valueColumn, spots);
+      } catch (Exception) {}
+    });
+    return spots;
+  }
+
+  List _extractAndRemoveKeysFromTable(List<List> rows) {
+    List<dynamic> keys = rows[0];
+    rows.removeAt(0);
+    return keys;
+  }
+
+  void _addFlSpotFromRow(
+      List row, int timeColumn, int valueColumn, List<FlSpot> spots) {
+    DateTime t = DateTime.parse(row[timeColumn]);
+    double time = double.parse(t.millisecondsSinceEpoch.toString());
+    double value = double.parse(row[valueColumn].toString());
+    spots.add(
+      FlSpot(time, value),
+    );
+  }
+
+  List<String> _tablesFromResponse(Response response) {
+    String body = response.body;
+    List<String> tables = body.split("\r\n\r\n");
+    return tables;
+  }
+
+  Future<Response> _requestQueryResults(queryObj) async {
+    String url = "${widget.userDoc["url"]}/api/v2/query";
+    url += "?org=${widget.userDoc["org"]}";
+    Response response = await post(
+      url,
+      headers: {
+        "Authorization": "Token ${widget.userDoc["token"]}",
+        "Accept": "application/csv",
+        "Content-type": "application/vnd.flux",
+      },
+      body: queryObj["text"],
+    );
+    if (response.statusCode != 200) {
+      print(
+          "WARNING Failed to execute query: ${response.request.url}}: ${response.statusCode}: ${response.body}");
+      print(queryObj["text"]);
+    }
+    return response;
+  }
+
+  int _hexStringToHexInt(String hex) {
     hex = hex.replaceFirst('#', '');
     hex = hex.length == 6 ? 'ff' + hex : hex;
     int val = int.parse(hex, radix: 16);
