@@ -3,7 +3,7 @@ import 'package:flux_mobile/influxDB.dart';
 import 'package:rapido/rapido.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
-import 'chart.dart';
+import 'influxdb_chart.dart';
 
 class DashboardCell extends StatefulWidget {
   final String cellId;
@@ -73,7 +73,7 @@ class _DashboardCellState extends State<DashboardCell> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Chart(
+              child: InfluxDBChart(
                 queries: queries,
                 colorScheme: cellObj["properties"]["colors"],
               ),

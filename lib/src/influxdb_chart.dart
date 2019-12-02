@@ -3,19 +3,19 @@ import 'package:flux_mobile/influxDB.dart';
 import 'package:flux_mobile/src/influxdb_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class Chart extends StatefulWidget {
+class InfluxDBChart extends StatefulWidget {
   final List<InfluxDBQuery> queries;
   final List<dynamic> colorScheme;
 
   // TODO: receive instead a List<InfluxDBQuery>, and a color scheme>
-  const Chart(
+  const InfluxDBChart(
       {Key key, @required this.queries, this.colorScheme})
       : super(key: key);
   @override
-  _ChartState createState() => _ChartState();
+  _InfluxDBChartState createState() => _InfluxDBChartState();
 }
 
-class _ChartState extends State<Chart> {
+class _InfluxDBChartState extends State<InfluxDBChart> {
   String responseString = "initalizing ...";
   List<LineChartBarData> lines = [];
 
