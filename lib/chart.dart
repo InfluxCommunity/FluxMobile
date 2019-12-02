@@ -26,36 +26,40 @@ class _ChartState extends State<Chart> {
 
   _buildChart() async {
     List<dynamic> queries = widget.cellProperties["queries"];
+    List<Color> colors = [];
+    List<dynamic> cellColors = widget.cellProperties["colors"];
+    // TODO: improve? map?
+    cellColors.forEach((dynamic c) {
+      colors.add(Color(_hexStringToHexInt(c["hex"])));
+    });
 
-    List<dynamic> colors = widget.cellProperties["colors"];
-    int lineIndex = 0;
+    List<List<List<dynamic>>> series = await _getAllQueries(queries);
 
-    queries.forEach((dynamic queryObj) async {
-      _requestQueryResults(queryObj).then((Response response) {
-        List<String> tables = _tablesFromResponse(response);
+    setState(() {
+      int seriesMax = series.length - 1;
+      int seriesIdx = 0;
+      series.forEach((List<List<dynamic>> rows) {
+        Map<String, int> fieldMap = new Map<String, int>();
+        int colIndex = 0;
 
-        tables.forEach((String table) {
-          CsvToListConverter converter = CsvToListConverter();
-          List<List<dynamic>> rows = converter.convert(table);
-
-          if (rows.length != 0) {
-            List keys = _extractAndRemoveKeysFromTable(rows);
-
-            int valueColumn = keys.indexOf("_value");
-            int timeColumn = keys.indexOf("_time");
-
-            List<FlSpot> spots =
-                _createLineDataFromTableRows(rows, timeColumn, valueColumn);
-
-            dynamic color = colors[lineIndex];
-            LineChartBarData lineChartBarData =
-                _createBarData(spots, Color(_hexStringToHexInt(color["hex"])));
-            setState(() {
-              lines.add(lineChartBarData);
-              lineIndex += 1;
-            });
-          }
+        rows[0].forEach((dynamic field) {
+          fieldMap[field.toString()] = colIndex;
+          colIndex += 1;
         });
+        rows.removeAt(0);
+
+        List<FlSpot> spots = _createLineDataFromTableRows(
+          rows, fieldMap["_time"], fieldMap["_value"]
+        );
+
+        if (spots.length > 0) {
+          LineChartBarData lineChartBarData = _createBarData(
+            spots, _intermediateColor(colors, seriesIdx, seriesMax)
+          );
+          lines.add(lineChartBarData);
+        }
+
+        seriesIdx += 1;
       });
     });
   }
@@ -80,12 +84,6 @@ class _ChartState extends State<Chart> {
     return spots;
   }
 
-  List _extractAndRemoveKeysFromTable(List<List> rows) {
-    List<dynamic> keys = rows[0];
-    rows.removeAt(0);
-    return keys;
-  }
-
   void _addFlSpotFromRow(
       List row, int timeColumn, int valueColumn, List<FlSpot> spots) {
     DateTime t = DateTime.parse(row[timeColumn]);
@@ -96,37 +94,65 @@ class _ChartState extends State<Chart> {
     );
   }
 
-  List<String> _tablesFromResponse(Response response) {
-    String body = response.body;
-    List<String> tables = body.split("\r\n\r\n");
-    return tables;
-  }
-
-  Future<Response> _requestQueryResults(queryObj) async {
-    String url = "${widget.userDoc["url"]}/api/v2/query";
-    url += "?org=${widget.userDoc["org"]}";
-    Response response = await post(
-      url,
-      headers: {
-        "Authorization": "Token ${widget.userDoc["token"]}",
-        "Accept": "application/csv",
-        "Content-type": "application/vnd.flux",
-      },
-      body: queryObj["text"],
-    );
-    if (response.statusCode != 200) {
-      print(
-          "WARNING Failed to execute query: ${response.request.url}}: ${response.statusCode}: ${response.body}");
-      print(queryObj["text"]);
-    }
-    return response;
-  }
-
   int _hexStringToHexInt(String hex) {
     hex = hex.replaceFirst('#', '');
     hex = hex.length == 6 ? 'ff' + hex : hex;
     int val = int.parse(hex, radix: 16);
     return val;
+  }
+
+  Future<List<List<List<dynamic>>>> _getAllQueries(List<dynamic> queries) async {
+    String url = "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/query";
+    url += "?org=${widget.userDoc["org"]}";
+
+    List<List<List<dynamic>>> result = [];
+    List<Future> waitFor = [];
+    queries.forEach((dynamic queryObj) {
+      waitFor.add((() async {
+      Response response = await post(
+        url,
+        headers: {
+          "Authorization": "Token ${widget.userDoc["token"]}",
+          "Accept": "application/csv",
+          "Content-type": "application/vnd.flux",
+        },
+        body: queryObj["text"],
+      );
+      if (response.statusCode != 200) {
+        print(
+            "WARNING Failed to execute query: $url: ${response.statusCode}: ${response.body}");
+        print(queryObj["text"]);
+      } else {
+        response.body.split("\r\n\r\n").forEach((String part) {
+          CsvToListConverter converter = CsvToListConverter();
+          List<List<dynamic>> rows = converter.convert(part);
+          if (rows.length >= 2) {
+            result.add(rows);
+          }
+        });
+      }
+      })());
+    });
+
+    await Future.wait(waitFor);
+
+    return result;
+  }
+
+  Color _intermediateColor(List<Color> colors, int seriesIndex, int seriesCount) {
+    if (seriesCount < 1 || colors.length < 2) {
+      return colors[0];
+    }
+    double t = ((colors.length - 1.0) * seriesIndex) / seriesCount;
+    int i = t.floor();
+    if (i == colors.length - 1) {
+      i -= 1;
+    }
+    return HSVColor.lerp(
+      HSVColor.fromColor(colors[i]),
+      HSVColor.fromColor(colors[i+1]),
+      t - i,
+    ).toColor();
   }
 
   @override
