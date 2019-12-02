@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:rapido/rapido.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
-import 'dashboard.dart';
+import 'package:flux_mobile/influxDB.dart';
+
 
 void main() => runApp(MyApp());
 
