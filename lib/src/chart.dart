@@ -6,9 +6,12 @@ import 'package:rapido/rapido.dart';
 
 class Chart extends StatefulWidget {
   final Document userDoc;
-  final dynamic cellProperties;
+  final List<InfluxDBQuery> queries;
+  final List<dynamic> colorScheme;
 
-  const Chart({Key key, @required this.userDoc, @required this.cellProperties})
+  // TODO: receive instead a List<InfluxDBQuery>, and a color scheme>
+  const Chart(
+      {Key key, @required this.userDoc, @required this.queries, this.colorScheme})
       : super(key: key);
   @override
   _ChartState createState() => _ChartState();
@@ -25,24 +28,15 @@ class _ChartState extends State<Chart> {
   }
 
   _buildChart() async {
-    List<dynamic> queryObjs = widget.cellProperties["queries"];
-    List<Color> colors = [];
-    List<dynamic> cellColors = widget.cellProperties["colors"];
+    List<Color> lineColors = [];
     List<InfluxDBTable> tables = [];
 
-    // TODO: improve? map?
-    cellColors.forEach((dynamic c) {
-      colors.add(Color(_hexStringToHexInt(c["hex"])));
+    widget.colorScheme.forEach((dynamic c) {
+      lineColors.add(Color(_hexStringToHexInt(c["hex"])));
     });
 
     // execute each query and collect up the tables
-    for (dynamic queryObj in queryObjs) {
-      InfluxDBQuery query = InfluxDBQuery(
-          queryString: queryObj["text"],
-          influxDBUrl: widget.userDoc["url"],
-          org: widget.userDoc["org"],
-          token: widget.userDoc["token"]);
-
+    for (InfluxDBQuery query in widget.queries) {
       List<InfluxDBTable> ts = await query.execute();
       tables.addAll(ts);
     }
@@ -53,14 +47,15 @@ class _ChartState extends State<Chart> {
       // get the line data from the table
       List<FlSpot> spots = [];
       for (InfluxDBRow row in table.rows) {
-        spots.add(FlSpot(row.millisecondsSinceEpoch.toDouble(), double.parse(row.value.toString())));
+        spots.add(FlSpot(row.millisecondsSinceEpoch.toDouble(),
+            double.parse(row.value.toString())));
       }
 
       //format each line
       LineChartBarData lineData = LineChartBarData(
         spots: spots,
         dotData: FlDotData(show: false),
-        colors: [_intermediateColor(colors, i, tables.length)],
+        colors: [_intermediateColor(lineColors, i, tables.length)],
         barWidth: 0.5,
       );
 

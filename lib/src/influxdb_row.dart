@@ -7,9 +7,8 @@ class InfluxDBRow extends ListBase<dynamic> {
   List<String> keys;
 
   InfluxDBRow.fromList(
-      {@required List<dynamic> fields, @required List<String> keys}) {
+      {@required List<dynamic> fields, @required this.keys}) {
     _fields = fields;
-    this.keys = keys;
   }
 
   dynamic get value {
