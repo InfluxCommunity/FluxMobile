@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     String url =
-        "https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/dashboards";
+        "${userDocs[0]["url"]}/api/v2/dashboards";
     url += "?orgID=${userDocs[0]["orgId"]}";
     Response response = await get(
       url,
