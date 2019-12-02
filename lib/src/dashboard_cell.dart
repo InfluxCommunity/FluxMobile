@@ -75,8 +75,7 @@ class _DashboardCellState extends State<DashboardCell> {
               padding: const EdgeInsets.all(8.0),
               child: Chart(
                 queries: queries,
-                userDoc: widget.userDoc,
-                colors: cellObj["properties"]["colors"],
+                colorScheme: cellObj["properties"]["colors"],
               ),
             )
           ],

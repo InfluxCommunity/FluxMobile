@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
 import 'package:flux_mobile/src/influxdb_row.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:rapido/rapido.dart';
 
 class Chart extends StatefulWidget {
-  final Document userDoc;
   final List<InfluxDBQuery> queries;
   final List<dynamic> colorScheme;
 
   // TODO: receive instead a List<InfluxDBQuery>, and a color scheme>
   const Chart(
-      {Key key, @required this.userDoc, @required this.queries, this.colorScheme})
+      {Key key, @required this.queries, this.colorScheme})
       : super(key: key);
   @override
   _ChartState createState() => _ChartState();
