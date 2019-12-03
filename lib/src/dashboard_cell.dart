@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
+import 'package:flux_mobile/src/influxdb_color_scheme.dart';
 import 'package:rapido/rapido.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
@@ -65,20 +66,18 @@ class _DashboardCellState extends State<DashboardCell> {
         waitForQueries.add((() async {
           List<InfluxDBTable> ts = await query.execute();
           tables.addAll(ts);
-          print(tables.length);
         })());
       });
     }
     await Future.wait(waitForQueries);
-    setState(() {
-    });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     if (tables == [] || cellObj == null) {
       return Center(child: Text("Loading Cell ..."));
-    } 
+    }
 
     return Container(
       child: Card(
@@ -92,7 +91,9 @@ class _DashboardCellState extends State<DashboardCell> {
             padding: const EdgeInsets.all(8.0),
             child: InfluxDBChart(
               tables: tables,
-              colorScheme: cellObj["properties"]["colors"],
+              colorScheme: InfluxDBColorScheme.fromAPIData(
+                  size: tables.length,
+                  colorData: cellObj["properties"]["colors"]),
             ),
           )
         ],

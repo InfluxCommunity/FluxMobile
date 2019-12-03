@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
+import 'package:flux_mobile/src/influxdb_color_scheme.dart';
 import 'package:flux_mobile/src/influxdb_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class InfluxDBChart extends StatefulWidget {
   final List<InfluxDBTable> tables;
-  final List<dynamic> colorScheme;
+  final InfluxDBColorScheme colorScheme;
 
-  // TODO: receive instead a List<InfluxDBQuery>, and a color scheme>
-  const InfluxDBChart(
-      {Key key, @required this.tables, this.colorScheme})
+  const InfluxDBChart({Key key, @required this.tables, this.colorScheme})
       : super(key: key);
   @override
   _InfluxDBChartState createState() => _InfluxDBChartState();
@@ -18,22 +17,21 @@ class InfluxDBChart extends StatefulWidget {
 class _InfluxDBChartState extends State<InfluxDBChart> {
   String responseString = "initalizing ...";
   List<LineChartBarData> lines = [];
+  InfluxDBColorScheme colorScheme;
 
   @override
   void initState() {
     super.initState();
+    if (widget.colorScheme == null) {
+      colorScheme = InfluxDBColorScheme(size: widget.tables.length);
+    } else {
+      colorScheme = widget.colorScheme;
+    }
     _buildChart();
   }
 
   _buildChart() async {
-    List<Color> lineColors = [];
-
-    widget.colorScheme.forEach((dynamic c) {
-      lineColors.add(Color(_hexStringToHexInt(c["hex"])));
-    });
-
     // execute each query and collect up the tables
-
 
     // each table becomes a line for the chart
     for (int i = 0; i < widget.tables.length; i++) {
@@ -49,7 +47,7 @@ class _InfluxDBChartState extends State<InfluxDBChart> {
       LineChartBarData lineData = LineChartBarData(
         spots: spots,
         dotData: FlDotData(show: false),
-        colors: [_intermediateColor(lineColors, i, widget.tables.length)],
+        colors: [colorScheme[i]],
         barWidth: 0.5,
       );
 
@@ -57,30 +55,6 @@ class _InfluxDBChartState extends State<InfluxDBChart> {
     }
 
     setState(() {});
-  }
-
-  int _hexStringToHexInt(String hex) {
-    hex = hex.replaceFirst('#', '');
-    hex = hex.length == 6 ? 'ff' + hex : hex;
-    int val = int.parse(hex, radix: 16);
-    return val;
-  }
-
-  Color _intermediateColor(
-      List<Color> colors, int seriesIndex, int seriesCount) {
-    if (seriesCount < 1 || colors.length < 2) {
-      return colors[0];
-    }
-    double t = ((colors.length - 1.0) * seriesIndex) / seriesCount;
-    int i = t.floor();
-    if (i == colors.length - 1) {
-      i -= 1;
-    }
-    return HSVColor.lerp(
-      HSVColor.fromColor(colors[i]),
-      HSVColor.fromColor(colors[i + 1]),
-      t - i,
-    ).toColor();
   }
 
   @override
