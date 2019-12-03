@@ -4,12 +4,12 @@ import 'package:flux_mobile/src/influxdb_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class InfluxDBChart extends StatefulWidget {
-  final List<InfluxDBQuery> queries;
+  final List<InfluxDBTable> tables;
   final List<dynamic> colorScheme;
 
   // TODO: receive instead a List<InfluxDBQuery>, and a color scheme>
   const InfluxDBChart(
-      {Key key, @required this.queries, this.colorScheme})
+      {Key key, @required this.tables, this.colorScheme})
       : super(key: key);
   @override
   _InfluxDBChartState createState() => _InfluxDBChartState();
@@ -27,21 +27,17 @@ class _InfluxDBChartState extends State<InfluxDBChart> {
 
   _buildChart() async {
     List<Color> lineColors = [];
-    List<InfluxDBTable> tables = [];
 
     widget.colorScheme.forEach((dynamic c) {
       lineColors.add(Color(_hexStringToHexInt(c["hex"])));
     });
 
     // execute each query and collect up the tables
-    for (InfluxDBQuery query in widget.queries) {
-      List<InfluxDBTable> ts = await query.execute();
-      tables.addAll(ts);
-    }
+
 
     // each table becomes a line for the chart
-    for (int i = 0; i < tables.length; i++) {
-      InfluxDBTable table = tables[i];
+    for (int i = 0; i < widget.tables.length; i++) {
+      InfluxDBTable table = widget.tables[i];
       // get the line data from the table
       List<FlSpot> spots = [];
       for (InfluxDBRow row in table.rows) {
@@ -53,7 +49,7 @@ class _InfluxDBChartState extends State<InfluxDBChart> {
       LineChartBarData lineData = LineChartBarData(
         spots: spots,
         dotData: FlDotData(show: false),
-        colors: [_intermediateColor(lineColors, i, tables.length)],
+        colors: [_intermediateColor(lineColors, i, widget.tables.length)],
         barWidth: 0.5,
       );
 
