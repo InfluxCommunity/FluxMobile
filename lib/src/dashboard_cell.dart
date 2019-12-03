@@ -19,14 +19,15 @@ class DashboardCell extends StatefulWidget {
 
 class _DashboardCellState extends State<DashboardCell> {
   dynamic cellObj;
+  List<InfluxDBTable> tables = [];
 
   @override
   void initState() {
     super.initState();
-    setDashboardCellData();
+    _setDashboardCellData();
   }
 
-  setDashboardCellData() async {
+  _setDashboardCellData() async {
     String url =
         "${widget.userDoc["url"]}/api/v2/dashboards/${widget.dashboardId}/cells/${widget.cellId}/view";
     url += "?orgID=${widget.userDoc["orgId"]}";
@@ -42,45 +43,60 @@ class _DashboardCellState extends State<DashboardCell> {
           "WARNING: Failed to retrive cell: $url ${response.statusCode}: ${response.body}");
       return null;
     }
+    cellObj = json.decode(response.body);
+    await _executeQueries();
+  }
+
+  Future _executeQueries() async {
+    List<InfluxDBQuery> queries = [];
+    List<dynamic> qs = cellObj["properties"]["queries"];
+    List<Future> waitForQueries = [];
+
+    for (dynamic q in qs) {
+      queries.add(
+        InfluxDBQuery(
+            queryString: q["text"],
+            token: widget.userDoc["token"],
+            influxDBUrl: widget.userDoc["url"],
+            org: widget.userDoc["org"]),
+      );
+
+      queries.forEach((InfluxDBQuery query) {
+        waitForQueries.add((() async {
+          List<InfluxDBTable> ts = await query.execute();
+          tables.addAll(ts);
+          print(tables.length);
+        })());
+      });
+    }
+    await Future.wait(waitForQueries);
     setState(() {
-      cellObj = json.decode(response.body);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (cellObj == null) {
+    if (tables == [] || cellObj == null) {
       return Center(child: Text("Loading Cell ..."));
-    } else {
-      List<InfluxDBQuery> queries = [];
-      List<dynamic> qs = cellObj["properties"]["queries"];
-      for (dynamic q in qs) {
-        queries.add(
-          InfluxDBQuery(
-              queryString: q["text"],
-              token: widget.userDoc["token"],
-              influxDBUrl: widget.userDoc["url"],
-              org: widget.userDoc["org"]),
-        );
-      }
-      return Container(
-        child: Card(
-            child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(cellObj["name"]),
+    } 
+
+    return Container(
+      child: Card(
+          child: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(cellObj["name"]),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InfluxDBChart(
+              tables: tables,
+              colorScheme: cellObj["properties"]["colors"],
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InfluxDBChart(
-                queries: queries,
-                colorScheme: cellObj["properties"]["colors"],
-              ),
-            )
-          ],
-        )),
-      );
-    }
+          )
+        ],
+      )),
+    );
   }
 }
