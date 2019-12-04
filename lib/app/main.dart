@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   DocumentList userDocs;
 
-  InfluxDBChart influxdbChart;
+  InfluxDBLineGraph influxdbChart;
   @override
   void initState() {
     super.initState();
@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
         token: userDoc["token"]);
     List<InfluxDBTable> tables = await query.execute();
     setState(() {
-      influxdbChart = InfluxDBChart(
+      influxdbChart = InfluxDBLineGraph(
         tables: tables,
       );
     });

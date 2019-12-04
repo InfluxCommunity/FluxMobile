@@ -4,17 +4,17 @@ import 'package:flux_mobile/src/influxdb_color_scheme.dart';
 import 'package:flux_mobile/src/influxdb_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class InfluxDBChart extends StatefulWidget {
+class InfluxDBLineGraph extends StatefulWidget {
   final List<InfluxDBTable> tables;
   final InfluxDBColorScheme colorScheme;
 
-  const InfluxDBChart({Key key, @required this.tables, this.colorScheme})
+  const InfluxDBLineGraph({Key key, @required this.tables, this.colorScheme})
       : super(key: key);
   @override
-  _InfluxDBChartState createState() => _InfluxDBChartState();
+  _InfluxDBLineGraphState createState() => _InfluxDBLineGraphState();
 }
 
-class _InfluxDBChartState extends State<InfluxDBChart> {
+class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
   String responseString = "initalizing ...";
   List<LineChartBarData> lines = [];
   InfluxDBColorScheme colorScheme;
