@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rapido/rapido.dart';
-import 'package:http/http.dart';
-import 'dart:convert';
 import 'package:flux_mobile/influxDB.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -30,132 +27,84 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Text loadingPrompt = Text("Loading Dashboards ...");
+  Text loadingPrompt = Text("Running Query ....");
   Text needLoginPrompt = Text("Click the Little Person Icon to Log in");
-
   String errorMessage = "";
-
-  DocumentList dashboardsList = DocumentList(
-    "Dasbhoards",
-    persistenceProvider: null,
-  );
+  InfluxDBQuery query;
 
   DocumentList userDocs;
+
+  InfluxDBChart influxdbChart;
   @override
   void initState() {
     super.initState();
     userDocs = DocumentList(
       "InfluxDBUser",
-      labels: {"Organization": "org", "OrgId": "orgId", "Token": "token", "Base URL": "url"},
+      labels: {
+        "Organization": "org",
+        "OrgId": "orgId",
+        "Token": "token",
+        "Base URL": "url"
+      },
       onLoadComplete: ((DocumentList loadedList) {
-        setState(() {});
+        print("load complete");
         if (userDocs.length > 0) {
-          loadDashboardList();
+          _executeQuery();
         }
       }),
     );
   }
 
+  void _executeQuery() async {
+    Document userDoc = userDocs[0];
+    String queryString = '''from(bucket: "PlantBuddy")
+  |> range(start: -24h)
+  |> filter(fn: (r) => r._measurement == "humidity" or r._measurement == "light" or r._measurement == "moisture" or r._measurement == "temp")
+  |> filter(fn: (r) => r._field == "soilTemp" or r._field == "soilMoisture" or r._field == "light" or r._field == "humidity" or r._field == "airTemp")''';
+    query = InfluxDBQuery(
+        queryString: queryString,
+        influxDBUrl: userDoc["url"],
+        org: userDoc["org"],
+        token: userDoc["token"]);
+    List<InfluxDBTable> tables = await query.execute();
+    setState(() {
+      influxdbChart = InfluxDBChart(
+        tables: tables,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DocumentListScaffold(
-      dashboardsList,
-      subtitleKey: "description",
-      titleKeys: [
-        "name",
-      ],
-      additionalActions: <Widget>[
-        IconButton(
-            icon: Icon(Icons.person),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: ((BuildContext context) {
-                    return DocumentForm(userDocs,
-                        document: userDocs.length > 0 ? userDocs[0] : null);
-                  }),
-                ),
-              );
-              if (userDocs.length > 0) {
-                loadDashboardList();
-              }
-            })
-      ],
-      emptyListWidget: Center(
-        child: errorMessage != "" ? Text(errorMessage) : (userDocs.length == 0 ? needLoginPrompt : loadingPrompt),
+    return Scaffold(
+      body: influxdbChart == null
+          ? Container(
+              child: Center(
+                child: userDocs == null || userDocs.length < 1
+                    ? Text("You need to log in")
+                    : Text("Loading ..."),
+              ),
+            )
+          : Center(child: influxdbChart),
+      appBar: AppBar(
+        title: Text("Plant Buddy"),
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.person),
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((BuildContext context) {
+                      return DocumentForm(userDocs,
+                          document: userDocs.length > 0 ? userDocs[0] : null);
+                    }),
+                  ),
+                );
+                if (userDocs.length > 0) {}
+              })
+        ],
       ),
-      onItemTap: (Document dashboardDoc) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (BuildContext context) {
-          return Dashboard(userDoc: userDocs[0], id: dashboardDoc["id"]);
-        }));
-      },
     );
-  }
-
-  loadDashboardList() async {
-    if (userDocs.length == 0) {
-      setState(() {
-        dashboardsList.clear();
-        errorMessage = "WARNING: Tried to load dashboards when user data was not set.";
-      });
-      return;
-    }
-
-    String url =
-        "${userDocs[0]["url"]}/api/v2/dashboards";
-    url += "?orgID=${userDocs[0]["orgId"]}";
-    Response response = await get(
-      url,
-      headers: {
-        "Authorization": "Token ${userDocs[0]["token"]}",
-        "Content-type": "application/json",
-      },
-    );
-    if (response.statusCode == 200) {
-      var returnedObj = json.decode(response.body);
-      List<dynamic> dashboardsObj = returnedObj["dashboards"];
-
-      setState(() {
-        dashboardsList.clear();
-        errorMessage = "";
-        dashboardsObj.forEach((dynamic dashboardObj) {
-          dashboardsList.add(Document(initialValues: {
-            "name": dashboardObj["name"],
-            "description": dashboardObj["description"],
-            "id": dashboardObj["id"],
-          }));
-        });
-      });
-    } else {
-      setState(() {
-        dashboardsList.clear();
-        errorMessage = "Dashboard retrieval error:\n\n${requestError(response)}";
-      });
-    }
-  }
-
-  requestError(Response response) {
-    var responseAsJson = {};
-    try {
-      responseAsJson = json.decode(response.body);
-    } catch (e) {
-      // response was not JSON
-    }
-
-    String info = "";
-
-    if (response.statusCode == 401) {
-      info = "invalid credentials";
-    } else if (responseAsJson["code"] is String) {
-      info = "${responseAsJson["code"]}";
-    }
-
-    if (responseAsJson["message"] is String) {
-      info += "; details: ${responseAsJson["message"]}";
-    }
-
-    return info;
   }
 }
