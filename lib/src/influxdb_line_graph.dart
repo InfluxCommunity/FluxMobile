@@ -64,6 +64,7 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
     }
 
     return Container(
+      constraints: BoxConstraints.expand(),
       child: LineChart(
         LineChartData(
           lineBarsData: lines,
