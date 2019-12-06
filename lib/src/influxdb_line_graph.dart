@@ -88,14 +88,16 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
       String label,
       {@required Document userDoc}) async {
     List<InfluxDBLineGraph> graphs = [];
-    // List<Future> awaitAll = [];
-    // await Future.wait(awaitAll);
-    List<String> dashboardIds = await _getDashboardIds(userDoc);
+    List<String> dashboardIds =
+        await _getDashboardIds(userDoc: userDoc, label: label);
+
+        
 
     return graphs;
   }
 
-  static Future<List<String>> _getDashboardIds(Document userDoc) async {
+  static Future<List<String>> _getDashboardIds(
+      {Document userDoc, String label}) async {
     List<String> ids = [];
 
     String url = "${userDoc["url"]}/api/v2/dashboards";
@@ -112,7 +114,12 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
       List<dynamic> dashboardsObj = returnedObj["dashboards"];
 
       dashboardsObj.forEach((dynamic dashboardObj) {
-        ids.add(dashboardObj["id"]);
+        List<dynamic> labelsObjs = dashboardObj["labels"];
+        for (dynamic labelObj in labelsObjs) {
+          if (labelObj["name"] == label) {
+            ids.add(dashboardObj["id"]);
+          }
+        }
       });
     }
     return ids;
