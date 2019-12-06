@@ -91,9 +91,17 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
     List<String> dashboardIds =
         await _getDashboardIds(userDoc: userDoc, label: label);
 
-        
+    List<InfluxDBQuery> queries =
+        await _getQueries(userDoc: userDoc, dashboardIds: dashboardIds);
 
     return graphs;
+  }
+
+  static Future<List<InfluxDBQuery>> _getQueries(
+      {Document userDoc, List<String> dashboardIds}) async {
+    List<InfluxDBQuery> queries = [];
+
+    return queries;
   }
 
   static Future<List<String>> _getDashboardIds(
