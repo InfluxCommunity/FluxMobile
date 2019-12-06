@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
 import 'package:flux_mobile/src/influxdb_color_scheme.dart';
 import 'package:flux_mobile/src/influxdb_row.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:http/http.dart';
+import 'package:rapido/rapido.dart';
 
 class InfluxDBLineGraph extends StatefulWidget {
   final List<InfluxDBTable> tables;
@@ -78,5 +82,39 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
         ),
       ),
     );
+  }
+
+  static Future<List<InfluxDBLineGraph>> graphsForDashboardsWithLabel(
+      String label,
+      {@required Document userDoc}) async {
+    List<InfluxDBLineGraph> graphs = [];
+    // List<Future> awaitAll = [];
+    // await Future.wait(awaitAll);
+    List<String> dashboardIds = await _getDashboardIds(userDoc);
+
+    return graphs;
+  }
+
+  static Future<List<String>> _getDashboardIds(Document userDoc) async {
+    List<String> ids = [];
+
+    String url = "${userDoc["url"]}/api/v2/dashboards";
+    url += "?orgID=${userDoc["orgId"]}";
+    Response response = await get(
+      url,
+      headers: {
+        "Authorization": "Token ${userDoc["token"]}",
+        "Content-type": "application/json",
+      },
+    );
+    if (response.statusCode == 200) {
+      var returnedObj = json.decode(response.body);
+      List<dynamic> dashboardsObj = returnedObj["dashboards"];
+
+      dashboardsObj.forEach((dynamic dashboardObj) {
+        ids.add(dashboardObj["id"]);
+      });
+    }
+    return ids;
   }
 }
