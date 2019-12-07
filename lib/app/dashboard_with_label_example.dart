@@ -18,8 +18,8 @@ class DashboardWithLabelExample extends StatefulWidget {
 }
 
 class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
-  List<InfluxDBLineGraph> graphs = [];
-  
+  List<Card> cards = [];
+
   @override
   void initState() {
     super.initState();
@@ -33,22 +33,16 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
 
   @override
   Widget build(BuildContext context) {
-    if (graphs == null) {
+    if (cards == null) {
       return Center(
         child: CircularProgressIndicator(),
       );
     }
     return ListView.builder(
-      itemCount: graphs.length,
-      itemBuilder: (BuildContext context, int index) {
-        return Card(
-          child: Container(
-              padding: EdgeInsets.all(10.0),
-              constraints: BoxConstraints(maxHeight: 350.00),
-              child: graphs[index]),
-        );
-      },
-    );
+        itemCount: cards.length,
+        itemBuilder: (BuildContext context, int index) {
+          return cards[index];
+        });
   }
 
   Future _graphsForDashboardsWithLabel() async {
@@ -78,13 +72,25 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
       queries.forEach((InfluxDBQuery query) {
         waitForQueries.add((() async {
           List<InfluxDBTable> tables = await query.execute();
-
-          graphs.add(
-            InfluxDBLineGraph(
-              tables: tables,
-              colorScheme: InfluxDBColorScheme.fromAPIData(
-                  colorData: cellObject["properties"]["colors"],
-                  size: tables.length),
+          cards.add(
+            Card(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text(cellObject["name"])),
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    constraints: BoxConstraints(maxHeight: 350.00),
+                    child: InfluxDBLineGraph(
+                      tables: tables,
+                      colorScheme: InfluxDBColorScheme.fromAPIData(
+                          colorData: cellObject["properties"]["colors"],
+                          size: tables.length),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         })());
