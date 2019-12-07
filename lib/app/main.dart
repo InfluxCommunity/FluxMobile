@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flux_mobile/app/dashboard_with_label_example.dart';
 import 'package:rapido/rapido.dart';
-import 'package:flux_mobile/influxDB.dart';
+import 'simple_query_graph_example.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,97 +15,82 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flux Mobile'),
+      home: ExampleTabs(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
-
+class ExampleTabs extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _ExampleTabsState createState() => _ExampleTabsState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  Text loadingPrompt = Text("Running Query ....");
-  Text needLoginPrompt = Text("Click the Little Person Icon to Log in");
-  String errorMessage = "";
-  InfluxDBQuery query;
-
+class _ExampleTabsState extends State<ExampleTabs> {
   DocumentList userDocs;
-
-  InfluxDBLineGraph influxdbChart;
-  @override
-  void initState() {
-    super.initState();
-    userDocs = DocumentList(
-      "InfluxDBUser",
-      labels: {
-        "Organization": "org",
-        "OrgId": "orgId",
-        "Token": "token",
-        "Base URL": "url"
-      },
-      onLoadComplete: ((DocumentList loadedList) {
-        print("load complete");
-        if (userDocs.length > 0) {
-          _executeQuery();
-        }
-      }),
-    );
-  }
-
-  void _executeQuery() async {
-    Document userDoc = userDocs[0];
-    String queryString = '''from(bucket: "PlantBuddy")
+  String queryString = '''from(bucket: "PlantBuddy")
   |> range(start: -24h)
   |> filter(fn: (r) => r._measurement == "humidity" or r._measurement == "light" or r._measurement == "moisture" or r._measurement == "temp")
   |> filter(fn: (r) => r._field == "soilTemp" or r._field == "soilMoisture" or r._field == "light" or r._field == "humidity" or r._field == "airTemp")''';
-    query = InfluxDBQuery(
-        queryString: queryString,
-        influxDBUrl: userDoc["url"],
-        org: userDoc["org"],
-        token: userDoc["token"]);
-    List<InfluxDBTable> tables = await query.execute();
-    setState(() {
-      influxdbChart = InfluxDBLineGraph(
-        tables: tables,
-      );
+
+  @override
+  void initState() {
+    super.initState();
+    userDocs = DocumentList("InfluxDBUser", labels: {
+      "Organization": "org",
+      "OrgId": "orgId",
+      "Token": "token",
+      "Base URL": "url"
+    }, onLoadComplete: (DocumentList loadedDoc) {
+      setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: influxdbChart == null
-          ? Container(
-              child: Center(
-                child: userDocs == null || userDocs.length < 1
-                    ? Text("You need to log in")
-                    : Text("Loading ..."),
-              ),
-            )
-          : Center(child: influxdbChart),
-      appBar: AppBar(
-        title: Text("Plant Buddy"),
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.person),
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: ((BuildContext context) {
-                      return DocumentForm(userDocs,
-                          document: userDocs.length > 0 ? userDocs[0] : null);
-                    }),
-                  ),
-                );
-                if (userDocs.length > 0) {}
-              })
-        ],
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Examples"),
+          bottom: TabBar(
+            tabs: <Widget>[
+              Text("1"),
+              Text("2"),
+            ],
+          ),
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(Icons.person),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((BuildContext context) {
+                        return DocumentForm(userDocs,
+                            document: userDocs.length > 0 ? userDocs[0] : null);
+                      }),
+                    ),
+                  );
+                  if (userDocs.length > 0) {}
+                })
+          ],
+        ),
+        body: TabBarView(children: [
+          (userDocs.length == 0 || userDocs == null)
+              ? Text("Need to log in ...")
+              : SimpleQueryGraphExample(
+                  url: userDocs[0]["url"],
+                  org: userDocs[0]["org"],
+                  token: userDocs[0]["token"],
+                  queryString: queryString,
+                ),
+          DashboardWithLabelExample(
+            label: "mobile",
+            baseUrl: userDocs[0]["url"],
+            orgId: userDocs[0]["orgId"],
+            token: userDocs[0]["token"],
+          )
+        ]),
       ),
     );
   }

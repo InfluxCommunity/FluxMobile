@@ -1,12 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
 import 'package:flux_mobile/src/influxdb_color_scheme.dart';
 import 'package:flux_mobile/src/influxdb_row.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:http/http.dart';
-import 'package:rapido/rapido.dart';
 
 class InfluxDBLineGraph extends StatefulWidget {
   final List<InfluxDBTable> tables;
@@ -16,6 +12,7 @@ class InfluxDBLineGraph extends StatefulWidget {
       : super(key: key);
   @override
   _InfluxDBLineGraphState createState() => _InfluxDBLineGraphState();
+
 }
 
 class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
@@ -82,54 +79,5 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
         ),
       ),
     );
-  }
-
-  static Future<List<InfluxDBLineGraph>> graphsForDashboardsWithLabel(
-      String label,
-      {@required Document userDoc}) async {
-    List<InfluxDBLineGraph> graphs = [];
-    List<String> dashboardIds =
-        await _getDashboardIds(userDoc: userDoc, label: label);
-
-    List<InfluxDBQuery> queries =
-        await _getQueries(userDoc: userDoc, dashboardIds: dashboardIds);
-
-    return graphs;
-  }
-
-  static Future<List<InfluxDBQuery>> _getQueries(
-      {Document userDoc, List<String> dashboardIds}) async {
-    List<InfluxDBQuery> queries = [];
-
-    return queries;
-  }
-
-  static Future<List<String>> _getDashboardIds(
-      {Document userDoc, String label}) async {
-    List<String> ids = [];
-
-    String url = "${userDoc["url"]}/api/v2/dashboards";
-    url += "?orgID=${userDoc["orgId"]}";
-    Response response = await get(
-      url,
-      headers: {
-        "Authorization": "Token ${userDoc["token"]}",
-        "Content-type": "application/json",
-      },
-    );
-    if (response.statusCode == 200) {
-      var returnedObj = json.decode(response.body);
-      List<dynamic> dashboardsObj = returnedObj["dashboards"];
-
-      dashboardsObj.forEach((dynamic dashboardObj) {
-        List<dynamic> labelsObjs = dashboardObj["labels"];
-        for (dynamic labelObj in labelsObjs) {
-          if (labelObj["name"] == label) {
-            ids.add(dashboardObj["id"]);
-          }
-        }
-      });
-    }
-    return ids;
   }
 }
