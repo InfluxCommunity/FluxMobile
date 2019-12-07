@@ -29,8 +29,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
   DocumentList userDocs;
   String queryString = '''from(bucket: "PlantBuddy")
   |> range(start: -24h)
-  |> filter(fn: (r) => r._measurement == "humidity" or r._measurement == "light" or r._measurement == "moisture" or r._measurement == "temp")
-  |> filter(fn: (r) => r._field == "soilTemp" or r._field == "soilMoisture" or r._field == "light" or r._field == "humidity" or r._field == "airTemp")''';
+  |> filter(fn: (r) => r._field == "soilMoisture")''';
 
   @override
   void initState() {

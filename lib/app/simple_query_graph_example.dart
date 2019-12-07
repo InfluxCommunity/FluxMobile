@@ -26,7 +26,7 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
   Widget build(BuildContext context) {
     if (graph == null) {
       return Center(
-        child: Text("Loading ... "),
+        child: CircularProgressIndicator(),
       );
     }
     return Column(
@@ -58,5 +58,8 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
     graph = InfluxDBLineGraph(
       tables: tables,
     );
+    setState(() {
+      
+    });
   }
 }
