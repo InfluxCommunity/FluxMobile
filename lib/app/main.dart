@@ -27,9 +27,6 @@ class ExampleTabs extends StatefulWidget {
 
 class _ExampleTabsState extends State<ExampleTabs> {
   DocumentList userDocs;
-  String queryString = '''from(bucket: "PlantBuddy")
-  |> range(start: -24h)
-  |> filter(fn: (r) => r._field == "soilMoisture")''';
 
   @override
   void initState() {
