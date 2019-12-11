@@ -71,6 +71,7 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
           lineBarsData: lines,
           gridData: FlGridData(
             show: false,
+            
           ),
           backgroundColor: Colors.black,
           titlesData: FlTitlesData(

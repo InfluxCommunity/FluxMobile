@@ -81,7 +81,6 @@ class _ExampleTabsState extends State<ExampleTabs> {
                   url: userDocs[0]["url"],
                   org: userDocs[0]["org"],
                   token: userDocs[0]["token"],
-                  queryString: queryString,
                 ),
           DashboardWithLabelExample(
             label: "mobile",

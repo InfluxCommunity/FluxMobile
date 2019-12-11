@@ -5,9 +5,8 @@ class SimpleQueryGraphExample extends StatefulWidget {
   final String url;
   final String org;
   final String token;
-  final String queryString;
 
-  SimpleQueryGraphExample({this.url, this.org, this.token, this.queryString});
+  SimpleQueryGraphExample({this.url, this.org, this.token});
 
   @override
   _SimpleQueryGraphExampleState createState() =>
@@ -16,32 +15,49 @@ class SimpleQueryGraphExample extends StatefulWidget {
 
 class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
   InfluxDBLineGraph graph;
+  TextEditingController textEditingController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    _executeQuery();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (graph == null) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-    return Column(
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.all(10.0),
-          child: Center(
-            child: Text("Displays a graph with the given Flux query"),
-          ),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(10.0),
+              child: graph == null
+                  ? Center(
+                      child:
+                          Text("Enter a query below and click the run button"),
+                    )
+                  : Container(
+                      padding: EdgeInsets.all(10.0),
+                      constraints: BoxConstraints(maxHeight: 350.00),
+                      child: graph),
+            ),
+            Container(
+              padding: EdgeInsets.all(10.0),
+              child: Container(
+                decoration: BoxDecoration(border: Border.all()),
+                padding: EdgeInsets.all(5.0),
+                child: TextField(
+                  controller: textEditingController,
+                  maxLines: 10,
+                ),
+              ),
+            ),
+          ],
         ),
-        Container(
-            padding: EdgeInsets.all(10.0),
-            constraints: BoxConstraints(maxHeight: 350.00),
-            child: graph),
-      ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.play_arrow),
+        onPressed: _executeQuery,
+      ),
     );
   }
 
@@ -49,17 +65,20 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
   // Creates an InfluxDBQueryObject, executes it,
   // and then greates an InfluxDBLineGraph
   void _executeQuery() async {
+    setState(() {
+      graph = null;
+    });
     InfluxDBQuery query = InfluxDBQuery(
-        queryString: widget.queryString,
+        queryString: textEditingController.text,
         influxDBUrl: widget.url,
         org: widget.org,
         token: widget.token);
     List<InfluxDBTable> tables = await query.execute();
-    graph = InfluxDBLineGraph(
-      tables: tables,
-    );
+    print(tables.length);
     setState(() {
-      
+      graph = InfluxDBLineGraph(
+        tables: tables,
+      );
     });
   }
 }
