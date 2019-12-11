@@ -16,7 +16,7 @@ class SimpleQueryGraphExample extends StatefulWidget {
 class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
   InfluxDBLineGraph graph;
   TextEditingController textEditingController = TextEditingController();
-
+  String errorString = "";
   @override
   void initState() {
     super.initState();
@@ -38,7 +38,12 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
                   : Container(
                       padding: EdgeInsets.all(10.0),
                       constraints: BoxConstraints(maxHeight: 350.00),
-                      child: graph),
+                      child: errorString == ""
+                          ? graph
+                          : Center(
+                              child: Text(errorString),
+                            ),
+                    ),
             ),
             Container(
               padding: EdgeInsets.all(10.0),
@@ -66,6 +71,7 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
   // and then greates an InfluxDBLineGraph
   void _executeQuery() async {
     setState(() {
+      errorString = "";
       graph = null;
     });
     InfluxDBQuery query = InfluxDBQuery(
@@ -74,8 +80,11 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
         org: widget.org,
         token: widget.token);
     List<InfluxDBTable> tables = await query.execute();
-    print(tables.length);
+
     setState(() {
+      if (query.statusCode != 200) {
+        errorString = query.errorString;
+      }
       graph = InfluxDBLineGraph(
         tables: tables,
       );

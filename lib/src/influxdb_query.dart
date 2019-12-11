@@ -9,6 +9,8 @@ class InfluxDBQuery {
   final String org;
   final String token;
   List<InfluxDBTable> tables = [];
+  int statusCode;
+  String errorString;
 
   InfluxDBQuery(
       {@required this.queryString,
@@ -31,9 +33,11 @@ class InfluxDBQuery {
       body: queryString,
     );
 
+    statusCode = response.statusCode;
     // Double check that the response worked
     if (response.statusCode != 200) {
-      throw ("Failed to execute query: ${response.body}");
+      errorString = response.body;
+      print("Failed to execute query: ${response.body}");
     }
     //2: Parse the tables out of the CVS and reate InfluxDB Tables with each block
     response.body.split("\r\n\r\n").forEach((String part) {
