@@ -17,11 +17,14 @@ class InfluxDBColorScheme {
       {@required this.size, List<dynamic> colorData}) {
     if (colorData != null) {
       colorData.forEach((dynamic c) {
-        print(c["hex"]);
         themeColors.add(Color(_hexStringToHexInt(c["hex"])));
       });
     }
     _setThemeColors();
+  }
+
+  InfluxDBColorScheme withSize(int size) {
+    return InfluxDBColorScheme(size: size, themeColors: themeColors);
   }
 
   _setThemeColors() {
@@ -29,7 +32,6 @@ class InfluxDBColorScheme {
   }
 
   Color operator [](int index) {
-    print(themeColors);
     if (size < 4) return themeColors[index];
     if (index == 0) return themeColors[0];
     if (index == size - 1) return (themeColors[2]);

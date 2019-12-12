@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/app/dashboard_with_label_example.dart';
+import 'package:flux_mobile/src/influxdb_api.dart';
 import 'package:rapido/rapido.dart';
 import 'simple_query_graph_example.dart';
 
@@ -43,6 +44,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
 
   @override
   Widget build(BuildContext context) {
+    InfluxDBApi api = getApi();
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -72,21 +74,27 @@ class _ExampleTabsState extends State<ExampleTabs> {
           ],
         ),
         body: TabBarView(children: [
-          (userDocs.length == 0 || userDocs == null)
-              ? Text("Need to log in ...")
-              : SimpleQueryGraphExample(
-                  url: userDocs[0]["url"],
-                  org: userDocs[0]["org"],
-                  token: userDocs[0]["token"],
-                ),
-          DashboardWithLabelExample(
-            label: "mobile",
-            baseUrl: userDocs[0]["url"],
-            orgId: userDocs[0]["orgId"],
-            token: userDocs[0]["token"],
+          ((api != null)
+            ? SimpleQueryGraphExample(api: api)
+            : Text("Need to log in ...")
+          ),
+          ((api != null)
+            ? DashboardWithLabelExample(label: "mobile", api: api)
+            : Text("Need to log in ...")
           )
         ]),
       ),
+    );
+  }
+
+  InfluxDBApi getApi() {
+    if (userDocs == null || userDocs.length == 0) {
+      return null;
+    }
+    return InfluxDBApi(
+      influxDBUrl: userDocs[0]["url"],
+      org: userDocs[0]["org"],
+      token: userDocs[0]["token"],
     );
   }
 }

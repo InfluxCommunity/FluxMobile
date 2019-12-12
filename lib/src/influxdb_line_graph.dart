@@ -28,6 +28,7 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
     } else {
       colorScheme = widget.colorScheme;
     }
+    colorScheme = colorScheme.withSize(widget.tables.length);
     _buildChart();
   }
 
@@ -40,8 +41,12 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
       // get the line data from the table
       List<FlSpot> spots = [];
       for (InfluxDBRow row in table.rows) {
-        spots.add(FlSpot(row.millisecondsSinceEpoch.toDouble(),
-            double.parse(row.value.toString())));
+        try {
+          spots.add(FlSpot(row.millisecondsSinceEpoch.toDouble(),
+              double.parse(row.value.toString())));
+        } catch (e) {
+          print("Unable to parse row: " + e.toString());
+        }
       }
 
       //format each line

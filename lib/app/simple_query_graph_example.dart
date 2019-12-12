@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
 
 class SimpleQueryGraphExample extends StatefulWidget {
-  final String url;
-  final String org;
-  final String token;
+  final InfluxDBApi api;
 
-  SimpleQueryGraphExample({this.url, this.org, this.token});
+  SimpleQueryGraphExample({@required this.api});
 
   @override
   _SimpleQueryGraphExampleState createState() =>
@@ -74,12 +72,9 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
       errorString = "";
       graph = null;
     });
-    InfluxDBQuery query = InfluxDBQuery(
-        queryString: textEditingController.text,
-        influxDBUrl: widget.url,
-        org: widget.org,
-        token: widget.token);
+    InfluxDBQuery query = widget.api.query(textEditingController.text);
     List<InfluxDBTable> tables = await query.execute();
+
 
     setState(() {
       if (query.statusCode != 200) {
