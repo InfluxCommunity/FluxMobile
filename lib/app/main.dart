@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/app/dashboard_with_label_example.dart';
-import 'package:flux_mobile/src/influxdb_api.dart';
+import 'package:flux_mobile/influxdb.dart';
 import 'package:rapido/rapido.dart';
 import 'simple_query_graph_example.dart';
 

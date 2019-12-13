@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
-import 'package:http/http.dart';
 
 class DashboardWithLabelExample extends StatefulWidget {
   final String label;
@@ -16,7 +13,7 @@ class DashboardWithLabelExample extends StatefulWidget {
 }
 
 class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
-  List<Card> cards = [];
+  List<Card> cards;
 
   @override
   void initState() {
@@ -26,7 +23,6 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
 
   Future _loadGraphs() async {
     await _graphsForDashboardsWithLabel();
-    print("DING DONG 4");
     try {
       setState(() {});
     } catch (e) {
@@ -36,11 +32,16 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
 
   @override
   Widget build(BuildContext context) {
-    if (cards.length == 0) {
+    if (cards == null) {
       return Center(
         child: CircularProgressIndicator(),
       );
+    } else if (cards.length == 0) {
+      return Center(
+        child: Text("No dashboards with \"mobile\" label were found"),
+      );
     }
+
     return ListView.builder(
         itemCount: cards.length,
         itemBuilder: (BuildContext context, int index) {
@@ -49,51 +50,41 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   }
 
   Future _graphsForDashboardsWithLabel() async {
-    List<String> dashboardIds = await _getDashboardIdsWithLabel();
-    List<dynamic> cellObjs = await _getCellObjects(dashboardIds: dashboardIds);
+    List<InfluxDBDashboard> dashboards = await _getDashboardsWithLabel();
+    List<InfluxDBDashboardCell> cells = [];
 
+    List<Future<List<InfluxDBDashboardCell>>> futures = dashboards.map((d) => d.cells()).toList();
+    for (Future<List<InfluxDBDashboardCell>> future in futures) {
+      cells.addAll(await future);
+    }
+
+    await _initializeCells(cells);
+  }
+
+  Future _initializeCells(List<InfluxDBDashboardCell> cells) async {
     cards = [];
-    if (cellObjs != null) {
-      List<Future<Card>> awaitCardObjs = [];
-      for (dynamic cellObj in cellObjs) {
-        awaitCardObjs.add(_executeQueries(cellObject: cellObj));
-      }
-      for (Future<Card> awaitCard in awaitCardObjs) {
-        cards.add(await awaitCard);
-      }
+    List<Future<Card>> futures = cells.map((c) => _initializeCell(c)).toList();
+    for (Future<Card> future in futures) {
+      cards.add(await future);
     }
   }
 
-  Future<Card> _executeQueries({cellObject}) async {
-    List<InfluxDBQuery> queries = [];
-    List<dynamic> qs = cellObject["properties"]["queries"];
-    List<Future> waitForQueries = [];
-    for (dynamic q in qs) {
-      queries.add(widget.api.query(q["text"]));
-    }
-
-    List<InfluxDBTable> allTables = [];
-    queries.forEach((InfluxDBQuery query) {
-      waitForQueries.add((() async {
-        allTables.addAll(await query.execute());
-      })());
-    });
-
-    await Future.wait(waitForQueries);
+  Future<Card> _initializeCell(InfluxDBDashboardCell cell) async {
+    List<InfluxDBTable> allTables = await cell.executeQueries();
 
     return Card(
       child: Column(
         children: <Widget>[
           Container(
               padding: EdgeInsets.all(10.0),
-              child: Text(cellObject["name"])),
+              child: Text(cell.name)),
           Container(
             padding: EdgeInsets.all(10.0),
             constraints: BoxConstraints(maxHeight: 350.00),
             child: InfluxDBLineGraph(
               tables: allTables,
               colorScheme: InfluxDBColorScheme.fromAPIData(
-                  colorData: cellObject["properties"]["colors"],
+                  colorData: cell.colors,
                   size: allTables.length),
             ),
           ),
@@ -102,92 +93,8 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
     );
   }
 
-  Future<List<dynamic>> _getCellObjects({List<String> dashboardIds}) async {
-    List<dynamic> cellObjects = [];
-
-    for (String dashboardId in dashboardIds) {
-      String url = "${widget.api.influxDBUrl}/api/v2/dashboards/$dashboardId";
-      url += "?org=${widget.api.org}";
-      Response response = await get(
-        url,
-        headers: {
-          "Authorization": "Token ${widget.api.token}",
-          "Content-type": "application/json",
-        },
-      );
-      if (response.statusCode != 200) {
-        print(
-            "WARNING: Failed to retrieve dashboard: $url ${response.statusCode}: ${response.body}");
-      }
-      List<dynamic> cells = json.decode(response.body)["cells"];
-
-      // TODO: make all API calls in parallel
-      cells.sort((a, b) => _cellPosition(a).compareTo(_cellPosition(b)));
-
-      for (dynamic cell in cells) {
-        dynamic cellObj =
-            await _getCellObject(cellId: cell["id"], dashboardId: dashboardId);
-        cellObjects.add(cellObj);
-      }
-    }
-
-    return cellObjects;
-  }
-
-  Future<dynamic> _getCellObject({String cellId, String dashboardId}) async {
-    String url =
-        "${widget.api.influxDBUrl}/api/v2/dashboards/$dashboardId/cells/$cellId/view";
-    url += "?orgID=${widget.api.org}";
-    Response response = await get(
-      url,
-      headers: {
-        "Authorization": "Token ${widget.api.token}",
-        "Content-type": "application/json",
-      },
-    );
-    if (response.statusCode != 200) {
-      print(
-          "WARNING: Failed to retrive cell: $url ${response.statusCode}: ${response.body}");
-      return null;
-    }
-    return json.decode(response.body);
-  }
-
-  Future<List<String>> _getDashboardIdsWithLabel() async {
-    List<String> ids = [];
-
-    String url = "${widget.api.influxDBUrl}/api/v2/dashboards";
-    url += "?org=${widget.api.org}";
-    Response response = await get(
-      url,
-      headers: {
-        "Authorization": "Token ${widget.api.token}",
-        "Content-type": "application/json",
-      },
-    );
-    if (response.statusCode == 200) {
-      var returnedObj = json.decode(response.body);
-      List<dynamic> dashboardsObj = returnedObj["dashboards"];
-
-      dashboardsObj.forEach((dynamic dashboardObj) {
-        List<dynamic> labelsObjs = dashboardObj["labels"];
-        for (dynamic labelObj in labelsObjs) {
-          if (labelObj["name"] == widget.label) {
-            ids.add(dashboardObj["id"]);
-          }
-        }
-      });
-    }
-    return ids;
-  }
-
-  int _cellPosition(dynamic cell) {
-    int result = 0;
-    try {
-      result = cell["y"] * 256 + cell["x"];
-    } catch (e) {
-      print("Unable to calculate cell position for sorting: " + e.toString());
-    }
-    return result;
+  Future<List<InfluxDBDashboard>> _getDashboardsWithLabel() async {
+    List<InfluxDBDashboard> dashboards = await widget.api.dashboards();
+    return dashboards.where((d) => d.labels.where((l) => l.name == "mobile").length > 0).toList();
   }
 }
