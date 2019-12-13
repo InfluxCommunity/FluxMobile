@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
-import 'package:flux_mobile/src/influxdb_color_scheme.dart';
-import 'package:flux_mobile/src/influxdb_row.dart';
+import 'package:flux_mobile/src/api/influxdb_row.dart';
+import 'package:flux_mobile/src/ui/influxdb_color_scheme.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class InfluxDBLineGraph extends StatefulWidget {
