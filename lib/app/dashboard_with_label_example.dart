@@ -53,6 +53,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
     List<InfluxDBDashboard> dashboards = await _getDashboardsWithLabel();
     List<InfluxDBDashboardCell> cells = [];
 
+    // toList() is needed and ensures that all async commands are called before iterating on them
     List<Future<List<InfluxDBDashboardCell>>> futures = dashboards.map((d) => d.cells()).toList();
     for (Future<List<InfluxDBDashboardCell>> future in futures) {
       cells.addAll(await future);
@@ -63,6 +64,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
 
   Future _initializeCells(List<InfluxDBDashboardCell> cells) async {
     cards = [];
+    // toList() is needed and ensures that all async commands are called before iterating on them
     List<Future<Card>> futures = cells.map((c) => _initializeCell(c)).toList();
     for (Future<Card> future in futures) {
       cards.add(await future);

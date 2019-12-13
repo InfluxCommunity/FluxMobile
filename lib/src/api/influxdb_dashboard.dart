@@ -23,6 +23,7 @@ class InfluxDBDashboard {
 
   Future<List<InfluxDBDashboardCell>> cells() async {
     List<InfluxDBDashboardCell> result = [];
+    // toList() is needed and ensures that all async commands are called before iterating on them
     List<Future<InfluxDBDashboardCell>> futures = cellInfos.map((q) => q.cell()).toList();
     for (Future<InfluxDBDashboardCell> future in futures) {
       result.add(await future);
@@ -161,6 +162,7 @@ class InfluxDBDashboardCell {
   Future<List<InfluxDBTable>> executeQueries() async {
     List<InfluxDBTable> allTables = [];
 
+    // toList() is needed and ensures that all async commands are called before iterating on them
     List<Future<List<InfluxDBTable>>> futures = queries.map((q) => q.query().execute()).toList();
     for (Future<List<InfluxDBTable>> future in futures) {
       allTables.addAll(await future);
