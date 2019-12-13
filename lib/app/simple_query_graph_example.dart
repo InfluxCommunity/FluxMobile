@@ -77,9 +77,6 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
 
 
     setState(() {
-      if (query.statusCode != 200) {
-        errorString = query.errorString;
-      }
       graph = InfluxDBLineGraph(
         tables: tables,
       );

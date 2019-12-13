@@ -17,12 +17,7 @@ class InfluxDBApi {
       @required this.token});
 
   InfluxDBQuery query(String queryString) {
-    return InfluxDBQuery(
-      queryString: queryString,
-      influxDBUrl: influxDBUrl,
-      org: org,
-      token: token,
-    );
+    return InfluxDBQuery(api: this, queryString: queryString);
   }
 
   Future<List<InfluxDBDashboard>> dashboards() async {
@@ -35,11 +30,43 @@ class InfluxDBApi {
     return InfluxDBDashboardCell.fromAPI(dashboard: cell.dashboard, object: body);
   }
 
+  Future<String> postFluxQuery(String queryString) async {
+    Response response = await post(
+      _getURL("/api/v2/query"),
+      headers: {
+        "Authorization": "Token $token",
+        "Accept": "application/csv",
+        "Content-type": "application/vnd.flux",
+      },
+      body: queryString,
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      _handleError(response);
+    }
+  }
+
+  String _getURL(urlSuffix) {
+    String url = influxDBUrl;
+    if (url[url.length - 1] == "/") {
+      url = url.substring(0, url.length - 1);
+    }
+
+    url += urlSuffix;
+
+    if (url.indexOf("?") >= 0) {
+      url = url + "&org=$org";
+    } else {
+      url = url + "?org=$org";
+    }
+    return url;
+  }
+
   Future<dynamic> _getJSONData(urlSuffix) async {
-    // TODO: remove trailing / in influxDBUrl if provided
-    String url = "$influxDBUrl$urlSuffix?org=$org";
     Response response = await get(
-      url,
+      _getURL(urlSuffix),
       headers: {
         "Authorization": "Token $token",
         "Content-type": "application/json",
