@@ -3,15 +3,16 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 
-import 'influxdb_dashboard.dart';
-import 'influxdb_query.dart';
+import 'dashboard.dart';
+import 'error.dart';
+import 'query.dart';
 
-class InfluxDBApi {
+class InfluxDBAPI {
   final String influxDBUrl;
   final String org;
   final String token;
 
-  InfluxDBApi(
+  InfluxDBAPI(
       {@required this.influxDBUrl,
       @required this.org,
       @required this.token});
@@ -41,11 +42,11 @@ class InfluxDBApi {
       body: queryString,
     );
 
-    if (response.statusCode == 200) {
-      return response.body;
-    } else {
+    if (response.statusCode != 200) {
       _handleError(response);
     }
+
+    return response.body;
   }
 
   String _getURL(urlSuffix) {
@@ -81,7 +82,6 @@ class InfluxDBApi {
   }
 
   _handleError(Response response) {
-    // TODO: provide real error handling and possibly multiple classes for convenient catching
-    throw("HTTP ERROR - TODO - IMPROVE");
+    throw InfluxDBAPIHTTPError.fromResponse(response);
   }
 }

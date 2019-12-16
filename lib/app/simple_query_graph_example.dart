@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flux_mobile/influxDB.dart';
+import 'package:flux_mobile/src/influxDB.dart';
 
 class SimpleQueryGraphExample extends StatefulWidget {
-  final InfluxDBApi api;
+  final InfluxDBAPI api;
 
   SimpleQueryGraphExample({@required this.api});
 
@@ -14,7 +14,7 @@ class SimpleQueryGraphExample extends StatefulWidget {
 class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
   InfluxDBLineGraph graph;
   TextEditingController textEditingController = TextEditingController();
-  String errorString = "";
+  String errorString;
   @override
   void initState() {
     super.initState();
@@ -30,18 +30,15 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
               padding: EdgeInsets.all(10.0),
               child: graph == null
                   ? Center(
-                      child:
-                          Text("Enter a query below and click the run button"),
+                      child: (errorString != null
+                          ? Text(errorString)
+                          : Text(
+                              "Enter a query below and click the run button")),
                     )
                   : Container(
                       padding: EdgeInsets.all(10.0),
                       constraints: BoxConstraints(maxHeight: 350.00),
-                      child: errorString == ""
-                          ? graph
-                          : Center(
-                              child: Text(errorString),
-                            ),
-                    ),
+                      child: graph),
             ),
             Container(
               padding: EdgeInsets.all(10.0),
@@ -72,14 +69,28 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
       errorString = "";
       graph = null;
     });
-    InfluxDBQuery query = widget.api.query(textEditingController.text);
-    List<InfluxDBTable> tables = await query.execute();
 
+    List<InfluxDBTable> tables;
+
+    String err = "";
+
+    try {
+      InfluxDBQuery query = widget.api.query(textEditingController.text);
+      tables = await query.execute();
+    } on InfluxDBAPIHTTPError catch (e) {
+      err = e.readableMessage();
+    }
 
     setState(() {
-      graph = InfluxDBLineGraph(
-        tables: tables,
-      );
+      if (tables != null) {
+        errorString = null;
+        graph = InfluxDBLineGraph(
+          tables: tables,
+        );
+      } else {
+        graph = null;
+        errorString = err;
+      }
     });
   }
 }

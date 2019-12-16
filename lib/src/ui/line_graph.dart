@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flux_mobile/influxDB.dart';
-import 'package:flux_mobile/src/api/influxdb_row.dart';
-import 'package:flux_mobile/src/ui/influxdb_color_scheme.dart';
 import 'package:fl_chart/fl_chart.dart';
+
+import '../api/row.dart';
+import '../api/table.dart';
+import 'color_scheme.dart';
 
 class InfluxDBLineGraph extends StatefulWidget {
   final List<InfluxDBTable> tables;
@@ -12,7 +13,6 @@ class InfluxDBLineGraph extends StatefulWidget {
       : super(key: key);
   @override
   _InfluxDBLineGraphState createState() => _InfluxDBLineGraphState();
-
 }
 
 class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
@@ -76,7 +76,6 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
           lineBarsData: lines,
           gridData: FlGridData(
             show: false,
-            
           ),
           backgroundColor: Colors.black,
           titlesData: FlTitlesData(

@@ -1,5 +1,6 @@
 import 'package:csv/csv.dart';
-import 'package:flux_mobile/src/api/influxdb_row.dart';
+
+import './row.dart';
 
 class InfluxDBTable {
   List<String> keys;

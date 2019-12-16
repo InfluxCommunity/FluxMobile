@@ -1,11 +1,11 @@
 import 'package:meta/meta.dart';
 
-import '../api/influxdb_query.dart';
-import '../api/influxdb_table.dart';
-import 'influxdb_api.dart';
+import 'api.dart';
+import 'query.dart';
+import 'table.dart';
 
 class InfluxDBDashboard {
-  final InfluxDBApi api;
+  final InfluxDBAPI api;
   String id;
   String name;
   String description;
@@ -31,7 +31,7 @@ class InfluxDBDashboard {
     return result;
   }
 
-  static List<InfluxDBDashboard> fromAPIList({@required InfluxDBApi api, List<dynamic> objects}) {
+  static List<InfluxDBDashboard> fromAPIList({@required InfluxDBAPI api, List<dynamic> objects}) {
     List<InfluxDBDashboard> result = [];
     for (dynamic object in objects) {
       result.add(InfluxDBDashboard.fromAPI(api: api, object: object));
@@ -66,7 +66,7 @@ class InfluxDBDashboardLabel {
 
 class InfluxDBDashboardCellInfo {
   final InfluxDBDashboard dashboard;
-  InfluxDBApi api;
+  InfluxDBAPI api;
   String id;
   int x, y, w, h;
 
@@ -110,7 +110,7 @@ class InfluxDBDashboardCellAxis {
 
 class InfluxDBDashboardCellQuery {
   final InfluxDBDashboardCell cell;
-  InfluxDBApi api;
+  InfluxDBAPI api;
   String name;
   String queryString;
 
@@ -135,7 +135,7 @@ class InfluxDBDashboardCellQuery {
 
 class InfluxDBDashboardCell {
   final InfluxDBDashboard dashboard;
-  InfluxDBApi api;
+  InfluxDBAPI api;
   String id;
   String name;
 
