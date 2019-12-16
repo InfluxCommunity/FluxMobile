@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flux_mobile/influxDB.dart';
+import 'package:flux_mobile/src/influxDB.dart';
 
 class DashboardWithLabelExample extends StatefulWidget {
   final String label;
-  final InfluxDBApi api;
+  final InfluxDBAPI api;
 
   DashboardWithLabelExample({@required this.api, this.label});
 

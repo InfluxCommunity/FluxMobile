@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/app/dashboard_with_label_example.dart';
-import 'package:flux_mobile/influxdb.dart';
 import 'package:rapido/rapido.dart';
 import 'simple_query_graph_example.dart';
+
+import 'package:flux_mobile/src/influxDB.dart';
 
 void main() => runApp(MyApp());
 
@@ -44,7 +45,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
 
   @override
   Widget build(BuildContext context) {
-    InfluxDBApi api = getApi();
+    InfluxDBAPI api = getApi();
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -87,11 +88,11 @@ class _ExampleTabsState extends State<ExampleTabs> {
     );
   }
 
-  InfluxDBApi getApi() {
+  InfluxDBAPI getApi() {
     if (userDocs == null || userDocs.length == 0) {
       return null;
     }
-    return InfluxDBApi(
+    return InfluxDBAPI(
       influxDBUrl: userDocs[0]["url"],
       org: userDocs[0]["org"],
       token: userDocs[0]["token"],

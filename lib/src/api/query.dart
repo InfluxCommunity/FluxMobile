@@ -1,11 +1,10 @@
 import 'package:flutter/foundation.dart';
 
-import '../api/influxdb_api.dart';
-import 'influxdb_table.dart';
-import 'package:http/http.dart';
+import '../api/api.dart';
+import './table.dart';
 
 class InfluxDBQuery {
-  final InfluxDBApi api;
+  final InfluxDBAPI api;
   final String queryString;
   List<InfluxDBTable> tables = [];
   String errorString;
