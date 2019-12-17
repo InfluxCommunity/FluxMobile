@@ -5,17 +5,27 @@ import '../api/row.dart';
 import '../api/table.dart';
 import 'color_scheme.dart';
 
-class InfluxDBLineGraph extends StatefulWidget {
+class InfluxDBLineGraphWidget extends StatefulWidget {
   final List<InfluxDBTable> tables;
   final InfluxDBColorScheme colorScheme;
+  final double minX;
+  final double maxX;
+  final double minY;
+  final double maxY;
 
-  const InfluxDBLineGraph({Key key, @required this.tables, this.colorScheme})
+  const InfluxDBLineGraphWidget({
+    Key key,
+    @required this.tables,
+    this.colorScheme,
+    this.minX, this.maxX,
+    this.minY, this.maxY,
+  })
       : super(key: key);
   @override
-  _InfluxDBLineGraphState createState() => _InfluxDBLineGraphState();
+  _InfluxDBLineGraphWidgetState createState() => _InfluxDBLineGraphWidgetState();
 }
 
-class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
+class _InfluxDBLineGraphWidgetState extends State<InfluxDBLineGraphWidget> {
   String responseString = "initalizing ...";
   List<LineChartBarData> lines = [];
   InfluxDBColorScheme colorScheme;
@@ -69,20 +79,53 @@ class _InfluxDBLineGraphState extends State<InfluxDBLineGraph> {
       return Center(child: CircularProgressIndicator());
     }
 
+    SideTitles leftTitles = SideTitles(
+        reservedSize: 40,
+        showTitles: true,
+        getTitles: getValueAsString,
+      );
+
+    if (widget.minY != null && widget.maxY != null) {
+      double diffY = widget.maxY - widget.minY;
+
+      // TODO: improve calculations
+      double interval = diffY / 10.0;
+
+      leftTitles = SideTitles(
+        reservedSize: 40,
+        showTitles: true,
+        interval: interval,
+        getTitles: getValueAsString,
+      );
+   }
+
+    FlTitlesData titlesData = FlTitlesData(
+      show: true,
+      leftTitles: leftTitles,
+      bottomTitles: SideTitles(showTitles: false),
+    );
+
     return Container(
       constraints: BoxConstraints.expand(),
       child: LineChart(
         LineChartData(
+          titlesData: titlesData,
+          minX: widget.minX,
+          maxX: widget.maxX,
+          minY: widget.minY,
+          maxY: widget.maxY,
           lineBarsData: lines,
           gridData: FlGridData(
             show: false,
           ),
           backgroundColor: Colors.black,
-          titlesData: FlTitlesData(
-            bottomTitles: SideTitles(showTitles: false),
-          ),
         ),
       ),
     );
+  }
+
+  String getValueAsString(double value) {
+    // TODO: implement approximations
+    return '$value';
   }
 }
