@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/src/influxDB.dart';
+import 'package:flux_mobile/src/ui/dashboard_cell_widget.dart';
 
 class DashboardWithLabelExample extends StatefulWidget {
   final String label;
@@ -25,7 +26,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
     await _graphsForDashboardsWithLabel();
     try {
       setState(() {});
-    } catch (e) {
+    } on FlutterError catch (e) {
       print("Unable to set state - probably no longer visible; error: " + e.toString());
     }
   }
@@ -64,35 +65,15 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
 
   Future _initializeCells(List<InfluxDBDashboardCell> cells) async {
     cards = [];
-    // toList() is needed and ensures that all async commands are called before iterating on them
-    List<Future<Card>> futures = cells.map((c) => _initializeCell(c)).toList();
-    for (Future<Card> future in futures) {
-      cards.add(await future);
-    }
-  }
-
-  Future<Card> _initializeCell(InfluxDBDashboardCell cell) async {
-    List<InfluxDBTable> allTables = await cell.executeQueries();
-
-    return Card(
-      child: Column(
-        children: <Widget>[
-          Container(
-              padding: EdgeInsets.all(10.0),
-              child: Text(cell.name)),
-          Container(
-            padding: EdgeInsets.all(10.0),
-            constraints: BoxConstraints(maxHeight: 350.00),
-            child: InfluxDBLineGraph(
-              tables: allTables,
-              colorScheme: InfluxDBColorScheme.fromAPIData(
-                  colorData: cell.colors,
-                  size: allTables.length),
-            ),
+    for (InfluxDBDashboardCell cell in cells) {
+      cards.add(
+        Card(
+          child: InfluxDBDashboardCellWidget(
+            cell: cell,
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    }
   }
 
   Future<List<InfluxDBDashboard>> _getDashboardsWithLabel() async {

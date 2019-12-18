@@ -98,12 +98,20 @@ class InfluxDBDashboardCellInfo {
 
 class InfluxDBDashboardCellAxis {
   final InfluxDBDashboardCell cell;
-  String minimum;
-  String maximum;
+  double minimum;
+  double maximum;
   InfluxDBDashboardCellAxis.fromAPI({@required this.cell, dynamic object}) {
-    if (object != null) {
-      minimum = object["bounds"][0];
-      maximum = object["bounds"][1];
+    if (object != null && object.length >= 2) {
+      try {
+        minimum = double.parse(object["bounds"][0].toString());
+      } catch (_) {
+        // ignore errors
+      }
+      try {
+        maximum = double.parse(object["bounds"][1].toString());
+      } catch (_) {
+        // ignore errors
+      }
     }
   }
 }
