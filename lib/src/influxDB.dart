@@ -4,4 +4,4 @@ export 'api/error.dart';
 export 'api/query.dart';
 export 'api/table.dart';
 export 'ui/color_scheme.dart';
-export 'ui/line_graph_widget.dart';
+export 'ui/line_chart_widget.dart';

@@ -4,28 +4,27 @@ import 'package:fl_chart/fl_chart.dart';
 import '../api/row.dart';
 import '../api/table.dart';
 import 'color_scheme.dart';
+import 'dashboard_cell_widget_axis.dart';
 
-class InfluxDBLineGraphWidget extends StatefulWidget {
+class InfluxDBLineChartWidget extends StatefulWidget {
   final List<InfluxDBTable> tables;
   final InfluxDBColorScheme colorScheme;
-  final double minX;
-  final double maxX;
-  final double minY;
-  final double maxY;
+  final InfluxDBDashboardCellWidgetAxis xAxis;
+  final InfluxDBDashboardCellWidgetAxis yAxis;
 
-  const InfluxDBLineGraphWidget({
+  const InfluxDBLineChartWidget({
     Key key,
     @required this.tables,
     this.colorScheme,
-    this.minX, this.maxX,
-    this.minY, this.maxY,
-  })
-      : super(key: key);
+    this.xAxis,
+    this.yAxis,
+  }) : super(key: key);
   @override
-  _InfluxDBLineGraphWidgetState createState() => _InfluxDBLineGraphWidgetState();
+  _InfluxDBLineChartWidgetState createState() =>
+      _InfluxDBLineChartWidgetState();
 }
 
-class _InfluxDBLineGraphWidgetState extends State<InfluxDBLineGraphWidget> {
+class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
   String responseString = "initalizing ...";
   List<LineChartBarData> lines = [];
   InfluxDBColorScheme colorScheme;
@@ -52,8 +51,18 @@ class _InfluxDBLineGraphWidgetState extends State<InfluxDBLineGraphWidget> {
       List<FlSpot> spots = [];
       for (InfluxDBRow row in table.rows) {
         try {
-          spots.add(FlSpot(row.millisecondsSinceEpoch.toDouble(),
-              double.parse(row.value.toString())));
+          double x = row.millisecondsSinceEpoch.toDouble();
+          double y = double.parse(row.value.toString());
+
+          // TODO: clipToBorder should handle this, but does not, so
+          // need must handle bounds
+          if (widget.yAxis.maximum != null && y > widget.yAxis.maximum) {
+            y = widget.yAxis.maximum;
+          }
+          if (widget.yAxis.minimum != null && y < widget.yAxis.minimum) {
+            y = widget.yAxis.minimum;
+          }
+          spots.add(FlSpot(x, y));
         } catch (e) {
           print("Unable to parse row: " + e.toString());
         }
@@ -80,24 +89,11 @@ class _InfluxDBLineGraphWidgetState extends State<InfluxDBLineGraphWidget> {
     }
 
     SideTitles leftTitles = SideTitles(
-        reservedSize: 40,
-        showTitles: true,
-        getTitles: getValueAsString,
-      );
-
-    if (widget.minY != null && widget.maxY != null) {
-      double diffY = widget.maxY - widget.minY;
-
-      // TODO: improve calculations
-      double interval = diffY / 10.0;
-
-      leftTitles = SideTitles(
-        reservedSize: 40,
-        showTitles: true,
-        interval: interval,
-        getTitles: getValueAsString,
-      );
-   }
+      reservedSize: 40,
+      showTitles: true,
+      interval: widget.yAxis.interval,
+      getTitles: widget.yAxis.getValueAsString,
+    );
 
     FlTitlesData titlesData = FlTitlesData(
       show: true,
@@ -110,11 +106,16 @@ class _InfluxDBLineGraphWidgetState extends State<InfluxDBLineGraphWidget> {
       child: LineChart(
         LineChartData(
           titlesData: titlesData,
-          minX: widget.minX,
-          maxX: widget.maxX,
-          minY: widget.minY,
-          maxY: widget.maxY,
+          minX: widget.xAxis.minimum,
+          maxX: widget.xAxis.maximum,
+          minY: widget.yAxis.minimum,
+          maxY: widget.yAxis.maximum,
           lineBarsData: lines,
+          clipToBorder: true,
+          borderData: FlBorderData(
+            border: Border.all(color: Colors.grey, width: 2.0),
+            show: true,
+          ),
           gridData: FlGridData(
             show: false,
           ),
@@ -122,10 +123,5 @@ class _InfluxDBLineGraphWidgetState extends State<InfluxDBLineGraphWidget> {
         ),
       ),
     );
-  }
-
-  String getValueAsString(double value) {
-    // TODO: implement approximations
-    return '$value';
   }
 }

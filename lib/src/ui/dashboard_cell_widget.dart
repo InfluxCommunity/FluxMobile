@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 import '../api/dashboard.dart';
 import '../api/error.dart';
 import '../api/table.dart';
-import 'line_graph_widget.dart';
+import 'line_chart_widget.dart';
 import 'color_scheme.dart';
+import 'dashboard_cell_widget_axis.dart';
 
 class InfluxDBDashboardCellWidget extends StatefulWidget {
   final InfluxDBDashboardCell cell;
@@ -13,12 +13,13 @@ class InfluxDBDashboardCellWidget extends StatefulWidget {
   const InfluxDBDashboardCellWidget({Key key, @required this.cell})
       : super(key: key);
   @override
-  _InfluxDBDashboardCellWidgetState createState() => _InfluxDBDashboardCellWidgetState();
+  _InfluxDBDashboardCellWidgetState createState() =>
+      _InfluxDBDashboardCellWidgetState();
 }
 
-class _InfluxDBDashboardCellWidgetState extends State<InfluxDBDashboardCellWidget> {
+class _InfluxDBDashboardCellWidgetState
+    extends State<InfluxDBDashboardCellWidget> {
   String responseString = "initalizing ...";
-  List<LineChartBarData> lines = [];
   InfluxDBColorScheme colorScheme;
 
   List<InfluxDBTable> allTables;
@@ -51,9 +52,7 @@ class _InfluxDBDashboardCellWidgetState extends State<InfluxDBDashboardCellWidge
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Container(
-            padding: EdgeInsets.all(10.0),
-            child: Text(widget.cell.name)),
+        Container(padding: EdgeInsets.all(10.0), child: Text(widget.cell.name)),
         Container(
           padding: EdgeInsets.all(10.0),
           constraints: BoxConstraints(minHeight: 350, maxHeight: 350.00),
@@ -76,15 +75,18 @@ class _InfluxDBDashboardCellWidgetState extends State<InfluxDBDashboardCellWidge
       return Center(child: Text("No data for this cell has been retrieved"));
     }
 
-    return InfluxDBLineGraphWidget(
+    InfluxDBDashboardCellWidgetAxis xAxis =
+        InfluxDBDashboardCellWidgetAxis.fromCellAxis(widget.cell.xAxis);
+    InfluxDBDashboardCellWidgetAxis yAxis =
+        InfluxDBDashboardCellWidgetAxis.fromCellAxisAndTables(
+            widget.cell.yAxis, allTables);
+
+    return InfluxDBLineChartWidget(
       tables: allTables,
-      minX: widget.cell.xAxis.minimum,
-      maxX: widget.cell.xAxis.maximum,
-      minY: widget.cell.yAxis.minimum,
-      maxY: widget.cell.yAxis.maximum,
+      xAxis: xAxis,
+      yAxis: yAxis,
       colorScheme: InfluxDBColorScheme.fromAPIData(
-          colorData: widget.cell.colors,
-          size: allTables.length),
+          colorData: widget.cell.colors, size: allTables.length),
     );
   }
 }
