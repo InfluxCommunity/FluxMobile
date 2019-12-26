@@ -12,7 +12,7 @@ class SimpleQueryGraphExample extends StatefulWidget {
 }
 
 class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
-  InfluxDBLineGraphWidget graph;
+  InfluxDBLineChartWidget graph;
   TextEditingController textEditingController = TextEditingController();
   String errorString;
   @override
@@ -63,7 +63,7 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
 
   // Below is the interesting bit
   // Creates an InfluxDBQueryObject, executes it,
-  // and then greates an InfluxDBLineGraphWidget
+  // and then greates an InfluxDBLineChartWidget
   void _executeQuery() async {
     setState(() {
       errorString = "";
@@ -84,7 +84,7 @@ class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
     setState(() {
       if (tables != null) {
         errorString = null;
-        graph = InfluxDBLineGraphWidget(
+        graph = InfluxDBLineChartWidget(
           tables: tables,
         );
       } else {
