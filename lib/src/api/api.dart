@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 
 import 'dashboard.dart';
 import 'error.dart';
+import 'point.dart';
 import 'query.dart';
 
 class InfluxDBAPI {
@@ -29,6 +30,20 @@ class InfluxDBAPI {
   Future<InfluxDBDashboardCell> dashboardCell(InfluxDBDashboardCellInfo cell) async {
     dynamic body = await _getJSONData("/api/v2/dashboards/${cell.dashboard.id}/cells/${cell.id}/view");
     return InfluxDBDashboardCell.fromAPI(dashboard: cell.dashboard, object: body);
+  }
+
+  Future writePoint(InfluxDBPoint point) async {
+        Response response = await post(
+      _getURL("/api/v2/query"),
+      headers: {
+        "Authorization": "Token $token",
+      },
+      body: point.lineProtocol,
+    );
+
+    if (response.statusCode != 204) {
+      _handleError(response);
+    }
   }
 
   Future<String> postFluxQuery(String queryString) async {
