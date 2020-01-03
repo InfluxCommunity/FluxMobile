@@ -14,9 +14,7 @@ class InfluxDBAPI {
   final String token;
 
   InfluxDBAPI(
-      {@required this.influxDBUrl,
-      @required this.org,
-      @required this.token});
+      {@required this.influxDBUrl, @required this.org, @required this.token});
 
   InfluxDBQuery query(String queryString) {
     return InfluxDBQuery(api: this, queryString: queryString);
@@ -24,23 +22,34 @@ class InfluxDBAPI {
 
   Future<List<InfluxDBDashboard>> dashboards() async {
     dynamic body = await _getJSONData("/api/v2/dashboards");
-    return InfluxDBDashboard.fromAPIList(api: this, objects: body["dashboards"]);
+    return InfluxDBDashboard.fromAPIList(
+        api: this, objects: body["dashboards"]);
   }
 
-  Future<InfluxDBDashboardCell> dashboardCell(InfluxDBDashboardCellInfo cell) async {
-    dynamic body = await _getJSONData("/api/v2/dashboards/${cell.dashboard.id}/cells/${cell.id}/view");
-    return InfluxDBDashboardCell.fromAPI(dashboard: cell.dashboard, object: body);
+  Future<InfluxDBDashboardCell> dashboardCell(
+      InfluxDBDashboardCellInfo cell) async {
+    dynamic body = await _getJSONData(
+        "/api/v2/dashboards/${cell.dashboard.id}/cells/${cell.id}/view");
+    return InfluxDBDashboardCell.fromAPI(
+        dashboard: cell.dashboard, object: body);
   }
 
-  Future writePoint(InfluxDBPoint point) async {
-        Response response = await post(
-      _getURL("/api/v2/query"),
+  Future write(
+      {@required InfluxDBPoint point, @required String bucket}) async {
+    String url = "${_getURL("/api/v2/write")}&bucket=$bucket&precision=ns";
+
+    Response response = await post(
+      url,
       headers: {
-        "Authorization": "Token $token",
+        "Authorization": "Token $token"
       },
       body: point.lineProtocol,
     );
-
+    print(url);
+    print(response.request.headers);
+    print(point.lineProtocol);
+    print(response.statusCode);
+    print(response.body);
     if (response.statusCode != 204) {
       _handleError(response);
     }

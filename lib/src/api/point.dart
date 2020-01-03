@@ -4,7 +4,7 @@ import 'error.dart';
 /// A class that represents a point being written INTO InfluxDB.
 /// Note that Points are written into InfluxDB, but Tables and
 /// Rows are read from InfluxDB.
-class Point {
+class InfluxDBPoint {
   Map<String, dynamic> _tags = {};
   Map<String, dynamic> _fields = {};
 
@@ -23,7 +23,7 @@ class Point {
   /// a timestamp will be created at the time the object is created.
   /// If a timestamp is supplied a autoTimestamp is true,
   /// An InfluxDBAPIError will be thrown.
-  Point(
+  InfluxDBPoint(
       {@required this.measurement,
       Map<String, dynamic> tags,
       @required Map<String, dynamic> fields,
@@ -44,7 +44,9 @@ class Point {
   /// A String of InfluxDB line protocol.
   /// See https://v2.docs.influxdata.com/v2.0/reference/syntax/line-protocol/
   String get lineProtocol {
-    return "$measurement ${_lineProtocolForTags()} ${_lineProtocolForFields()} $nanoseconds";
+    String lp = "$measurement${_lineProtocolForTags()} ${_lineProtocolForFields()}";
+    if(nanoseconds != null) lp += nanoseconds.toString();
+    return lp;
   }
 
   /// Optional tag set of key, value relationships.
@@ -73,6 +75,8 @@ class Point {
   }
 
   String _lineProtocolForTags() {
+    print("********");
+    print(_tags);
     if (_tags == null || _tags.length == 0) {
       return "";
     }

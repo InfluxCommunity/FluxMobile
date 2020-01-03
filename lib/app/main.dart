@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/app/dashboard_with_label_example.dart';
+import 'package:flux_mobile/app/simple_write_example.dart';
 import 'package:rapido/rapido.dart';
 import 'simple_query_graph_example.dart';
 
@@ -47,15 +48,12 @@ class _ExampleTabsState extends State<ExampleTabs> {
   Widget build(BuildContext context) {
     InfluxDBAPI api = getApi();
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text("Examples"),
           bottom: TabBar(
-            tabs: <Widget>[
-              Text("1"),
-              Text("2"),
-            ],
+            tabs: <Widget>[Text("1"), Text("2"), Text("3")],
           ),
           actions: <Widget>[
             IconButton(
@@ -74,16 +72,19 @@ class _ExampleTabsState extends State<ExampleTabs> {
                 })
           ],
         ),
-        body: TabBarView(children: [
-          ((api != null)
-            ? SimpleQueryGraphExample(api: api)
-            : Text("Need to log in ...")
-          ),
-          ((api != null)
-            ? DashboardWithLabelExample(label: "mobile", api: api)
-            : Text("Need to log in ...")
-          )
-        ]),
+        body: TabBarView(
+          children: [
+            ((api != null)
+                ? SimpleQueryGraphExample(api: api)
+                : Text("Need to log in ...")),
+            ((api != null)
+                ? DashboardWithLabelExample(label: "mobile", api: api)
+                : Text("Need to log in ...")),
+            ((api != null)
+                ? SimpleWriteExample(api: api)
+                : Text("Need to log in ...")),
+          ],
+        ),
       ),
     );
   }
