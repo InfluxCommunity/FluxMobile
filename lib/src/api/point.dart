@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'error.dart';
 
 /// A class that represents a point being written INTO InfluxDB.
@@ -27,14 +28,17 @@ class InfluxDBPoint {
       {@required this.measurement,
       Map<String, dynamic> tags,
       @required Map<String, dynamic> fields,
-      this.nanoseconds,
+      nanoseconds,
       bool autoTimestamp}) {
-    if (nanoseconds == null && autoTimestamp == true) {
-      nanoseconds = DateTime.now().microsecondsSinceEpoch * 1000;
-    }
     if (nanoseconds != null && autoTimestamp == true) {
       throw InfluxDBAPIError(
           "AutoTimestamp cannot be true if a timestamp is supplied");
+    }
+    if (nanoseconds == null && autoTimestamp == true) {
+      this.nanoseconds = DateTime.now().microsecondsSinceEpoch * 1000;
+    }
+    else if(nanoseconds != null && autoTimestamp == false) {
+      this.nanoseconds = nanoseconds;
     }
     if (tags != null) this.tags = tags;
     _checkKeyNaming(fields);
@@ -44,8 +48,9 @@ class InfluxDBPoint {
   /// A String of InfluxDB line protocol.
   /// See https://v2.docs.influxdata.com/v2.0/reference/syntax/line-protocol/
   String get lineProtocol {
-    String lp = "$measurement${_lineProtocolForTags()} ${_lineProtocolForFields()}";
-    if(nanoseconds != null) lp += nanoseconds.toString();
+    String lp =
+        "$measurement${_lineProtocolForTags()} ${_lineProtocolForFields()}";
+    if (nanoseconds != null) lp += " $nanoseconds";
     return lp;
   }
 
@@ -75,8 +80,6 @@ class InfluxDBPoint {
   }
 
   String _lineProtocolForTags() {
-    print("********");
-    print(_tags);
     if (_tags == null || _tags.length == 0) {
       return "";
     }
