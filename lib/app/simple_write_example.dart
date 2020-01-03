@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flux_mobile/src/api/point.dart';
 import 'package:flux_mobile/src/influxDB.dart';
 
@@ -29,7 +30,7 @@ class _SimpleWriteExampleState extends State<SimpleWriteExample> {
   TextEditingController tagValue1Controller = TextEditingController();
   TextEditingController tagKey2Controller = TextEditingController();
   TextEditingController tagValue2Controller = TextEditingController();
-
+  bool autoTimestamp = false;
 
   @override
   void initState() {
@@ -124,7 +125,24 @@ class _SimpleWriteExampleState extends State<SimpleWriteExample> {
                 ),
               ),
             ],
-          ),Row(
+          ),
+          Row(
+            children: <Widget>[
+              Checkbox(
+                onChanged: (bool value) {
+                  setState(() {
+                    autoTimestamp = value;
+                    if(autoTimestamp == true){
+                      timestampController.text = "";
+                    }
+                  });
+                },
+                value: autoTimestamp,
+              ),
+              Text("Auto Timestamp")
+            ],
+          ),
+          Row(
             children: [
               Expanded(
                 child: TextField(
@@ -140,6 +158,11 @@ class _SimpleWriteExampleState extends State<SimpleWriteExample> {
               Map<String, dynamic> fields = Map<String, dynamic>();
               Map<String, dynamic> tags = Map<String, dynamic>();
 
+              int nanoseconds;
+              if (timestampController.text != "" && autoTimestamp == false) {
+                nanoseconds = int.parse(timestampController.text);
+              }
+
               if (fieldKey1Controller.text != "" &&
                   fieldValue1Controller.text != "") {
                 fields[fieldKey1Controller.text] = fieldValue1Controller.text;
@@ -152,7 +175,8 @@ class _SimpleWriteExampleState extends State<SimpleWriteExample> {
                   tagValue1Controller.text != "") {
                 tags[tagKey1Controller.text] = tagValue1Controller.text;
               }
-              if (tagKey2Controller.text != "" && tagKey2Controller.text != "") {
+              if (tagKey2Controller.text != "" &&
+                  tagKey2Controller.text != "") {
                 tags[tagKey2Controller.text] = tagValue2Controller.text;
               }
 
@@ -160,7 +184,9 @@ class _SimpleWriteExampleState extends State<SimpleWriteExample> {
                 InfluxDBPoint point = InfluxDBPoint(
                     measurement: measureController.text,
                     fields: fields,
-                    tags: tags);
+                    tags: tags,
+                    nanoseconds: nanoseconds,
+                    autoTimestamp: autoTimestamp);
                 widget.api.write(point: point, bucket: bucketController.text);
 
                 setState(() {
