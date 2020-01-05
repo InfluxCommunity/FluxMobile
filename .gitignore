@@ -1,3 +1,7 @@
+# AndroidX support
+./android/app/build.gradle
+./andgroid/gradle.properties
+
 # Miscellaneous
 *.class
 *.log

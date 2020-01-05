@@ -34,22 +34,14 @@ class InfluxDBAPI {
         dashboard: cell.dashboard, object: body);
   }
 
-  Future write(
-      {@required InfluxDBPoint point, @required String bucket}) async {
+  Future write({@required InfluxDBPoint point, @required String bucket}) async {
     String url = "${_getURL("/api/v2/write")}&bucket=$bucket&precision=ns";
 
     Response response = await post(
       url,
-      headers: {
-        "Authorization": "Token $token"
-      },
+      headers: {"Authorization": "Token $token"},
       body: point.lineProtocol,
     );
-    print(url);
-    print(response.request.headers);
-    print(point.lineProtocol);
-    print(response.statusCode);
-    print(response.body);
     if (response.statusCode != 204) {
       _handleError(response);
     }

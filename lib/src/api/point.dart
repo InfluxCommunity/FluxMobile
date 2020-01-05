@@ -61,7 +61,7 @@ class InfluxDBPoint {
   }
 
   Map<String, dynamic> get tags {
-    return tags;
+    return _tags;
   }
 
   /// The field values supplied in the point.
