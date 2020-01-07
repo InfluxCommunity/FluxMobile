@@ -8,24 +8,48 @@ import 'error.dart';
 import 'point.dart';
 import 'query.dart';
 
+/// Root class for interacting with InfluxDB 2.0.
 class InfluxDBAPI {
   final String influxDBUrl;
   final String org;
   final String token;
 
   InfluxDBAPI(
+  /// Initializes InfluxDBAPI object by passing URL, organization and token.
       {@required this.influxDBUrl, @required this.org, @required this.token});
 
+  /// Runs a query passed as string and returns the [InfluxDBQuery] object
   InfluxDBQuery query(String queryString) {
     return InfluxDBQuery(api: this, queryString: queryString);
   }
 
+  /// Retrieves raw results of a Flux query using InfluxDB API and returns the output as string
+  Future<String> postFluxQuery(String queryString) async {
+    Response response = await post(
+      _getURL("/api/v2/query"),
+      headers: {
+        "Authorization": "Token $token",
+        "Accept": "application/csv",
+        "Content-type": "application/vnd.flux",
+      },
+      body: queryString,
+    );
+
+    if (response.statusCode != 200) {
+      _handleError(response);
+    }
+
+    return response.body;
+  }
+
+  /// Retrieves a list of dashboards available for current account and returns a [Future] to [List] of [InfluxDBDashboard] objects.
   Future<List<InfluxDBDashboard>> dashboards() async {
     dynamic body = await _getJSONData("/api/v2/dashboards");
     return InfluxDBDashboard.fromAPIList(
         api: this, objects: body["dashboards"]);
   }
 
+  /// Retrieves a specific dashboard cell; returns a [Future] to a [InfluxDBDashboardCell] object.
   Future<InfluxDBDashboardCell> dashboardCell(
       InfluxDBDashboardCellInfo cell) async {
     dynamic body = await _getJSONData(
@@ -45,24 +69,6 @@ class InfluxDBAPI {
     if (response.statusCode != 204) {
       _handleError(response);
     }
-  }
-
-  Future<String> postFluxQuery(String queryString) async {
-    Response response = await post(
-      _getURL("/api/v2/query"),
-      headers: {
-        "Authorization": "Token $token",
-        "Accept": "application/csv",
-        "Content-type": "application/vnd.flux",
-      },
-      body: queryString,
-    );
-
-    if (response.statusCode != 200) {
-      _handleError(response);
-    }
-
-    return response.body;
   }
 
   String _getURL(urlSuffix) {
