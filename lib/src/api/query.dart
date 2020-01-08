@@ -3,16 +3,18 @@ import 'package:flutter/foundation.dart';
 import '../api/api.dart';
 import './table.dart';
 
-/// Class for executing InfluxDB query and retrieving the result, returning it as [List] of [InfluxDBTable] objects.
+/// InfluxDB 2.0 query, using the Flux language as query syntax.
 class InfluxDBQuery {
   /// Instance of [InfluxDBAPI] object for running the InfluxDB API calls.
   final InfluxDBAPI api;
 
   /// Query string to run.
   final String queryString;
+
   /// Tables with the result, only available after `execute` has been called.
   List<InfluxDBTable> tables = [];
 
+  /// Creates a new instance of [InfluxDBQuery] using [InfluxDBAPI] for running the InfluxDB API and the query to run.
   InfluxDBQuery({@required this.api, @required this.queryString});
 
   /// Executes the query and returns a [Future] to [List] of [InfluxDBTable] objects.
