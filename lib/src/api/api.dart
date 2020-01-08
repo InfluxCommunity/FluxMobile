@@ -10,13 +10,21 @@ import 'query.dart';
 
 /// Root class for interacting with InfluxDB 2.0.
 class InfluxDBAPI {
+  /// URL to InfluxDB 2.0 API.
   final String influxDBUrl;
+
+  /// Organization name to use for API calls.
   final String org;
+
+  /// Token to use for API calls.
   final String token;
 
   InfluxDBAPI(
-  /// Initializes InfluxDBAPI object by passing URL, organization and token.
-      {@required this.influxDBUrl, @required this.org, @required this.token});
+
+      /// Initializes InfluxDBAPI object by passing URL, organization and token.
+      {@required this.influxDBUrl,
+      @required this.org,
+      @required this.token});
 
   /// Runs a query passed as string and returns the [InfluxDBQuery] object
   InfluxDBQuery query(String queryString) {
@@ -87,6 +95,7 @@ class InfluxDBAPI {
     return url;
   }
 
+  /// Parses JSON output or throw appropriate error based on the response
   Future<dynamic> _getJSONData(urlSuffix) async {
     Response response = await get(
       _getURL(urlSuffix),
