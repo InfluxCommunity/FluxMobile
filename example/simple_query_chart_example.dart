@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flux_mobile/src/influxDB.dart';
+import 'package:flux_mobile/influxDB.dart';
 
-class SimpleQueryGraphExample extends StatefulWidget {
+class SimpleQueryChartExample extends StatefulWidget {
   final InfluxDBAPI api;
 
-  SimpleQueryGraphExample({@required this.api});
+  SimpleQueryChartExample({@required this.api});
 
   @override
-  _SimpleQueryGraphExampleState createState() =>
-      _SimpleQueryGraphExampleState();
+  _SimpleQueryChartExampleState createState() =>
+      _SimpleQueryChartExampleState();
 }
 
-class _SimpleQueryGraphExampleState extends State<SimpleQueryGraphExample> {
+class _SimpleQueryChartExampleState extends State<SimpleQueryChartExample> {
   InfluxDBLineChartWidget graph;
   TextEditingController textEditingController = TextEditingController();
   String errorString;
