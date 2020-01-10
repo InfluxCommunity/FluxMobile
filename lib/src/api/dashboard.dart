@@ -66,7 +66,7 @@ class InfluxDBDashboardLabel {
   /// Label name.
   String name;
 
-  /// Label color as hex.
+  /// Label color as hex with `#` prefix - such as `#ffff00` a yellow color.
   String color;
 
   /// Label description.
@@ -93,8 +93,6 @@ class InfluxDBDashboardLabel {
 }
 
 /// Class representing basic information about a single cell in [InfluxDBDashboardLabel]. This information is retrieved along with information on dashboard itself and does not have to be fetched separately.
-/// A cell is positioned within a dashboard, where horizontal display is split into 12 elements - so `x` must be at least 0 and `x + w` has to be 12 or less.
-/// There are no limits on vertical coordinates.
 class InfluxDBDashboardCellInfo {
   /// Dashboard that the cell belongs to.
   final InfluxDBDashboard dashboard;
@@ -105,16 +103,16 @@ class InfluxDBDashboardCellInfo {
   /// Unique identifier of the cell.
   String id;
 
-  /// Horizontal position of the cell in the dashboard.
+  /// Horizontal position of the cell in the dashboard. A cell is positioned within a dashboard, where horizontal display is split into 12 elements - so `x` must be non-negative and `x + w` has to be 12 or less.
   int x;
 
-  /// Vertical position of the cell in the dashboard.
+  /// Vertical position of the cell in the dashboard. There are no limits on vertical coordinates, aside from the fact that `y` must be non-negative.
   int y;
 
-  /// Width of the cell in the dashboard.
+  /// Width of the cell in the dashboard. A cell is positioned within a dashboard, where horizontal display is split into 12 elements - so `x` must be non-negative and `x + w` has to be 12 or less.
   int w;
 
-  /// Height of the cell in the dashboard.
+  /// Height of the cell in the dashboard. There are no limits on maximum height of a cell.
   int h;
 
   /// Retrieves detailed information about the specific cell. Returns a [Future] to [InfluxDBDashboardCell].

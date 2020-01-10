@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flux_mobile/src/influxDB.dart';
-import 'package:flux_mobile/src/ui/dashboard_cell_widget.dart';
+import 'package:flux_mobile/influxDB.dart';
 
 class DashboardWithLabelExample extends StatefulWidget {
   final String label;
@@ -39,7 +38,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
       );
     } else if (cards.length == 0) {
       return Center(
-        child: Text("No dashboards with \"mobile\" label were found"),
+        child: Text("No dashboards with \"mobile\" label were found.\n\nPlease log in to InfluxDB UI, create a dashboard with one or more cells and append a \"mobile\" label to it to see any results here."),
       );
     }
 
@@ -64,7 +63,6 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   }
 
   Future _initializeCells(List<InfluxDBDashboardCell> cells) async {
-    cards = [];
     for (InfluxDBDashboardCell cell in cells) {
       cards.add(
         Card(

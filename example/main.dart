@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flux_mobile/app/dashboard_with_label_example.dart';
-import 'package:flux_mobile/app/simple_write_example.dart';
 import 'package:rapido/rapido.dart';
-import 'simple_query_graph_example.dart';
 
-import 'package:flux_mobile/src/influxDB.dart';
+import 'package:flux_mobile/influxDB.dart';
+
+import './dashboard_with_label_example.dart';
+import './simple_write_example.dart';
+import './simple_query_chart_example.dart';
 
 void main() => runApp(MyApp());
 
@@ -53,7 +54,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
         appBar: AppBar(
           title: Text("Examples"),
           bottom: TabBar(
-            tabs: <Widget>[Text("1"), Text("2"), Text("3")],
+            tabs: <Widget>[Text("Query"), Text("Dashboard"), Text("Write")],
           ),
           actions: <Widget>[
             IconButton(
@@ -75,7 +76,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
         body: TabBarView(
           children: [
             ((api != null)
-                ? SimpleQueryGraphExample(api: api)
+                ? SimpleQueryChartExample(api: api)
                 : Text("Need to log in ...")),
             ((api != null)
                 ? DashboardWithLabelExample(label: "mobile", api: api)

@@ -6,10 +6,15 @@ import '../api/table.dart';
 import 'color_scheme.dart';
 import 'dashboard_cell_widget_axis.dart';
 
+/// Widget for rendering a dashboard cell as a line chart.
 class InfluxDBLineChartWidget extends StatefulWidget {
+  /// [List] of [InfluxDBTable]s that this widget is showing information for.
   final List<InfluxDBTable> tables;
+  /// Color scheme to use.
   final InfluxDBColorScheme colorScheme;
+  /// Information about X axis.
   final InfluxDBDashboardCellWidgetAxis xAxis;
+  /// Information about Y axis.
   final InfluxDBDashboardCellWidgetAxis yAxis;
 
   const InfluxDBLineChartWidget({
@@ -24,9 +29,11 @@ class InfluxDBLineChartWidget extends StatefulWidget {
       _InfluxDBLineChartWidgetState();
 }
 
+/// Widget state management for [InfluxDBDashboardCellWidget].
 class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
-  String responseString = "initalizing ...";
+  /// List of all lines to render in the line chart
   List<LineChartBarData> lines = [];
+  /// Color scheme to use.
   InfluxDBColorScheme colorScheme;
 
   @override
@@ -54,8 +61,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
           double x = row.millisecondsSinceEpoch.toDouble();
           double y = double.parse(row.value.toString());
 
-          // TODO: clipToBorder should handle this, but does not, so
-          // need must handle bounds
+          // clipToBorder should handle this, but does not, so need must handle bounds
           if (widget.yAxis.maximum != null && y > widget.yAxis.maximum) {
             y = widget.yAxis.maximum;
           }

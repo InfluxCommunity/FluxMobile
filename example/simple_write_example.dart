@@ -1,9 +1,5 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flux_mobile/src/api/point.dart';
-import 'package:flux_mobile/src/influxDB.dart';
+import 'package:flux_mobile/influxDB.dart';
 
 class SimpleWriteExample extends StatefulWidget {
   final InfluxDBAPI api;
