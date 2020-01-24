@@ -63,6 +63,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   }
 
   Future _initializeCells(List<InfluxDBDashboardCell> cells) async {
+    cards = [];
     for (InfluxDBDashboardCell cell in cells) {
       cards.add(
         Card(
