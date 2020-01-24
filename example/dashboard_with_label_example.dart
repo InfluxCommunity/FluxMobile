@@ -13,7 +13,7 @@ class DashboardWithLabelExample extends StatefulWidget {
 }
 
 class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
-  List<Card> cards;
+  List<Card> cards = [];
 
   @override
   void initState() {
@@ -63,6 +63,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   }
 
   Future _initializeCells(List<InfluxDBDashboardCell> cells) async {
+    cards = [];
     for (InfluxDBDashboardCell cell in cells) {
       cards.add(
         Card(
