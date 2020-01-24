@@ -13,7 +13,8 @@ class DashboardWithLabelExample extends StatefulWidget {
 }
 
 class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
-  List<Card> cards = [];
+  // initialize cards to null to show the progress indicator until response from server is received
+  List<Card> cards;
 
   @override
   void initState() {
@@ -22,6 +23,8 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   }
 
   Future _loadGraphs() async {
+    // set cards to null to show the progress indicator until response from server is received
+    cards = null;
     await _graphsForDashboardsWithLabel();
     try {
       setState(() {});
@@ -38,7 +41,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
       );
     } else if (cards.length == 0) {
       return Center(
-        child: Text("No dashboards with \"mobile\" label were found.\n\nPlease log in to InfluxDB UI, create a dashboard with one or more cells and append a \"mobile\" label to it to see any results here."),
+        child: Text("No dashboards with \"${widget.label}\" label were found.\n\nPlease log in to InfluxDB UI, create a dashboard with one or more cells and append a \"mobile\" label to it to see any results here."),
       );
     }
 
@@ -77,6 +80,6 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
 
   Future<List<InfluxDBDashboard>> _getDashboardsWithLabel() async {
     List<InfluxDBDashboard> dashboards = await widget.api.dashboards();
-    return dashboards.where((d) => d.labels.where((l) => l.name == "mobile").length > 0).toList();
+    return dashboards.where((d) => d.labels.where((l) => l.name == widget.label).length > 0).toList();
   }
 }
