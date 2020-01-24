@@ -13,7 +13,7 @@ class DashboardWithLabelExample extends StatefulWidget {
 }
 
 class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
-  List<Card> cards;
+  List<Card> cards = [];
 
   @override
   void initState() {
