@@ -35,12 +35,15 @@ class _ExampleTabsState extends State<ExampleTabs> {
   @override
   void initState() {
     super.initState();
-    userDocs = DocumentList("InfluxDBUser", labels: {
-      "Organization": "org",
-      "OrgId": "orgId",
-      "Token": "token",
-      "Base URL": "url"
-    }, onLoadComplete: (DocumentList loadedDoc) {
+    userDocs = DocumentList("InfluxDBUser",
+        labels: {
+          "Organization": "org",
+          "OrgId": "orgId",
+          "Token": "token",
+          "Base URL": "url"
+        },
+        persistenceProvider: SecretsPercistence(),
+        onLoadComplete: (DocumentList loadedDoc) {
       setState(() {});
     });
   }
