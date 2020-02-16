@@ -39,7 +39,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
         labels: {
           "Organization": "org",
           "OrgId": "orgId",
-          "Token": "token",
+          "Token": "token secret",
           "Base URL": "url"
         },
         persistenceProvider: SecretsPercistence(),
@@ -100,7 +100,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
     return InfluxDBAPI(
       influxDBUrl: userDocs[0]["url"],
       org: userDocs[0]["org"],
-      token: userDocs[0]["token"],
+      token: userDocs[0]["token secret"],
     );
   }
 }
