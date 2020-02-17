@@ -35,12 +35,15 @@ class _ExampleTabsState extends State<ExampleTabs> {
   @override
   void initState() {
     super.initState();
-    userDocs = DocumentList("InfluxDBUser", labels: {
-      "Organization": "org",
-      "OrgId": "orgId",
-      "Token": "token",
-      "Base URL": "url"
-    }, onLoadComplete: (DocumentList loadedDoc) {
+    userDocs = DocumentList("InfluxDBUser",
+        labels: {
+          "Organization": "org",
+          "OrgId": "orgId",
+          "Token": "token secret",
+          "Base URL": "url"
+        },
+        persistenceProvider: SecretsPercistence(),
+        onLoadComplete: (DocumentList loadedDoc) {
       setState(() {});
     });
   }
@@ -97,7 +100,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
     return InfluxDBAPI(
       influxDBUrl: userDocs[0]["url"],
       org: userDocs[0]["org"],
-      token: userDocs[0]["token"],
+      token: userDocs[0]["token secret"],
     );
   }
 }
