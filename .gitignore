@@ -27,10 +27,10 @@
 # Flutter/Dart/Pub related
 **/doc/api/
 .dart_tool/
-.flutter-plugins
-.packages
+#.flutter-plugins
+#.packages
 .pub-cache/
-.pub/
+#.pub/
 /build/
 
 # Android related
@@ -39,7 +39,7 @@
 **/android/captures/
 **/android/gradlew
 **/android/gradlew.bat
-# **/android/local.properties
+**/android/local.properties
 # **/android/**/GeneratedPluginRegistrant.java
 
 # iOS/XCode related
