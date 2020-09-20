@@ -86,6 +86,8 @@ class _SimpleQueryChartExampleState extends State<SimpleQueryChartExample> {
         errorString = null;
         graph = InfluxDBLineChartWidget(
           tables: tables,
+          xAxis: InfluxDBDashboardCellWidgetAxis(),
+          yAxis: InfluxDBDashboardCellWidgetAxis(),
         );
       } else {
         graph = null;

@@ -21,8 +21,8 @@ class InfluxDBLineChartWidget extends StatefulWidget {
     Key key,
     @required this.tables,
     this.colorScheme,
-    this.xAxis,
-    this.yAxis,
+    @required this.xAxis,
+    @required this.yAxis,
   }) : super(key: key);
   @override
   _InfluxDBLineChartWidgetState createState() =>
@@ -117,7 +117,6 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
           minY: widget.yAxis.minimum,
           maxY: widget.yAxis.maximum,
           lineBarsData: lines,
-          // clipToBorder: true,
           borderData: FlBorderData(
             border: Border.all(color: Colors.grey, width: 2.0),
             show: true,
