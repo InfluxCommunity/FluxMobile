@@ -117,7 +117,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
           minY: widget.yAxis.minimum,
           maxY: widget.yAxis.maximum,
           lineBarsData: lines,
-          clipToBorder: true,
+          // clipToBorder: true,
           borderData: FlBorderData(
             border: Border.all(color: Colors.grey, width: 2.0),
             show: true,
