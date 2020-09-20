@@ -88,22 +88,24 @@ class _ExampleTabsState extends State<ExampleTabs> {
   }
 
   InfluxDBAPI getApi() {
-
-    if (user.orgId == null || user.baseURL == null || user.token == null) {
+    if (
+        user.orgName == null ||
+        user.baseURL == null ||
+        user.token == null) {
       return null;
     }
     return InfluxDBAPI(
       influxDBUrl: user.baseURL,
-      org: user.orgId,
+      org: user.orgName,
       token: user.token,
     );
   }
 }
 
 class InfluxDBUser {
-  String orgId;
   String token;
   String baseURL;
+  String orgName;
 }
 
 class InfluxDBUserForm extends StatefulWidget {
@@ -138,9 +140,9 @@ class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
           child: Column(
             children: [
               TextFormField(
-                decoration: (InputDecoration(labelText: "Organization Id")),
+                decoration: (InputDecoration(labelText: "Organization Name")),
                 onSaved: (String value) {
-                  widget.user.orgId = value;
+                  widget.user.orgName = value;
                 },
               ),
               TextFormField(

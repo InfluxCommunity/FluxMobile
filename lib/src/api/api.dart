@@ -104,6 +104,9 @@ class InfluxDBAPI {
         "Content-type": "application/json",
       },
     );
+    print("-------------");
+    print(response.statusCode == 200);
+    print(response.body);
     if (response.statusCode == 200) {
       dynamic body = json.decode(response.body);
       return body;
