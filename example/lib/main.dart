@@ -32,12 +32,12 @@ class _ExampleTabsState extends State<ExampleTabs> {
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
   Widget build(BuildContext context) {
     InfluxDBAPI api = getApi();
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -54,11 +54,13 @@ class _ExampleTabsState extends State<ExampleTabs> {
                     context,
                     MaterialPageRoute(
                       builder: ((BuildContext context) {
-                        return InfluxDBUserForm();
+                        return InfluxDBUserForm(user: this.user);
                       }),
                     ),
                   );
-                  if (user == null) {}
+                  setState(() {
+                    api = getApi();
+                  });
                 })
           ],
         ),
@@ -66,13 +68,19 @@ class _ExampleTabsState extends State<ExampleTabs> {
           children: [
             ((api != null)
                 ? SimpleQueryChartExample(api: api)
-                : Text("Need to log in ...")),
+                : Center(
+                    child: Text("Need to log in ..."),
+                  )),
             ((api != null)
                 ? DashboardWithLabelExample(label: "mobile", api: api)
-                : Text("Need to log in ...")),
+                : Center(
+                    child: Text("Need to log in ..."),
+                  )),
             ((api != null)
                 ? SimpleWriteExample(api: api)
-                : Text("Need to log in ...")),
+                : Center(
+                    child: Text("Need to log in ..."),
+                  )),
           ],
         ),
       ),
@@ -80,7 +88,9 @@ class _ExampleTabsState extends State<ExampleTabs> {
   }
 
   InfluxDBAPI getApi() {
-    if (user == null) {
+    print((user.orgId == null || user.baseURL == null || user.token == null));
+
+    if (user.orgId == null || user.baseURL == null || user.token == null) {
       return null;
     }
     return InfluxDBAPI(
@@ -98,10 +108,16 @@ class InfluxDBUser {
 }
 
 class InfluxDBUserForm extends StatefulWidget {
+  final InfluxDBUser user;
+
+  const InfluxDBUserForm({Key key, this.user}) : super(key: key);
+
   _InfluxDBUserFormState createState() => _InfluxDBUserFormState();
 }
 
 class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,22 +127,39 @@ class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
           IconButton(
               icon: Icon(Icons.check),
               onPressed: () {
-                print("Save Document");
+                formKey.currentState.save();
+                Navigator.pop(context);
               }),
         ],
       ),
-      body: Form(
-        child: Column(
-          children: [Text("this is text")],
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Form(
+          key: formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: (InputDecoration(labelText: "Organization Id")),
+                onSaved: (String value) {
+                  widget.user.orgId = value;
+                },
+              ),
+              TextFormField(
+                decoration: (InputDecoration(labelText: "Url")),
+                onSaved: (String value) {
+                  widget.user.baseURL = value;
+                },
+              ),
+              TextFormField(
+                decoration: (InputDecoration(labelText: "Token")),
+                onSaved: (String value) {
+                  widget.user.token = value;
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-/*
-1. Create a user data structure
-2. Creat a form to display the user data
-3. Write the data to disk
-4. read the data from disk
-*/
