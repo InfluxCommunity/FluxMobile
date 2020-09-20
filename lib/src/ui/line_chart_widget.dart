@@ -10,10 +10,13 @@ import 'dashboard_cell_widget_axis.dart';
 class InfluxDBLineChartWidget extends StatefulWidget {
   /// [List] of [InfluxDBTable]s that this widget is showing information for.
   final List<InfluxDBTable> tables;
+
   /// Color scheme to use.
   final InfluxDBColorScheme colorScheme;
+
   /// Information about X axis.
   final InfluxDBDashboardCellWidgetAxis xAxis;
+
   /// Information about Y axis.
   final InfluxDBDashboardCellWidgetAxis yAxis;
 
@@ -21,8 +24,8 @@ class InfluxDBLineChartWidget extends StatefulWidget {
     Key key,
     @required this.tables,
     this.colorScheme,
-    @required this.xAxis,
-    @required this.yAxis,
+    this.xAxis,
+    this.yAxis,
   }) : super(key: key);
   @override
   _InfluxDBLineChartWidgetState createState() =>
@@ -33,8 +36,11 @@ class InfluxDBLineChartWidget extends StatefulWidget {
 class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
   /// List of all lines to render in the line chart
   List<LineChartBarData> lines = [];
+
   /// Color scheme to use.
   InfluxDBColorScheme colorScheme;
+  InfluxDBDashboardCellWidgetAxis xAxis;
+  InfluxDBDashboardCellWidgetAxis yAxis;
 
   @override
   void initState() {
@@ -44,6 +50,14 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
     } else {
       colorScheme = widget.colorScheme;
     }
+
+    widget.xAxis == null
+        ? xAxis = InfluxDBDashboardCellWidgetAxis()
+        : xAxis = widget.xAxis;
+    widget.yAxis == null
+        ? yAxis = InfluxDBDashboardCellWidgetAxis()
+        : yAxis = widget.yAxis;
+        
     colorScheme = colorScheme.withSize(widget.tables.length);
     _buildChart();
   }

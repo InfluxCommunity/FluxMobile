@@ -88,7 +88,6 @@ class _ExampleTabsState extends State<ExampleTabs> {
   }
 
   InfluxDBAPI getApi() {
-    print((user.orgId == null || user.baseURL == null || user.token == null));
 
     if (user.orgId == null || user.baseURL == null || user.token == null) {
       return null;
