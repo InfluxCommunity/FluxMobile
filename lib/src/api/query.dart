@@ -41,7 +41,6 @@ class InfluxDBQuery {
             currentKeys = List<String>.from(row);
           }
         } else {
-          print(row[2].runtimeType);
           if (row[2].runtimeType == int) {
             // ignore: unrelated_type_equality_checks
             if (row[2] == currentTable) {
