@@ -1,5 +1,3 @@
-import 'package:csv/csv.dart';
-
 import './row.dart';
 
 /// Individual table result from calling [InfluxDBAPI] and [InfluxDBQuery] API calls.
@@ -11,17 +9,10 @@ class InfluxDBTable {
   List<InfluxDBRow> rows = [];
 
   /// Creates an instance of [InfluxDBTable] from raw CSV string returned by the query API call.
-  InfluxDBTable.fromCSV(String csv) {
-    CsvToListConverter converter = CsvToListConverter();
-    List<List<dynamic>> rowObjs = converter.convert(csv);
-
-    keys = List<String>.from(rowObjs[0]);
-
-    // delete the row of fieldnames
-    rowObjs.removeAt(0);
-
+  InfluxDBTable.fromCSV(List<List<dynamic>> dataRows, List<String> keys) {
+ 
     // create the rows
-    rowObjs.forEach((List<dynamic> row) {
+    dataRows.forEach((List<dynamic> row) {
       rows.add(InfluxDBRow.fromList(fields: row, keys: keys));
     });
   }

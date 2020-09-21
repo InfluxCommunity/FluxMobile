@@ -183,10 +183,12 @@ class InfluxDBDashboardCell {
 
     colors = properties["colors"];
 
-    xAxis = InfluxDBDashboardCellAxis.fromAPI(
-        cell: this, object: properties["axes"]["x"]);
-    yAxis = InfluxDBDashboardCellAxis.fromAPI(
-        cell: this, object: properties["axes"]["y"]);
+    if (properties["axes"] != null) {
+      xAxis = InfluxDBDashboardCellAxis.fromAPI(
+          cell: this, object: properties["axes"]["x"]);
+      yAxis = InfluxDBDashboardCellAxis.fromAPI(
+          cell: this, object: properties["axes"]["y"]);
+    }
 
     queries = InfluxDBDashboardCellQuery.fromAPIList(
         cell: this, objects: properties["queries"]);
