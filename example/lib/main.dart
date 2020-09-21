@@ -3,6 +3,7 @@ import 'package:flux_mobile/influxDB.dart';
 import './dashboard_with_label_example.dart';
 import './simple_write_example.dart';
 import './simple_query_chart_example.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() => runApp(MyApp());
 
@@ -31,7 +32,15 @@ class _ExampleTabsState extends State<ExampleTabs> {
 
   @override
   void initState() {
+    _initUser();
     super.initState();
+  }
+
+  _initUser() async {
+    await this.user.loadFromStorage();
+    setState(() {
+      
+    });
   }
 
   @override
@@ -88,10 +97,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
   }
 
   InfluxDBAPI getApi() {
-    if (
-        user.orgName == null ||
-        user.baseURL == null ||
-        user.token == null) {
+    if (user.orgName == null || user.baseURL == null || user.token == null) {
       return null;
     }
     return InfluxDBAPI(
@@ -106,6 +112,21 @@ class InfluxDBUser {
   String token;
   String baseURL;
   String orgName;
+  FlutterSecureStorage storage = new FlutterSecureStorage();
+
+  loadFromStorage() async {
+    Map<String, String> userMaps = await storage.readAll();
+
+    this.token = userMaps["token"];
+    this.baseURL = userMaps["url"];
+    this.orgName = userMaps["org"];
+  }
+
+  saveToStorage() {
+    storage.write(key: "token", value: this.token);
+    storage.write(key: "url", value: this.baseURL);
+    storage.write(key: "org", value: this.orgName);
+  }
 }
 
 class InfluxDBUserForm extends StatefulWidget {
@@ -118,6 +139,17 @@ class InfluxDBUserForm extends StatefulWidget {
 
 class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  TextEditingController orgController = TextEditingController();
+  TextEditingController urlController = TextEditingController();
+  TextEditingController tokenController = TextEditingController();
+
+  @override
+  void initState() {
+    orgController.text = widget.user.orgName;
+    urlController.text = widget.user.baseURL;
+    tokenController.text = widget.user.token;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +161,7 @@ class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
               icon: Icon(Icons.check),
               onPressed: () {
                 formKey.currentState.save();
+                widget.user.saveToStorage();
                 Navigator.pop(context);
               }),
         ],
@@ -140,18 +173,21 @@ class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
           child: Column(
             children: [
               TextFormField(
+                controller: orgController,
                 decoration: (InputDecoration(labelText: "Organization Name")),
                 onSaved: (String value) {
                   widget.user.orgName = value;
                 },
               ),
               TextFormField(
+                controller: urlController,
                 decoration: (InputDecoration(labelText: "Url")),
                 onSaved: (String value) {
                   widget.user.baseURL = value;
                 },
               ),
               TextFormField(
+                controller: tokenController,
                 decoration: (InputDecoration(labelText: "Token")),
                 onSaved: (String value) {
                   widget.user.token = value;
