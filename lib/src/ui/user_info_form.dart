@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:passwordfield/passwordfield.dart';
 
-class InfluxDBUser {
+/// Provide persistence for the arguments needed to 
+/// initialize an instance of InfluxDBAPI, using secrets store
+class PersistedAPIArgs {
   String token;
   String baseURL;
   String orgName;
   FlutterSecureStorage storage = new FlutterSecureStorage();
 
+  /// Read the data from secure storage. Fields that are not persisted
+  /// will remain null
   loadFromStorage() async {
     Map<String, String> userMaps = await storage.readAll();
 
@@ -16,6 +20,7 @@ class InfluxDBUser {
     this.orgName = userMaps["org"];
   }
 
+  /// Write the data to secure storage
   saveToStorage() {
     storage.write(key: "token", value: this.token);
     storage.write(key: "url", value: this.baseURL);
@@ -23,25 +28,29 @@ class InfluxDBUser {
   }
 }
 
-class InfluxDBUserForm extends StatefulWidget {
-  final InfluxDBUser user;
+/// A form to allow a user to enter (and persist)
+/// information to make API calls work
+class APIArgsForm extends StatefulWidget {
+  final PersistedAPIArgs args;
 
-  const InfluxDBUserForm({Key key, this.user}) : super(key: key);
+  /// Create an instance of a form using an instance of args
+  const APIArgsForm({Key key, @required this.args}) : super(key: key);
 
-  _InfluxDBUserFormState createState() => _InfluxDBUserFormState();
+  _APIArgsFormState createState() => _APIArgsFormState();
 }
 
-class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  TextEditingController orgController = TextEditingController();
-  TextEditingController urlController = TextEditingController();
-  TextEditingController tokenController = TextEditingController();
+class _APIArgsFormState extends State<APIArgsForm> {
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController _orgController = TextEditingController();
+  TextEditingController _urlController = TextEditingController();
+  TextEditingController _tokenController = TextEditingController();
 
   @override
   void initState() {
-    orgController.text = widget.user.orgName;
-    urlController.text = widget.user.baseURL;
-    tokenController.text = widget.user.token;
+    _orgController.text = widget.args.orgName;
+    _urlController.text = widget.args.baseURL;
+    _tokenController.text = widget.args.token;
     super.initState();
   }
 
@@ -54,8 +63,8 @@ class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
           IconButton(
               icon: Icon(Icons.check),
               onPressed: () {
-                formKey.currentState.save();
-                widget.user.saveToStorage();
+                _formKey.currentState.save();
+                widget.args.saveToStorage();
                 Navigator.pop(context);
               }),
         ],
@@ -63,33 +72,34 @@ class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Form(
-          key: formKey,
+          key: _formKey,
           child: Column(
             children: [
               TextFormField(
-                controller: orgController,
+                controller: _orgController,
                 decoration: (InputDecoration(labelText: "Organization Name")),
                 onSaved: (String value) {
-                  widget.user.orgName = value;
+                  widget.args.orgName = value;
                 },
               ),
               TextFormField(
-                controller: urlController,
-                decoration: (InputDecoration(labelText: "Url")),
+                controller: _urlController,
+                decoration: (InputDecoration(labelText: "URL")),
                 onSaved: (String value) {
-                  widget.user.baseURL = value;
+                  widget.args.baseURL = value;
                 },
               ),
               FormField(
                 builder: (FormFieldState<String> state) {
                   return PasswordField(
                     hasFloatingPlaceholder: true,
-                    controller: tokenController,
+                    floatingText: "Token",
+                    controller: _tokenController,
                     hintText: "Token",
                   );
                 },
                 onSaved: (String value) {
-                  widget.user.token = tokenController.text;
+                  widget.args.token = _tokenController.text;
                 },
               ),
             ],

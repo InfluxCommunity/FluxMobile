@@ -27,7 +27,7 @@ class ExampleTabs extends StatefulWidget {
 }
 
 class _ExampleTabsState extends State<ExampleTabs> {
-  InfluxDBUser user = InfluxDBUser();
+  PersistedAPIArgs args = PersistedAPIArgs();
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
   }
 
   _initUser() async {
-    await this.user.loadFromStorage();
+    await this.args.loadFromStorage();
     setState(() {
       
     });
@@ -62,7 +62,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
                     context,
                     MaterialPageRoute(
                       builder: ((BuildContext context) {
-                        return InfluxDBUserForm(user: this.user);
+                        return APIArgsForm(args: this.args);
                       }),
                     ),
                   );
@@ -96,13 +96,13 @@ class _ExampleTabsState extends State<ExampleTabs> {
   }
 
   InfluxDBAPI getApi() {
-    if (user.orgName == null || user.baseURL == null || user.token == null) {
+    if (args.orgName == null || args.baseURL == null || args.token == null) {
       return null;
     }
     return InfluxDBAPI(
-      influxDBUrl: user.baseURL,
-      org: user.orgName,
-      token: user.token,
+      influxDBUrl: args.baseURL,
+      org: args.orgName,
+      token: args.token,
     );
   }
 }
