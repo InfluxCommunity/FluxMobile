@@ -83,6 +83,7 @@ class _InfluxDBUserFormState extends State<InfluxDBUserForm> {
               FormField(
                 builder: (FormFieldState<String> state) {
                   return PasswordField(
+                    hasFloatingPlaceholder: true,
                     controller: tokenController,
                     hintText: "Token",
                   );
