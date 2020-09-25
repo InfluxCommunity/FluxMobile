@@ -9,11 +9,12 @@ class InfluxDBTable {
   List<InfluxDBRow> rows = [];
 
   /// Creates an instance of [InfluxDBTable] from raw CSV string returned by the query API call.
-  InfluxDBTable.fromCSV(List<List<dynamic>> dataRows, List<String> keys) {
+  InfluxDBTable.fromCSV(List<List<dynamic>> dataRows, this.keys) {
  
     // create the rows
     dataRows.forEach((List<dynamic> row) {
-      rows.add(InfluxDBRow.fromList(fields: row, keys: keys));
+    InfluxDBRow newRow = InfluxDBRow.fromList(fields: row, keys: keys);
+    this.rows.add(newRow);
     });
   }
 }
