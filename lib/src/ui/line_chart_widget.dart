@@ -137,6 +137,26 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
       constraints: BoxConstraints.expand(),
       child: LineChart(
         LineChartData(
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipItems: (List<LineBarSpot> spots) {
+                return spots.map((barSpot) {
+                  String m = widget.tables[barSpot.barIndex].rows[0].field;
+                  
+                  return LineTooltipItem("$m - ${barSpot.y.toStringAsFixed(4)}", TextStyle(color: Colors.black));
+                  // final flSpot = barSpot;
+                  // if (flSpot.x == 0 || flSpot.x == 6) {
+                  //   return null;
+                  // }
+
+                  // return LineTooltipItem(
+                  //   '${weekDays[flSpot.x.toInt()]} \n${flSpot.y} k calories',
+                  //   const TextStyle(color: Colors.white),
+                  // );
+                }).toList();
+              },
+            ),
+          ),
           titlesData: titlesData,
           minX: widget.xAxis.minimum,
           maxX: widget.xAxis.maximum,

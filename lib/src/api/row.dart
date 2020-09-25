@@ -18,6 +18,10 @@ class InfluxDBRow extends ListBase<dynamic> {
     return _fields[keys.indexOf("_value")];
   }
 
+  dynamic get field {
+    return _fields[keys.indexOf("_field")];
+  }
+
   /// Measurement for this row.
   dynamic get measurement {
     return _fields[keys.indexOf("_measurement")];
