@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 import '../api/row.dart';
 import '../api/table.dart';
@@ -57,7 +58,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
     widget.yAxis == null
         ? yAxis = InfluxDBDashboardCellWidgetAxis()
         : yAxis = widget.yAxis;
-        
+
     colorScheme = colorScheme.withSize(widget.tables.length);
     _buildChart();
   }
@@ -118,7 +119,18 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
     FlTitlesData titlesData = FlTitlesData(
       show: true,
       leftTitles: leftTitles,
-      bottomTitles: SideTitles(showTitles: false),
+      bottomTitles: SideTitles(
+          showTitles: true,
+          rotateAngle: 90.0,
+          reservedSize: 50.0,
+          getTitles: (double value) {
+            DateTime time =
+                new DateTime.fromMillisecondsSinceEpoch(value.toInt());
+            NumberFormat format = NumberFormat("00", "en_US");
+            String t =
+                "${format.format(time.day)}-${format.format(time.hour)}:${format.format(time.minute)}:${format.format(time.microsecond)}";
+            return t;
+          }),
     );
 
     return Container(
