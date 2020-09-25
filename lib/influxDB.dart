@@ -12,3 +12,4 @@ export './src/ui/dashboard_cell_widget_axis.dart';
 export './src/ui/dashboard_cell_widget.dart';
 export './src/ui/line_chart_widget.dart';
 export './src/ui/user_info_form.dart';
+export './src/ui/dashboard_list_view.dart';

@@ -51,10 +51,15 @@ class InfluxDBAPI {
   }
 
   /// Retrieves a list of dashboards available for current account and returns a [Future] to [List] of [InfluxDBDashboard] objects.
-  Future<List<InfluxDBDashboard>> dashboards() async {
+  /// Option label parameter will filter list to dashboards tagged with the supplied lable
+  Future<List<InfluxDBDashboard>> dashboards({label: String}) async {
     dynamic body = await _getJSONData("/api/v2/dashboards");
-    return InfluxDBDashboard.fromAPIList(
+    List<InfluxDBDashboard> dashboards =  InfluxDBDashboard.fromAPIList(
         api: this, objects: body["dashboards"]);
+    if(label != null){
+      dashboards = dashboards.where((d) => d.labels.where((l) => l.name == label).length > 0).toList();
+    }
+    return dashboards;
   }
 
   /// Retrieves a specific dashboard cell; returns a [Future] to a [InfluxDBDashboardCell] object.
