@@ -35,12 +35,15 @@ class InfluxDBQuery {
 
     // use the csv library to convert each row into a List (a list of lists)
     List<List<dynamic>> allRows = converter.convert(body);
-
+   
     allRows.forEach((List<dynamic> row) {
-      if (row.length == 1) { 
-        // The row length is 1 when changine between tables in different yield 
+      
+      if (row.length == 1) {
+        // The row length is 1 when changine between tables in different yield
         // statements from a query, so this is always between tables
+
         tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+
         currentDataRows.clear();
       } else {
         if (row[2].runtimeType == String) {
@@ -71,6 +74,9 @@ class InfluxDBQuery {
         }
       }
     });
+    if (currentDataRows.length > 0) {
+      tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+    }
     return tables;
   }
 }
