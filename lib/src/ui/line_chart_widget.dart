@@ -7,7 +7,8 @@ import '../api/table.dart';
 import 'color_scheme.dart';
 import 'dashboard_cell_widget_axis.dart';
 
-/// Widget for rendering a dashboard cell as a line chart.
+/// Widget for rendering a set of tables as a line chart.
+/// each tables is required to have a _time and _value column
 class InfluxDBLineChartWidget extends StatefulWidget {
   /// [List] of [InfluxDBTable]s that this widget is showing information for.
   final List<InfluxDBTable> tables;
@@ -59,7 +60,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
         ? yAxis = InfluxDBDashboardCellWidgetAxis()
         : yAxis = widget.yAxis;
 
-    colorScheme = colorScheme.withSize(widget.tables.length);
+//    colorScheme = widget.colorScheme.withSize(widget.tables.length);
     _buildChart();
   }
 
@@ -143,16 +144,36 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                 return spots.map((barSpot) {
                   InfluxDBRow iRow = widget.tables[barSpot.barIndex].rows[0];
                   String t = "";
-                  if(iRow.containsKey("_value")) {
+                  if (iRow.containsKey("_value")) {
                     t += "${iRow["_value"]} \n";
                   }
+                  if (iRow.containsKey("_measurement") &&
+                      iRow.containsKey("_field")) {
+                    t += "${iRow["_measurement"]}, ${iRow["_field"]}\n";
+                  } else {
+                    if (iRow.containsKey("_measurement")) {
+                      t += "${iRow["_measurement"]}\n";
+                    }
+                    if (iRow.containsKey("_field")) {
+                      t += "${iRow["_field"]}\n";
+                    }
+                  }
                   iRow.keys.forEach((element) {
-                    if (!["_time", "_start", "_stop", "table", "result", "_value"].contains(element)) {
+                    if (![
+                      "_time",
+                      "_start",
+                      "_stop",
+                      "table",
+                      "result",
+                      "_value",
+                      "_measurement",
+                      "_field"
+                    ].contains(element)) {
                       t += "$element : ${iRow[element]} \n";
                     }
                   });
 
-                  Color c = widget.colorScheme.themeColors.elementAt(barSpot.barIndex);
+                  Color c = colorScheme.themeColors.elementAt(barSpot.barIndex);
                   return LineTooltipItem(t, TextStyle(color: c));
                 }).toList();
               },
