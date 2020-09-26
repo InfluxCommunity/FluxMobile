@@ -158,6 +158,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                       t += "${iRow["_field"]}\n";
                     }
                   }
+
                   iRow.keys.forEach((element) {
                     if (![
                       "_time",
@@ -172,9 +173,10 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                       t += "$element : ${iRow[element]} \n";
                     }
                   });
-
+                  
+                  t += DateTime.fromMillisecondsSinceEpoch(barSpot.x.toInt()).toString();
                   Color c = colorScheme.themeColors.elementAt(barSpot.barIndex);
-                  return LineTooltipItem(t, TextStyle(color: c));
+                  return LineTooltipItem(t, TextStyle(color: c, fontSize: 10.0));
                 }).toList();
               },
             ),
