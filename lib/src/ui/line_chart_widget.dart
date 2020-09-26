@@ -143,8 +143,11 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                 return spots.map((barSpot) {
                   InfluxDBRow iRow = widget.tables[barSpot.barIndex].rows[0];
                   String t = "";
+                  if(iRow.containsKey("_value")) {
+                    t += "${iRow["_value"]} \n";
+                  }
                   iRow.keys.forEach((element) {
-                    if (!["_time", "_start", "_stop", "table"].contains(element)) {
+                    if (!["_time", "_start", "_stop", "table", "result", "_value"].contains(element)) {
                       t += "$element : ${iRow[element]} \n";
                     }
                   });
