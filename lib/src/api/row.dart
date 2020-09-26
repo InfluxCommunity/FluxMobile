@@ -3,28 +3,24 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 
 /// Wrapper for querying the [InfluxDBAPI] and [InfluxDBQuery], providing standard fields as getters.
-class InfluxDBRow extends ListBase<dynamic> {
-  List<dynamic> _fields;
+class InfluxDBRow extends MapBase<String, dynamic> {
+  Map<String, dynamic> _map = {};
 
-  /// List of keys available in the results
-  List<String> keys;
-
-  InfluxDBRow.fromList({@required List<dynamic> fields, @required this.keys}) {
-    _fields = fields;
-  }
-
-  /// Value for this row.
-  dynamic get value {
-    return _fields[keys.indexOf("_value")];
+  InfluxDBRow.fromList({@required List<dynamic> fields, List<String> keys}) {
+    keys.asMap().forEach((i, value) {
+      if (value != null && value != "" && i > 0) {
+        _map[value] = fields[i];
+      }
+    });
   }
 
   dynamic get field {
-    return _fields[keys.indexOf("_field")];
+    return _map.containsKey("_field") ? _map["_field"] : null;
   }
 
   /// Measurement for this row.
   dynamic get measurement {
-    return _fields[keys.indexOf("_measurement")];
+    return _map.containsKey("_measurement") ? _map["_measurement"] : null;
   }
 
   /// Time associated with the row, as milliseconds.
@@ -34,19 +30,34 @@ class InfluxDBRow extends ListBase<dynamic> {
 
   /// Time associated with the row, raw string.
   String get utcString {
-    return _fields[keys.indexOf("_time")].toString();
+    return _map.containsKey("_time") ? _map["_time"].toString() : null;
   }
 
   @override
   int length;
 
   @override
-  operator [](int index) {
-    return _fields[index];
+  void clear() {
+    _map.clear();
   }
 
   @override
-  void operator []=(int index, value) {
-    _fields[index] = value;
+  remove(Object key) {
+    _map.remove(key);
+  }
+
+  @override
+  operator [](Object key) {
+    return _map[key];
+  }
+
+  @override
+  void operator []=(String key, value) {
+    _map[key] = value;
+  }
+
+  @override
+  Iterable<String> get keys {
+    return _map.keys;
   }
 }

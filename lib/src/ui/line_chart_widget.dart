@@ -74,7 +74,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
       for (InfluxDBRow row in table.rows) {
         try {
           double x = row.millisecondsSinceEpoch.toDouble();
-          double y = double.parse(row.value.toString());
+          double y = double.parse(row["_value"].toString());
 
           // clipToBorder should handle this, but does not, so need must handle bounds
           if (widget.yAxis.maximum != null && y > widget.yAxis.maximum) {
@@ -141,18 +141,16 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
             touchTooltipData: LineTouchTooltipData(
               getTooltipItems: (List<LineBarSpot> spots) {
                 return spots.map((barSpot) {
-                  String m = widget.tables[barSpot.barIndex].rows[0].field;
-                  
-                  return LineTooltipItem("$m - ${barSpot.y.toStringAsFixed(4)}", TextStyle(color: Colors.black));
-                  // final flSpot = barSpot;
-                  // if (flSpot.x == 0 || flSpot.x == 6) {
-                  //   return null;
-                  // }
+                  InfluxDBRow iRow = widget.tables[barSpot.barIndex].rows[0];
+                  String t = "";
+                  iRow.keys.forEach((element) {
+                    if (!["_time", "_start", "_stop", "table"].contains(element)) {
+                      t += "$element : ${iRow[element]} \n";
+                    }
+                  });
 
-                  // return LineTooltipItem(
-                  //   '${weekDays[flSpot.x.toInt()]} \n${flSpot.y} k calories',
-                  //   const TextStyle(color: Colors.white),
-                  // );
+                  Color c = widget.colorScheme.themeColors.elementAt(barSpot.barIndex);
+                  return LineTooltipItem(t, TextStyle(color: c));
                 }).toList();
               },
             ),

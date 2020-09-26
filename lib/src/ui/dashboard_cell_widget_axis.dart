@@ -44,7 +44,7 @@ class InfluxDBDashboardCellWidgetAxis {
         for (InfluxDBTable table in tables) {
           for (InfluxDBRow row in table.rows) {
             try {
-              double v = double.parse(row.value.toString());
+              double v = double.parse(row["_value"].toString());
               if (min == null || min > v) {
                 min = v;
               }
