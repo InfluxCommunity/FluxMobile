@@ -34,7 +34,7 @@ class InfluxDBAPI {
   /// Retrieves raw results of a Flux query using InfluxDB API and returns the output as string
   Future<String> postFluxQuery(String queryString) async {
     Response response = await post(
-      _getURL("/api/v2/query"),
+      _getURI("/api/v2/query"),
       headers: {
         "Authorization": "Token $token",
         "Accept": "application/csv",
@@ -54,10 +54,12 @@ class InfluxDBAPI {
   /// Option label parameter will filter list to dashboards tagged with the supplied lable
   Future<List<InfluxDBDashboard>> dashboards({label: String}) async {
     dynamic body = await _getJSONData("/api/v2/dashboards");
-    List<InfluxDBDashboard> dashboards =  InfluxDBDashboard.fromAPIList(
-        api: this, objects: body["dashboards"]);
-    if(label != null){
-      dashboards = dashboards.where((d) => d.labels.where((l) => l.name == label).length > 0).toList();
+    List<InfluxDBDashboard> dashboards =
+        InfluxDBDashboard.fromAPIList(api: this, objects: body["dashboards"]);
+    if (label != null) {
+      dashboards = dashboards
+          .where((d) => d.labels.where((l) => l.name == label).length > 0)
+          .toList();
     }
     return dashboards;
   }
@@ -72,10 +74,10 @@ class InfluxDBAPI {
   }
 
   Future write({@required InfluxDBPoint point, @required String bucket}) async {
-    String url = "${_getURL("/api/v2/write")}&bucket=$bucket&precision=ns";
-
+    Uri uri = _getURI("/api/v2/write",
+        additionalQueryParams: {"bucket": bucket, "precision": "ns"});
     Response response = await post(
-      url,
+      uri,
       headers: {"Authorization": "Token $token"},
       body: point.lineProtocol,
     );
@@ -84,26 +86,25 @@ class InfluxDBAPI {
     }
   }
 
-  String _getURL(urlSuffix) {
+  Uri _getURI(
+    urlSuffix, {
+    Map<String, String> additionalQueryParams,
+  }) {
+    Map<String, String> queryParams = {"org": org};
+    if (additionalQueryParams != null) {
+      queryParams.addAll(additionalQueryParams);
+    }
+
     String url = influxDBUrl;
-    if (url[url.length - 1] == "/") {
-      url = url.substring(0, url.length - 1);
-    }
-
-    url += urlSuffix;
-
-    if (url.indexOf("?") >= 0) {
-      url = url + "&org=$org";
-    } else {
-      url = url + "?org=$org";
-    }
-    return url;
+    if (url.startsWith("https://")) url = url.replaceFirst("https://", "");
+    if (url.endsWith("/")) url = url.substring(0, url.length - 1);
+    return Uri.https(url, urlSuffix, queryParams);
   }
 
   /// Parses JSON output or throw appropriate error based on the response
   Future<dynamic> _getJSONData(urlSuffix) async {
     Response response = await get(
-      _getURL(urlSuffix),
+      _getURI(urlSuffix),
       headers: {
         "Authorization": "Token $token",
         "Content-type": "application/json",
