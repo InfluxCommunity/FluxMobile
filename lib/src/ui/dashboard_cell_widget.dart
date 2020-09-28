@@ -5,7 +5,7 @@ import '../api/error.dart';
 import '../api/table.dart';
 import 'line_chart_widget.dart';
 import 'color_scheme.dart';
-import 'dashboard_cell_widget_axis.dart';
+import 'dashboard_line_chart_widget_axis.dart';
 
 /// Widget for showing an InfluxDB dashboard cell, using data from [InfluxDBDashboardCell].
 class InfluxDBDashboardCellWidget extends StatefulWidget {
@@ -83,10 +83,11 @@ class _InfluxDBDashboardCellWidgetState
       return Center(child: Text("No data for this cell has been retrieved"));
     }
 
-    InfluxDBDashboardCellWidgetAxis xAxis =
-        InfluxDBDashboardCellWidgetAxis.fromCellAxis(widget.cell.xAxis);
-    InfluxDBDashboardCellWidgetAxis yAxis =
-        InfluxDBDashboardCellWidgetAxis.fromCellAxisAndTables(
+    InfluxDBLineChartWidgetAxis xAxis =
+        InfluxDBLineChartWidgetAxis.fromCellAxis(widget.cell.xAxis);
+    
+    InfluxDBLineChartWidgetAxis yAxis =
+        InfluxDBLineChartWidgetAxis.fromCellAxisAndTables(
             widget.cell.yAxis, allTables);
 
     return InfluxDBLineChartWidget(

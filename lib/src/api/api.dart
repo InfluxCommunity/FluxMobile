@@ -118,6 +118,7 @@ class InfluxDBAPI {
   }
 
   _handleError(Response response) {
+    print("HTTP ERROR: ${response.body}");
     throw InfluxDBAPIHTTPError.fromResponse(response);
   }
 }

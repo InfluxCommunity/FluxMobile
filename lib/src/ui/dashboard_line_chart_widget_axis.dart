@@ -5,7 +5,7 @@ import '../api/row.dart';
 import '../api/dashboard.dart';
 
 /// Definition of an single axis (X or Y) in an [InfluxDBDashboardCellWidget].
-class InfluxDBDashboardCellWidgetAxis {
+class InfluxDBLineChartWidgetAxis {
   /// Minimum value to show for this axis. Can be `null`, in which case there is no minimum set and it could not be determined from reading [InfluxDBTable] data.
   double minimum;
   /// Maximum value to show for this axis. Can be `null`, in which case there is no maximum set and it could not be determined from reading [InfluxDBTable] data.
@@ -15,26 +15,26 @@ class InfluxDBDashboardCellWidgetAxis {
   /// specifies number of digits to round to for rendering values, rendering values with at most `roundFractionDigits` digits after `.`.
   int roundFractionDigits;
 
-  /// Creates an uninitialized instance of [InfluxDBDashboardCellWidgetAxis]
-  InfluxDBDashboardCellWidgetAxis();
+  /// Creates an uninitialized instance of [InfluxDBLineChartWidgetAxis]
+  InfluxDBLineChartWidgetAxis();
 
-  /// Creates an instance of [InfluxDBDashboardCellWidgetAxis] by retrieving data from [InfluxDBDashboardCellAxis] object.
-  static InfluxDBDashboardCellWidgetAxis fromCellAxis(
+  /// Creates an instance of [InfluxDBLineChartWidgetAxis] by retrieving data from [InfluxDBDashboardCellAxis] object.
+  static InfluxDBLineChartWidgetAxis fromCellAxis(
       InfluxDBDashboardCellAxis cellAxis) {
-    InfluxDBDashboardCellWidgetAxis axis = InfluxDBDashboardCellWidgetAxis();
+    InfluxDBLineChartWidgetAxis axis = InfluxDBLineChartWidgetAxis();
     axis.minimum = cellAxis.minimum;
     axis.maximum = cellAxis.maximum;
     axis.initializeValues();
     return axis;
   }
 
-  /// Creates an instance of [InfluxDBDashboardCellWidgetAxis] by retrieving data from [InfluxDBDashboardCellAxis] object.
+  /// Creates an instance of [InfluxDBLineChartWidgetAxis] by retrieving data from [InfluxDBDashboardCellAxis] object.
   /// If any non-empty [InfluxDBTable] is included, it also optionally initializes `minimum` and `maximum` using all of the values for all tables.
-  static InfluxDBDashboardCellWidgetAxis fromCellAxisAndTables(
+  static InfluxDBLineChartWidgetAxis fromCellAxisAndTables(
     InfluxDBDashboardCellAxis cellAxis,
     List<InfluxDBTable> tables,
   ) {
-    InfluxDBDashboardCellWidgetAxis axis = InfluxDBDashboardCellWidgetAxis();
+    InfluxDBLineChartWidgetAxis axis = InfluxDBLineChartWidgetAxis();
     axis.minimum = cellAxis.minimum;
     axis.maximum = cellAxis.maximum;
     tables = tables.where((t) => t.rows.length > 0).toList();

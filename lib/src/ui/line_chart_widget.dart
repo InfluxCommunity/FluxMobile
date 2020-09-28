@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../api/row.dart';
 import '../api/table.dart';
 import 'color_scheme.dart';
-import 'dashboard_cell_widget_axis.dart';
+import 'dashboard_line_chart_widget_axis.dart';
 
 /// Widget for rendering a set of tables as a line chart.
 /// each tables is required to have a _time and _value column
@@ -17,10 +17,10 @@ class InfluxDBLineChartWidget extends StatefulWidget {
   final InfluxDBColorScheme colorScheme;
 
   /// Information about X axis.
-  final InfluxDBDashboardCellWidgetAxis xAxis;
+  final InfluxDBLineChartWidgetAxis xAxis;
 
   /// Information about Y axis.
-  final InfluxDBDashboardCellWidgetAxis yAxis;
+  final InfluxDBLineChartWidgetAxis yAxis;
 
   const InfluxDBLineChartWidget({
     Key key,
@@ -41,8 +41,8 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
 
   /// Color scheme to use.
   InfluxDBColorScheme colorScheme;
-  InfluxDBDashboardCellWidgetAxis xAxis;
-  InfluxDBDashboardCellWidgetAxis yAxis;
+  InfluxDBLineChartWidgetAxis xAxis;
+  InfluxDBLineChartWidgetAxis yAxis;
 
   @override
   void initState() {
@@ -54,10 +54,10 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
     }
 
     widget.xAxis == null
-        ? xAxis = InfluxDBDashboardCellWidgetAxis()
+        ? xAxis = InfluxDBLineChartWidgetAxis()
         : xAxis = widget.xAxis;
     widget.yAxis == null
-        ? yAxis = InfluxDBDashboardCellWidgetAxis()
+        ? yAxis = InfluxDBLineChartWidgetAxis()
         : yAxis = widget.yAxis;
 
 //    colorScheme = widget.colorScheme.withSize(widget.tables.length);
@@ -110,6 +110,8 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
       return Center(child: CircularProgressIndicator());
     }
 
+    
+
     SideTitles leftTitles = SideTitles(
       reservedSize: 40,
       showTitles: true,
@@ -121,7 +123,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
       show: true,
       leftTitles: leftTitles,
       bottomTitles: SideTitles(
-          showTitles: true,
+          showTitles: false,
           rotateAngle: 90.0,
           reservedSize: 50.0,
           getTitles: (double value) {

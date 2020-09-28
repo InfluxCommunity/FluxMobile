@@ -65,7 +65,7 @@ class InfluxDBAPIHTTPError extends InfluxDBAPIError {
         return InfluxDBAPIHTTPInternalError(response);
         break;
       default:
-        return InfluxDBAPIHTTPError("Unknown error", response);
+        return InfluxDBAPIHTTPError(response.body, response);
     }
   }
 }

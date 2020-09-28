@@ -15,7 +15,7 @@ class _SimpleQueryChartExampleState extends State<SimpleQueryChartExample> {
   InfluxDBLineChartWidget graph;
   TextEditingController textEditingController = TextEditingController();
   String errorString;
-  
+
   @override
   void initState() {
     super.initState();
@@ -81,14 +81,14 @@ class _SimpleQueryChartExampleState extends State<SimpleQueryChartExample> {
     } on InfluxDBAPIHTTPError catch (e) {
       err = e.readableMessage();
     }
-
+    
     setState(() {
       if (tables != null) {
         errorString = null;
         graph = InfluxDBLineChartWidget(
           tables: tables,
-          xAxis: InfluxDBDashboardCellWidgetAxis(),
-          yAxis: InfluxDBDashboardCellWidgetAxis(),
+          xAxis: InfluxDBLineChartWidgetAxis(),
+          yAxis: InfluxDBLineChartWidgetAxis(),
         );
       } else {
         graph = null;
