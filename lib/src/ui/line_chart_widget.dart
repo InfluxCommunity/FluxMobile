@@ -146,9 +146,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                 return spots.map((barSpot) {
                   InfluxDBRow iRow = widget.tables[barSpot.barIndex].rows[0];
                   String t = "";
-                  if (iRow.containsKey("_value")) {
-                    t += "${iRow["_value"]} \n";
-                  }
+                  t+=barSpot.y.toString() + "\n";
                   if (iRow.containsKey("_measurement") &&
                       iRow.containsKey("_field")) {
                     t += "${iRow["_measurement"]}, ${iRow["_field"]}\n";
