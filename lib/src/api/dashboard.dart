@@ -174,11 +174,14 @@ class InfluxDBDashboardCell {
   /// Color scheme that is used by this cell.
   List<dynamic> colors;
 
+  String cellType;
+
   /// Creates an instance of [InfluxDBDashboardCell] from parsed JSON data from API call.
   InfluxDBDashboardCell.fromAPI({@required this.dashboard, dynamic object}) {
     api = dashboard.api;
     id = object["id"];
     name = object["name"];
+    cellType = object["properties"]["type"];
     dynamic properties = object["properties"];
 
     colors = properties["colors"];

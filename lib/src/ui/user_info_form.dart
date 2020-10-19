@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:passwordfield/passwordfield.dart';
 
-/// Provide persistence for the arguments needed to 
+/// Provide persistence for the arguments needed to
 /// initialize an instance of InfluxDBAPI, using secrets store
 class PersistedAPIArgs {
   String token;
@@ -26,6 +26,10 @@ class PersistedAPIArgs {
     storage.write(key: "url", value: this.baseURL);
     storage.write(key: "org", value: this.orgName);
   }
+
+  bool get setup {
+    return (baseURL != null && orgName != null && token != null);
+  }
 }
 
 /// A form to allow a user to enter (and persist)
@@ -40,7 +44,6 @@ class APIArgsForm extends StatefulWidget {
 }
 
 class _APIArgsFormState extends State<APIArgsForm> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _orgController = TextEditingController();
   TextEditingController _urlController = TextEditingController();

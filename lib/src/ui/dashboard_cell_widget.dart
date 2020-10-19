@@ -6,6 +6,7 @@ import '../api/table.dart';
 import 'line_chart_widget.dart';
 import 'color_scheme.dart';
 import 'dashboard_line_chart_widget_axis.dart';
+import 'single_stat_widget.dart';
 
 /// Widget for showing an InfluxDB dashboard cell, using data from [InfluxDBDashboardCell].
 class InfluxDBDashboardCellWidget extends StatefulWidget {
@@ -83,19 +84,26 @@ class _InfluxDBDashboardCellWidgetState
       return Center(child: Text("No data for this cell has been retrieved"));
     }
 
-    InfluxDBLineChartWidgetAxis xAxis =
-        InfluxDBLineChartWidgetAxis.fromCellAxis(widget.cell.xAxis);
-    
-    InfluxDBLineChartWidgetAxis yAxis =
-        InfluxDBLineChartWidgetAxis.fromCellAxisAndTables(
-            widget.cell.yAxis, allTables);
+    if (widget.cell.cellType == "xy") {
+      InfluxDBLineChartWidgetAxis xAxis =
+          InfluxDBLineChartWidgetAxis.fromCellAxis(widget.cell.xAxis);
 
-    return InfluxDBLineChartWidget(
-      tables: allTables,
-      xAxis: xAxis,
-      yAxis: yAxis,
-      colorScheme: InfluxDBColorScheme.fromAPIData(
-          colorData: widget.cell.colors, size: allTables.length),
-    );
+      InfluxDBLineChartWidgetAxis yAxis =
+          InfluxDBLineChartWidgetAxis.fromCellAxisAndTables(
+              widget.cell.yAxis, allTables);
+
+      return InfluxDBLineChartWidget(
+        tables: allTables,
+        xAxis: xAxis,
+        yAxis: yAxis,
+        colorScheme: InfluxDBColorScheme.fromAPIData(
+            colorData: widget.cell.colors, size: allTables.length),
+      );
+    } else {
+      return InfluxDBSingleStateWidget(
+        tables: allTables,
+        colors: widget.cell.colors,
+      );
+    }
   }
 }
