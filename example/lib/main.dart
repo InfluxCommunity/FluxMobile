@@ -27,7 +27,7 @@ class ExampleTabs extends StatefulWidget {
 }
 
 class _ExampleTabsState extends State<ExampleTabs> {
-  PersistedAPIArgs args = PersistedAPIArgs();
+  InfluxDBPersistedAPIArgs args = InfluxDBPersistedAPIArgs();
 
   @override
   void initState() {
@@ -37,9 +37,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
 
   _initUser() async {
     await this.args.loadFromStorage();
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   @override
@@ -62,7 +60,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
                     context,
                     MaterialPageRoute(
                       builder: ((BuildContext context) {
-                        return APIArgsForm(args: this.args);
+                        return InfluxDBAPIArgsForm(args: this.args);
                       }),
                     ),
                   );
@@ -99,11 +97,6 @@ class _ExampleTabsState extends State<ExampleTabs> {
     if (args.orgName == null || args.baseURL == null || args.token == null) {
       return null;
     }
-    return InfluxDBAPI(
-      influxDBUrl: args.baseURL,
-      org: args.orgName,
-      token: args.token,
-    );
+    return InfluxDBAPI.fromPersistedAPIArgs(args);
   }
 }
-

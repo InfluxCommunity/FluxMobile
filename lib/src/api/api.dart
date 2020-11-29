@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flux_mobile/src/ui/user_info_form.dart';
 import 'package:http/http.dart';
 
 import 'dashboard.dart';
@@ -18,6 +19,11 @@ class InfluxDBAPI {
 
   /// Token to use for API calls.
   final String token;
+
+  InfluxDBAPI.fromPersistedAPIArgs(InfluxDBPersistedAPIArgs args)
+      : influxDBUrl = args.baseURL,
+        org = args.orgName,
+        token = args.token;
 
   InfluxDBAPI(
 

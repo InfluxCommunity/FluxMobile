@@ -4,7 +4,7 @@ import 'package:passwordfield/passwordfield.dart';
 
 /// Provide persistence for the arguments needed to
 /// initialize an instance of InfluxDBAPI, using secrets store
-class PersistedAPIArgs {
+class InfluxDBPersistedAPIArgs {
   String token;
   String baseURL;
   String orgName;
@@ -34,16 +34,16 @@ class PersistedAPIArgs {
 
 /// A form to allow a user to enter (and persist)
 /// information to make API calls work
-class APIArgsForm extends StatefulWidget {
-  final PersistedAPIArgs args;
+class InfluxDBAPIArgsForm extends StatefulWidget {
+  final InfluxDBPersistedAPIArgs args;
 
   /// Create an instance of a form using an instance of args
-  const APIArgsForm({Key key, @required this.args}) : super(key: key);
+  const InfluxDBAPIArgsForm({Key key, @required this.args}) : super(key: key);
 
-  _APIArgsFormState createState() => _APIArgsFormState();
+  _InfluxDBAPIArgsFormState createState() => _InfluxDBAPIArgsFormState();
 }
 
-class _APIArgsFormState extends State<APIArgsForm> {
+class _InfluxDBAPIArgsFormState extends State<InfluxDBAPIArgsForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _orgController = TextEditingController();
   TextEditingController _urlController = TextEditingController();
