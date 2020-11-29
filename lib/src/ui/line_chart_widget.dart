@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../api/row.dart';
 import '../api/table.dart';
 import 'color_scheme.dart';
-import 'dashboard_line_chart_widget_axis.dart';
+import 'line_chart_axis.dart';
 
 /// Widget for rendering a set of tables as a line chart.
 /// each tables is required to have a _time and _value column
@@ -17,10 +17,10 @@ class InfluxDBLineChartWidget extends StatefulWidget {
   final InfluxDBColorScheme colorScheme;
 
   /// Information about X axis.
-  final InfluxDBLineChartWidgetAxis xAxis;
+  final InfluxDBLineChartAxis xAxis;
 
   /// Information about Y axis.
-  final InfluxDBLineChartWidgetAxis yAxis;
+  final InfluxDBLineChartAxis yAxis;
 
   const InfluxDBLineChartWidget({
     Key key,
@@ -41,8 +41,8 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
 
   /// Color scheme to use.
   InfluxDBColorScheme colorScheme;
-  InfluxDBLineChartWidgetAxis xAxis;
-  InfluxDBLineChartWidgetAxis yAxis;
+  InfluxDBLineChartAxis xAxis;
+  InfluxDBLineChartAxis yAxis;
 
   @override
   void initState() {
@@ -54,10 +54,10 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
     }
 
     widget.xAxis == null
-        ? xAxis = InfluxDBLineChartWidgetAxis()
+        ? xAxis = InfluxDBLineChartAxis()
         : xAxis = widget.xAxis;
     widget.yAxis == null
-        ? yAxis = InfluxDBLineChartWidgetAxis()
+        ? yAxis = InfluxDBLineChartAxis()
         : yAxis = widget.yAxis;
 
 //    colorScheme = widget.colorScheme.withSize(widget.tables.length);
