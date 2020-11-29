@@ -5,7 +5,7 @@ import '../api/error.dart';
 import '../api/table.dart';
 import 'line_chart_widget.dart';
 import 'color_scheme.dart';
-import 'dashboard_line_chart_widget_axis.dart';
+import 'line_chart_axis.dart';
 import 'single_stat_widget.dart';
 
 /// Widget for showing an InfluxDB dashboard cell, using data from [InfluxDBDashboardCell].
@@ -85,11 +85,11 @@ class _InfluxDBDashboardCellWidgetState
     }
 
     if (widget.cell.cellType == "xy") {
-      InfluxDBLineChartWidgetAxis xAxis =
-          InfluxDBLineChartWidgetAxis.fromCellAxis(widget.cell.xAxis);
+      InfluxDBLineChartAxis xAxis =
+          InfluxDBLineChartAxis.fromCellAxis(widget.cell.xAxis);
 
-      InfluxDBLineChartWidgetAxis yAxis =
-          InfluxDBLineChartWidgetAxis.fromCellAxisAndTables(
+      InfluxDBLineChartAxis yAxis =
+          InfluxDBLineChartAxis.fromCellAxisAndTables(
               widget.cell.yAxis, allTables);
 
       return InfluxDBLineChartWidget(

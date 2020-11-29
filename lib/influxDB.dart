@@ -9,7 +9,7 @@ export './src/api/table.dart';
 export './src/api/row.dart';
 
 export './src/ui/color_scheme.dart';
-export 'src/ui/dashboard_line_chart_widget_axis.dart';
+export 'src/ui/line_chart_axis.dart';
 export './src/ui/dashboard_cell_widget.dart';
 export './src/ui/line_chart_widget.dart';
 export './src/ui/user_info_form.dart';
