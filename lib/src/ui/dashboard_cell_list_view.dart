@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import '../api/dashboard.dart';
-import './dashboard_cell_widget.dart';
+import 'dashboard_cell_widget.dart';
 
-class InfluxDBDashboardListView extends StatefulWidget {
+class InfluxDBDashboardCellListView extends StatefulWidget {
   final InfluxDBDashboard dashboard;
 
-  const InfluxDBDashboardListView({Key key, this.dashboard}) : super(key: key);
+  const InfluxDBDashboardCellListView({Key key, this.dashboard}) : super(key: key);
 
   @override
-  _InfluxDBDashboardListViewState createState() =>
-      _InfluxDBDashboardListViewState();
+  _InfluxDBDashboardCellListViewState createState() =>
+      _InfluxDBDashboardCellListViewState();
 }
 
-class _InfluxDBDashboardListViewState extends State<InfluxDBDashboardListView> {
+class _InfluxDBDashboardCellListViewState extends State<InfluxDBDashboardCellListView> {
   List<InfluxDBDashboardCellWidget> _cellWidgets;
 
   @override

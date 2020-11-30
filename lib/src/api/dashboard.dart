@@ -5,6 +5,9 @@ import 'query.dart';
 import 'table.dart';
 
 /// Class that provides information about a dashboard in InfluxDB 2.0.
+/// This class (and related classes) contain the data data structures retrieved
+/// from an instance of InfluxDB that can then be used to create the specific
+/// visualizations, for example in the /ui namespace of this library.
 class InfluxDBDashboard {
   /// Instance of [InfluxDBAPI] that can be used for subsequent API calls.
   final InfluxDBAPI api;
@@ -169,6 +172,7 @@ class InfluxDBDashboardCell {
   InfluxDBDashboardCellAxis yAxis;
 
   /// List of queries that the cell has defined and that should be performed to display its contents.
+  /// Note that some cell types, such as markdown, do not contain queries, so the list may be empty.
   List<InfluxDBDashboardCellQuery> queries;
 
   /// Color scheme that is used by this cell.
@@ -176,14 +180,16 @@ class InfluxDBDashboardCell {
 
   String cellType;
 
+  Map<String, dynamic> properties;
+
   /// Creates an instance of [InfluxDBDashboardCell] from parsed JSON data from API call.
   InfluxDBDashboardCell.fromAPI({@required this.dashboard, dynamic object}) {
     api = dashboard.api;
     id = object["id"];
     name = object["name"];
     cellType = object["properties"]["type"];
-    dynamic properties = object["properties"];
-
+    properties = object["properties"];
+    
     colors = properties["colors"];
 
     if (properties["axes"] != null) {
@@ -193,19 +199,35 @@ class InfluxDBDashboardCell {
           cell: this, object: properties["axes"]["y"]);
     }
 
-    queries = InfluxDBDashboardCellQuery.fromAPIList(
-        cell: this, objects: properties["queries"]);
+    if (properties["queries"] == null) {
+      queries = List<InfluxDBDashboardCellQuery>();
+    } else {
+      queries = InfluxDBDashboardCellQuery.fromAPIList(
+          cell: this, objects: properties["queries"]);
+    }
+
+    //clean up the properties that have already been used or are nt needed
+    //this is necessary for markdown cell types, as the key for markdown property
+    //is not known until run time
+    properties.remove("colors");
+    properties.remove("name");
+    properties.remove("id");
+    properties.remove("axes");
+    properties.remove("shape");
+    properties.remove("type");
+    properties.remove("queries");
   }
 
   /// Executes all of the queries for this cell, leveraging parallelism if possible, returning a [List] of [Future] of [InfluxDBTable] objects.
   Future<List<InfluxDBTable>> executeQueries() async {
     List<InfluxDBTable> allTables = [];
-
-    // toList() is needed and ensures that all async commands are called before iterating on them
-    List<Future<List<InfluxDBTable>>> futures =
-        queries.map((q) => q.query().execute()).toList();
-    for (Future<List<InfluxDBTable>> future in futures) {
-      allTables.addAll(await future);
+    if (queries.length > 0) {
+      // toList() is needed and ensures that all async commands are called before iterating on them
+      List<Future<List<InfluxDBTable>>> futures =
+          queries.map((q) => q.query().execute()).toList();
+      for (Future<List<InfluxDBTable>> future in futures) {
+        allTables.addAll(await future);
+      }
     }
 
     return allTables;
@@ -213,6 +235,7 @@ class InfluxDBDashboardCell {
 }
 
 /// Definition of an single axis (X or Y) in an [InfluxDBDashboardCell].
+/// Used to create graph specific axes (e.g. [LineChartAxis])
 class InfluxDBDashboardCellAxis {
   /// Cell that this axis belongs to.
   final InfluxDBDashboardCell cell;

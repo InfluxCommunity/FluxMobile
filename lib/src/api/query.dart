@@ -4,7 +4,10 @@ import 'package:csv/csv.dart';
 import '../api/api.dart';
 import './table.dart';
 
-/// InfluxDB 2.0 query, using the Flux language as query syntax.
+/// InfluxDB 2.0 query, using the Flux language as query language.
+/// Construct with an [InfluxDBAPI] object, and Flux query string.
+/// execute() will return the tables, and also the tables property
+/// will be available like: myInfluxDBQuery.tables
 class InfluxDBQuery {
   /// Instance of [InfluxDBAPI] object for running the InfluxDB API calls.
   final InfluxDBAPI api;
@@ -22,6 +25,8 @@ class InfluxDBQuery {
 
   /// Executes the query and returns a [Future] to [List] of [InfluxDBTable] objects.
   Future<List<InfluxDBTable>> execute() async {
+    // clear out the tables from previous runs
+    tables = [];
 
     //First get back the csv for the query
     String body = await api.postFluxQuery(queryString);
