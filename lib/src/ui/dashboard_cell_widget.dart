@@ -8,6 +8,7 @@ import 'color_scheme.dart';
 import 'line_chart_axis.dart';
 import 'single_stat_widget.dart';
 import 'markdown_widget.dart';
+import 'unsupported_cell_widget.dart';
 
 /// Widget for showing an InfluxDB dashboard cell, using data from [InfluxDBDashboardCell].
 class InfluxDBDashboardCellWidget extends StatefulWidget {
@@ -116,7 +117,7 @@ class _InfluxDBDashboardCellWidgetState
       case "markdown":
         return InfluxDBMarkDownWidget(data: widget.cell.properties);
       default:
-      return null;
+      return InfluxDBUnsupportedCellWidget(cellType: widget.cell.cellType);
     }
   }
 }
