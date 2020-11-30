@@ -24,14 +24,23 @@ class InfluxDBTableWidget extends StatelessWidget {
 
     List<Widget> cellWidgets = List<Widget>();
     headers.forEach((element) {
-      cellWidgets.add(Text(element));
+      cellWidgets.add(
+        Text(element),
+      );
     });
 
     tables.forEach((InfluxDBTable table) {
       table.rows.forEach((InfluxDBRow row) {
         fields.forEach((String key) {
           cellWidgets.add(
-            Text("${row[key]}"),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black),
+              ),
+              child: Center(
+                child: Text("${row[key]}"),
+              ),
+            ),
           );
         });
       });
