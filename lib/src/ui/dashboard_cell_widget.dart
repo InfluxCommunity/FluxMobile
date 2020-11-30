@@ -63,11 +63,7 @@ class _InfluxDBDashboardCellWidgetState
     //Trap unnamed cells
     String cellName = widget.cell.name == "Name this Cell" ? "Dashboard Cell" : widget.cell.name;
 
-    //special case that markdown cells encode their titles in the property instead
-    //of the cell name
-    if(widget.cell.cellType == "markdown") {
-      cellName = widget.cell.properties.keys.first;
-    }
+
     return Column(
       children: <Widget>[
         Container(padding: EdgeInsets.all(10.0), child: Text(cellName)),

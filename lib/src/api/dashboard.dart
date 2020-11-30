@@ -216,6 +216,13 @@ class InfluxDBDashboardCell {
     properties.remove("shape");
     properties.remove("type");
     properties.remove("queries");
+
+    //special case that markdown cells encode their titles in the property instead
+    //of the cell name
+    //This is a kludge
+    if(cellType == "markdown") {
+      name = properties.keys.first;
+    }
   }
 
   /// Executes all of the queries for this cell, leveraging parallelism if possible, returning a [List] of [Future] of [InfluxDBTable] objects.
