@@ -9,6 +9,7 @@ import 'line_chart_axis.dart';
 import 'single_stat_widget.dart';
 import 'markdown_widget.dart';
 import 'unsupported_cell_widget.dart';
+import 'table_widget.dart';
 
 /// Widget for showing an InfluxDB dashboard cell, using data from [InfluxDBDashboardCell].
 class InfluxDBDashboardCellWidget extends StatefulWidget {
@@ -116,6 +117,8 @@ class _InfluxDBDashboardCellWidgetState
         );
       case "markdown":
         return InfluxDBMarkDownWidget(data: widget.cell.properties);
+      case "table":
+        return InfluxDBTableWidget(properties: widget.cell.properties, tables: allTables);
       default:
       return InfluxDBUnsupportedCellWidget(cellType: widget.cell.cellType);
     }

@@ -16,4 +16,5 @@ export './src/ui/user_info_form.dart';
 export 'src/ui/dashboard_cell_list_view.dart';
 export 'src/ui/markdown_widget.dart';
 export 'src/ui/unsupported_cell_widget.dart';
+export 'src/ui/table_widget.dart';
 
