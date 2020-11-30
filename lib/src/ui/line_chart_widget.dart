@@ -65,8 +65,6 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
   }
 
   _buildChart() async {
-    // execute each query and collect up the tables
-
     // each table becomes a line for the chart
     for (int i = 0; i < widget.tables.length; i++) {
       InfluxDBTable table = widget.tables[i];

@@ -7,6 +7,7 @@ import 'line_chart_widget.dart';
 import 'color_scheme.dart';
 import 'line_chart_axis.dart';
 import 'single_stat_widget.dart';
+import 'markdown_widget.dart';
 
 /// Widget for showing an InfluxDB dashboard cell, using data from [InfluxDBDashboardCell].
 class InfluxDBDashboardCellWidget extends StatefulWidget {
@@ -42,7 +43,9 @@ class _InfluxDBDashboardCellWidgetState
     allTables = null;
 
     try {
+      // will set tables property for cells without quieries (e.g. markdown) to and empty list
       allTables = await widget.cell.executeQueries();
+
       errorString = null;
     } on InfluxDBAPIHTTPError catch (e) {
       errorString = e.readableMessage();
@@ -57,9 +60,17 @@ class _InfluxDBDashboardCellWidgetState
 
   @override
   Widget build(BuildContext context) {
+    //Trap unnamed cells
+    String cellName = widget.cell.name == "Name this Cell" ? "Dashboard Cell" : widget.cell.name;
+
+    //special case that markdown cells encode their titles in the property instead
+    //of the cell name
+    if(widget.cell.cellType == "markdown") {
+      cellName = widget.cell.properties.keys.first;
+    }
     return Column(
       children: <Widget>[
-        Container(padding: EdgeInsets.all(10.0), child: Text(widget.cell.name)),
+        Container(padding: EdgeInsets.all(10.0), child: Text(cellName)),
         Container(
           padding: EdgeInsets.all(10.0),
           constraints: BoxConstraints(minHeight: 350, maxHeight: 350.00),
@@ -76,34 +87,40 @@ class _InfluxDBDashboardCellWidgetState
       return Center(child: Text(errorString));
     }
 
+    // display a spinning indicator while fetching queries
     if (allTables == null) {
       return Center(child: CircularProgressIndicator());
     }
 
-    if (allTables.length == 0) {
+    if (allTables.length == 0 && widget.cell.queries.length > 0) {
       return Center(child: Text("No data for this cell has been retrieved"));
     }
 
-    if (widget.cell.cellType == "xy") {
-      InfluxDBLineChartAxis xAxis =
-          InfluxDBLineChartAxis.fromCellAxis(widget.cell.xAxis);
+    switch (widget.cell.cellType) {
+      case "xy":
+        InfluxDBLineChartAxis xAxis =
+            InfluxDBLineChartAxis.fromCellAxis(widget.cell.xAxis);
 
-      InfluxDBLineChartAxis yAxis =
-          InfluxDBLineChartAxis.fromCellAxisAndTables(
-              widget.cell.yAxis, allTables);
+        InfluxDBLineChartAxis yAxis =
+            InfluxDBLineChartAxis.fromCellAxisAndTables(
+                widget.cell.yAxis, allTables);
 
-      return InfluxDBLineChartWidget(
-        tables: allTables,
-        xAxis: xAxis,
-        yAxis: yAxis,
-        colorScheme: InfluxDBColorScheme.fromAPIData(
-            colorData: widget.cell.colors, size: allTables.length),
-      );
-    } else {
-      return InfluxDBSingleStateWidget(
-        tables: allTables,
-        colors: widget.cell.colors,
-      );
+        return InfluxDBLineChartWidget(
+          tables: allTables,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          colorScheme: InfluxDBColorScheme.fromAPIData(
+              colorData: widget.cell.colors, size: allTables.length),
+        );
+      case "single-stat":
+        return InfluxDBSingleStatWidget(
+          tables: allTables,
+          colors: widget.cell.colors,
+        );
+      case "markdown":
+        return InfluxDBMarkDownWidget(data: widget.cell.properties);
+      default:
+      return null;
     }
   }
 }

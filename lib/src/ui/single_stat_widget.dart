@@ -3,13 +3,13 @@ import '../api/table.dart';
 
 /// Widget for rendering a set of tables as a line chart.
 /// each tables is required to have a _time and _value column
-class InfluxDBSingleStateWidget extends StatefulWidget {
+class InfluxDBSingleStatWidget extends StatefulWidget {
   /// [List] of [InfluxDBTable]s that this widget is showing information for.
   final List<InfluxDBTable> tables;
 
   final dynamic colors;
 
-  const InfluxDBSingleStateWidget({
+  const InfluxDBSingleStatWidget({
     Key key,
     @required this.tables,
     this.colors,
@@ -20,7 +20,7 @@ class InfluxDBSingleStateWidget extends StatefulWidget {
 }
 
 /// Widget state management for [InfluxDBDashboardCellWidget].
-class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStateWidget> {
+class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
   /// Color scheme to use.
   dynamic value;
   Color backgroundColor;

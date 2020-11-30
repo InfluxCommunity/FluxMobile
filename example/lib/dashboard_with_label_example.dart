@@ -36,7 +36,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
         child: CircularProgressIndicator(),
       );
     } else {
-      return InfluxDBDashboardListView(dashboard: this.dashboard);
+      return InfluxDBDashboardCellListView(dashboard: this.dashboard);
     }
   }
 
