@@ -1,3 +1,4 @@
+import 'package:flux_mobile/src/api/variables.dart';
 import 'package:meta/meta.dart';
 
 import 'api.dart';
@@ -11,6 +12,7 @@ import 'table.dart';
 class InfluxDBDashboard {
   /// Instance of [InfluxDBAPI] that can be used for subsequent API calls.
   final InfluxDBAPI api;
+  final VariablesList variables;
 
   /// Unique identifier of the dashboard.
   String id;
@@ -28,7 +30,7 @@ class InfluxDBDashboard {
   List<InfluxDBDashboardCellInfo> cellInfos;
 
   /// Create an instance of [InfluxDBDashboard] from parsed JSON data from API call.
-  InfluxDBDashboard.fromAPI({@required this.api, dynamic object}) {
+  InfluxDBDashboard.fromAPI({@required this.api, this.variables, object}) {
     id = object["id"];
     name = object["name"];
     description = object["description"];
@@ -43,7 +45,7 @@ class InfluxDBDashboard {
     List<InfluxDBDashboardCell> result = [];
     // toList() is needed and ensures that all async commands are called before iterating on them
     List<Future<InfluxDBDashboardCell>> futures =
-        cellInfos.map((q) => q.cell()).toList();
+        cellInfos.map((q) => q.cell(variables: this.variables)).toList();
     for (Future<InfluxDBDashboardCell> future in futures) {
       result.add(await future);
     }
@@ -52,10 +54,13 @@ class InfluxDBDashboard {
 
   /// Initializes multiple dashboards from parsed JSON data from API call. Returns all items as a list.
   static List<InfluxDBDashboard> fromAPIList(
-      {@required InfluxDBAPI api, List<dynamic> objects}) {
+      {@required InfluxDBAPI api,
+      VariablesList variables,
+      List<dynamic> objects}) {
     List<InfluxDBDashboard> result = [];
     for (dynamic object in objects) {
-      result.add(InfluxDBDashboard.fromAPI(api: api, object: object));
+      result.add(InfluxDBDashboard.fromAPI(
+          api: api, variables: variables, object: object));
     }
     return result;
   }
@@ -103,6 +108,9 @@ class InfluxDBDashboardCellInfo {
   /// Instance of [InfluxDBAPI] that can be used for subsequent API calls.
   InfluxDBAPI api;
 
+  /// Platform Variables use in queries
+  List<InfluxDBVariable> variables;
+
   /// Unique identifier of the cell.
   String id;
 
@@ -119,13 +127,13 @@ class InfluxDBDashboardCellInfo {
   int h;
 
   /// Retrieves detailed information about the specific cell. Returns a [Future] to [InfluxDBDashboardCell].
-  Future<InfluxDBDashboardCell> cell() {
-    return api.dashboardCell(this);
+  Future<InfluxDBDashboardCell> cell({List<InfluxDBVariable> variables}) {
+    return api.dashboardCell(this,variables: variables);
   }
 
   /// Creates an instance of [InfluxDBDashboardCellInfo] from parsed JSON data from API call.
   InfluxDBDashboardCellInfo.fromAPI(
-      {@required this.dashboard, dynamic object}) {
+      {@required this.dashboard, this.variables, dynamic object}) {
     api = dashboard.api;
     id = object["id"];
     x = object["x"];
@@ -155,6 +163,7 @@ class InfluxDBDashboardCellInfo {
 class InfluxDBDashboardCell {
   /// Dashboard that the cell belongs to.
   final InfluxDBDashboard dashboard;
+  final List<InfluxDBVariable> variables;
 
   /// Instance of [InfluxDBAPI] that can be used for subsequent API calls.
   InfluxDBAPI api;
@@ -183,13 +192,14 @@ class InfluxDBDashboardCell {
   Map<String, dynamic> properties;
 
   /// Creates an instance of [InfluxDBDashboardCell] from parsed JSON data from API call.
-  InfluxDBDashboardCell.fromAPI({@required this.dashboard, dynamic object}) {
+  InfluxDBDashboardCell.fromAPI(
+      {@required this.dashboard, this.variables, dynamic object}) {
     api = dashboard.api;
     id = object["id"];
     name = object["name"];
     cellType = object["properties"]["type"];
     properties = object["properties"];
-    
+
     colors = properties["colors"];
 
     if (properties["axes"] != null) {
@@ -203,7 +213,9 @@ class InfluxDBDashboardCell {
       queries = List<InfluxDBDashboardCellQuery>();
     } else {
       queries = InfluxDBDashboardCellQuery.fromAPIList(
-          cell: this, objects: properties["queries"]);
+          cell: this,
+          variables: this.variables,
+          objects: properties["queries"]);
     }
 
     //clean up the properties that have already been used or are nt needed
@@ -220,7 +232,7 @@ class InfluxDBDashboardCell {
     //special case that markdown cells encode their titles in the property instead
     //of the cell name
     //This is a kludge
-    if(cellType == "markdown") {
+    if (cellType == "markdown") {
       name = properties.keys.first;
     }
   }
@@ -231,12 +243,11 @@ class InfluxDBDashboardCell {
     if (queries.length > 0) {
       // toList() is needed and ensures that all async commands are called before iterating on them
       List<Future<List<InfluxDBTable>>> futures =
-          queries.map((q) => q.query().execute()).toList();
+          queries.map((q) => q.query(variables: variables).execute()).toList();
       for (Future<List<InfluxDBTable>> future in futures) {
         allTables.addAll(await future);
       }
     }
-
     return allTables;
   }
 }
@@ -275,6 +286,9 @@ class InfluxDBDashboardCellQuery {
   /// Cell that this query belongs to.
   final InfluxDBDashboardCell cell;
 
+  /// Platform variables used in queries
+  final List<InfluxDBVariable> variables;
+
   /// Instance of [InfluxDBAPI] that can be used for subsequent API calls.
   InfluxDBAPI api;
 
@@ -285,7 +299,8 @@ class InfluxDBDashboardCellQuery {
   String queryString;
 
   /// Creates an instance of [InfluxDBDashboardCellQuery] from parsed JSON data from API call.
-  InfluxDBDashboardCellQuery.fromAPI({@required this.cell, dynamic object}) {
+  InfluxDBDashboardCellQuery.fromAPI(
+      {@required this.cell, this.variables, dynamic object}) {
     api = cell.api;
     name = object["name"];
     queryString = object["text"];
@@ -293,16 +308,18 @@ class InfluxDBDashboardCellQuery {
 
   /// Initializes multiple instances of [InfluxDBDashboardCellQuery] from parsed JSON data from API call. Returns all items as a list.
   static List<InfluxDBDashboardCellQuery> fromAPIList(
-      {@required InfluxDBDashboardCell cell, List<dynamic> objects}) {
+      {@required InfluxDBDashboardCell cell,
+      List<InfluxDBVariable> variables,
+      List<dynamic> objects}) {
     List<InfluxDBDashboardCellQuery> result = [];
     for (dynamic object in objects) {
-      result
-          .add(InfluxDBDashboardCellQuery.fromAPI(cell: cell, object: object));
+      result.add(InfluxDBDashboardCellQuery.fromAPI(
+          cell: cell, variables: variables, object: object));
     }
     return result;
   }
 
-  InfluxDBQuery query() {
-    return api.query(queryString);
+  InfluxDBQuery query({List<InfluxDBVariable> variables}) {
+    return api.query(queryString, variables: variables);
   }
 }
