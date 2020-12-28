@@ -15,7 +15,7 @@ class DashboardWithLabelExample extends StatefulWidget {
 class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   // initialize cards to null to show the progress indicator until response from server is received
   InfluxDBDashboard dashboard;
-
+  VariablesList variables;
   @override
   void initState() {
     _setDashboard();
@@ -23,11 +23,20 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   }
 
   _setDashboard() async {
-    List<InfluxDBDashboard> dashboards = await widget.api.dashboards(label: widget.label);
+    variables = await widget.api.variables();
+    await _resetDashboard();
+  }
+
+  Future _resetDashboard() async {
+    List<InfluxDBDashboard> dashboards =
+        await widget.api.dashboards(label: widget.label, variables: variables);
+    
     setState(() {
       this.dashboard = dashboards[0];
     });
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +45,38 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
         child: CircularProgressIndicator(),
       );
     } else {
-      return InfluxDBDashboardCellListView(dashboard: this.dashboard);
+      return Scaffold(
+        body: InfluxDBDashboardCellListView(dashboard: this.dashboard),
+        floatingActionButton: FloatingActionButton(
+          onPressed: ()  async {
+             await showDialog(
+              context: context,
+              builder: (_) => new SimpleDialog(
+                children: [
+                  Container(
+                      height: 300.0,
+                      child: InfluxDBVariablesForm(
+                        variables: variables,
+                        onChanged: (List<InfluxDBVariable> vars) {
+                          setState(() {
+                            variables = vars;
+                          });
+                        },
+                      ))
+                ],
+                title: Text("Variables"),
+                backgroundColor: Colors.green,
+              ),
+              barrierDismissible: true,
+            );
+            setState(() {
+              this.dashboard = null;
+              _resetDashboard();
+            });
+          },
+          child: Icon(Icons.settings),
+        ),
+      );
     }
   }
-
 }

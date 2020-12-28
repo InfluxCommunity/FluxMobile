@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:csv/csv.dart';
+import 'package:flux_mobile/src/api/variables.dart';
 
 import '../api/api.dart';
 import './table.dart';
@@ -15,11 +16,15 @@ class InfluxDBQuery {
   /// Query string to run.
   final String queryString;
 
+  /// Platform Variables
+  final List<InfluxDBVariable> variables;
+
   /// Tables with the result, only available after `execute` has been called.
   List<InfluxDBTable> tables = [];
 
   /// Creates a new instance of [InfluxDBQuery] using [InfluxDBAPI] for running the InfluxDB API and the query to run.
-  InfluxDBQuery({@required this.api, @required this.queryString});
+  InfluxDBQuery(
+      {@required this.api, @required this.queryString, this.variables});
 
   CsvToListConverter converter = CsvToListConverter();
 
@@ -29,7 +34,7 @@ class InfluxDBQuery {
     tables = [];
 
     //First get back the csv for the query
-    String body = await api.postFluxQuery(queryString);
+    String body = await api.postFluxQuery(queryString, variables: variables);
 
     // Track the current set of keys for the columns of each table
     List<String> currentKeys = List<String>();
@@ -40,9 +45,8 @@ class InfluxDBQuery {
 
     // use the csv library to convert each row into a List (a list of lists)
     List<List<dynamic>> allRows = converter.convert(body);
-   
+
     allRows.forEach((List<dynamic> row) {
-      
       if (row.length == 1) {
         // The row length is 1 when changine between tables in different yield
         // statements from a query, so this is always between tables

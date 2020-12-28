@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flux_mobile/influxDB.dart';
+import 'package:flux_mobile/src/api/variables.dart';
 import 'package:flux_mobile/src/ui/user_info_form.dart';
 import 'package:http/http.dart';
 
@@ -33,20 +37,61 @@ class InfluxDBAPI {
       @required this.token});
 
   /// Runs a query passed as string and returns the [InfluxDBQuery] object
-  InfluxDBQuery query(String queryString) {
-    return InfluxDBQuery(api: this, queryString: queryString);
+  InfluxDBQuery query(String queryString, {List<InfluxDBVariable> variables}) {
+    return InfluxDBQuery(
+        api: this, variables: variables, queryString: queryString);
   }
 
   /// Retrieves raw results of a Flux query using InfluxDB API and returns the output as string
-  Future<String> postFluxQuery(String queryString) async {
+  Future<String> postFluxQuery(String queryString,
+      {VariablesList variables}) async {
+    Map<String, dynamic> body = Map<String, dynamic>();
+    body["query"] = queryString;
+    if (variables != null) {
+      body["extern"] = Map<String, dynamic>();
+      body["extern"]["type"] = "File";
+      body["extern"]["package"] = null;
+      body["extern"]["imports"] = null;
+      body["extern"]["body"] = List<Map<String, dynamic>>();
+      Map<String, dynamic> externBodyElement = Map<String, dynamic>();
+      externBodyElement["type"] = "OptionStatement";
+      externBodyElement["assignment"] = Map<String, dynamic>();
+      externBodyElement["assignment"]["type"] = "VariableAssignment";
+      externBodyElement["assignment"]
+          ["id"] = {"type": "Identifier", "name": "v"};
+      externBodyElement["assignment"]["init"] = Map<String, dynamic>();
+      externBodyElement["assignment"]["init"]["type"] = "ObjectExpression";
+
+      List<Map<String, dynamic>> formattedVariables =
+          List<Map<String, dynamic>>();
+      variables.forEach((InfluxDBVariable variable) {
+        formattedVariables.add({
+          "type": "Property",
+          "key": {
+            "type": "Identifier",
+            "name": variable.name,
+          },
+          "value": variable.selectedValue,
+        });
+      });
+      externBodyElement["assignment"]["init"]["properties"] =
+          formattedVariables;
+      body["extern"]["body"].add(externBodyElement);
+
+      body["dialect"] = Map<String, List<String>>();
+      body["dialect"] = {
+        "annotations": ["group", "datatype", "default"]
+      };
+    }
+
     Response response = await post(
       _getURI("/api/v2/query"),
       headers: {
         "Authorization": "Token $token",
         "Accept": "application/csv",
-        "Content-type": "application/vnd.flux",
+        "Content-type": "application/json",
       },
-      body: queryString,
+      body: json.encode(body),
     );
 
     if (response.statusCode != 200) {
@@ -58,10 +103,11 @@ class InfluxDBAPI {
 
   /// Retrieves a list of dashboards available for current account and returns a [Future] to [List] of [InfluxDBDashboard] objects.
   /// Option label parameter will filter list to dashboards tagged with the supplied lable
-  Future<List<InfluxDBDashboard>> dashboards({label: String}) async {
+  Future<List<InfluxDBDashboard>> dashboards(
+      {label: String, VariablesList variables}) async {
     dynamic body = await _getJSONData("/api/v2/dashboards");
-    List<InfluxDBDashboard> dashboards =
-        InfluxDBDashboard.fromAPIList(api: this, objects: body["dashboards"]);
+    List<InfluxDBDashboard> dashboards = InfluxDBDashboard.fromAPIList(
+        api: this, variables: variables, objects: body["dashboards"]);
     if (label != null) {
       dashboards = dashboards
           .where((d) => d.labels.where((l) => l.name == label).length > 0)
@@ -71,12 +117,12 @@ class InfluxDBAPI {
   }
 
   /// Retrieves a specific dashboard cell; returns a [Future] to a [InfluxDBDashboardCell] object.
-  Future<InfluxDBDashboardCell> dashboardCell(
-      InfluxDBDashboardCellInfo cell) async {
+  Future<InfluxDBDashboardCell> dashboardCell(InfluxDBDashboardCellInfo cell,
+      {List<InfluxDBVariable> variables}) async {
     dynamic body = await _getJSONData(
         "/api/v2/dashboards/${cell.dashboard.id}/cells/${cell.id}/view");
     return InfluxDBDashboardCell.fromAPI(
-        dashboard: cell.dashboard, object: body);
+        dashboard: cell.dashboard, variables: variables, object: body);
   }
 
   Future write({@required InfluxDBPoint point, @required String bucket}) async {
@@ -127,5 +173,133 @@ class InfluxDBAPI {
   _handleError(Response response) {
     print("HTTP ERROR: ${response.body}");
     throw InfluxDBAPIHTTPError.fromResponse(response);
+  }
+
+  Map<String, dynamic> _timeRangeValue(int magnitude, String unit) {
+    return {
+      "type": "UnaryExpression",
+      "operator": "-",
+      "argument": {
+        "type": "DurationLiteral",
+        "values": [
+          {"magnitude": magnitude, "unit": unit}
+        ]
+      }
+    };
+  }
+
+  void _addTimeRangeVariables(VariablesList variables) {
+    Map<String, dynamic> startTimeRanges = {
+      "Past 5m": _timeRangeValue(5, "m"),
+      "Past 15m": _timeRangeValue(15, "m"),
+      "Past 1h": _timeRangeValue(1, "h"),
+      "Past 6h": _timeRangeValue(6, "h"),
+      "Past 12h": _timeRangeValue(12, "h"),
+      "Past 24h": _timeRangeValue(24, "h"),
+      "Past 2d": _timeRangeValue(2, "d"),
+      "Past 7d": _timeRangeValue(7, "d"),
+      "Past 30d": _timeRangeValue(30, "d"),
+    };
+
+    Map<String, dynamic> stopTimeRanges = Map<String, dynamic>();
+    stopTimeRanges["now"] = {
+      "type": "CallExpression",
+      "callee": {"type": "Identifier", "name": "now"}
+    };
+    stopTimeRanges.addAll(startTimeRanges);
+    InfluxDBVariable timeRangeStart = InfluxDBVariable(
+        name: "timeRangeStart", args: startTimeRanges, type: "Identifier");
+    InfluxDBVariable timeRangeStop = InfluxDBVariable(
+        name: "timeRangeStop", args: stopTimeRanges, type: "Identifier");
+
+    variables.addAll([timeRangeStart, timeRangeStop]);
+  }
+
+  Future<VariablesList> variables() async {
+    VariablesList variables = VariablesList();
+    _addTimeRangeVariables(variables);
+
+    Map<String, dynamic> variablesJson =
+        await _getJSONData("/api/v2/variables");
+    List<dynamic> vars = variablesJson["variables"];
+
+    vars.forEach((dynamic v) {
+      if (v["arguments"]["type"] == "map") {
+        Map<String, dynamic> args = Map<String, dynamic>();
+
+        Map<String, dynamic> argVals = v["arguments"]["values"];
+        argVals.keys.forEach((String key) {
+          args.addAll({
+            key: {
+              "type": "StringLiteral",
+              "value": argVals[key],
+            },
+          });
+        });
+
+        variables.add(
+          InfluxDBVariable(
+            type: "Identifier",
+            args: args,
+            name: v["name"],
+          ),
+        );
+      }
+      if (v["arguments"]["type"] == "constant") {
+        Map<String, dynamic> args = Map<String, dynamic>();
+
+        List<dynamic> argVals = v["arguments"]["values"];
+        argVals.forEach((element) {
+          args.addAll({
+            element: {
+              "type": "StringLiteral",
+              "value": element,
+            },
+          });
+        });
+        variables.add(
+          InfluxDBVariable(
+            type: "Identifier",
+            args: args,
+            name: v["name"],
+          ),
+        );
+      }
+    });
+
+    Iterable<dynamic> queryVariablesObjs =
+        vars.where((element) => element["arguments"]["type"] == "query");
+
+    Map<String, InfluxDBQueryVariable> variableNodeMap =
+        Map<String, InfluxDBQueryVariable>();
+
+    // create a map of all of the query variables
+    queryVariablesObjs.forEach((varObj) {
+      InfluxDBQueryVariable node = InfluxDBQueryVariable(
+          name: varObj["name"], obj: varObj, variables: variables, api: this);
+      variableNodeMap[varObj["name"]] = node;
+    });
+
+    variableNodeMap.forEach((key, value) {
+      // find all the child vars in the query
+      List<String> subVarNames = value.subVariables;
+
+      // add the children
+      subVarNames.forEach((String subVarName) {
+        variableNodeMap[key].children.add(variableNodeMap[subVarName]);
+        variableNodeMap[subVarName].onHydrated.add(value.onSubVariableHydrated);
+        variableNodeMap[subVarName]
+            .onChanged
+            .add(value.onSubVariableSlectionChange);
+      });
+    });
+
+    variableNodeMap.forEach((key, value) async {
+      if (value.children.length == 0) {
+        value.executeVariableQuery();
+      }
+    });
+
+    return variables;
   }
 }

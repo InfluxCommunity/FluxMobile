@@ -50,7 +50,11 @@ class _ExampleTabsState extends State<ExampleTabs> {
         appBar: AppBar(
           title: Text("Examples"),
           bottom: TabBar(
-            tabs: <Widget>[Text("Query"), Text("Dashboard"), Text("Write")],
+            tabs: <Widget>[
+              Text("Query"),
+              Text("Dashboard"),
+              Text("Write")
+            ],
           ),
           actions: <Widget>[
             IconButton(
@@ -73,17 +77,24 @@ class _ExampleTabsState extends State<ExampleTabs> {
         body: TabBarView(
           children: [
             ((api != null)
-                ? SimpleQueryChartExample(api: api)
+                ? SimpleQueryChartExample(
+                    api: api,
+                  )
                 : Center(
                     child: Text("Need to log in ..."),
                   )),
             ((api != null)
-                ? DashboardWithLabelExample(label: "mobile", api: api)
+                ? DashboardWithLabelExample(
+                    label: "mobile",
+                    api: api,
+                  )
                 : Center(
                     child: Text("Need to log in ..."),
                   )),
             ((api != null)
-                ? SimpleWriteExample(api: api)
+                ? SimpleWriteExample(
+                    api: api,
+                  )
                 : Center(
                     child: Text("Need to log in ..."),
                   )),

@@ -7,6 +7,7 @@ export './src/api/query.dart';
 export './src/api/point.dart';
 export './src/api/table.dart';
 export './src/api/row.dart';
+export './src/api/variables.dart';
 
 export './src/ui/color_scheme.dart';
 export 'src/ui/line_chart_axis.dart';
@@ -17,4 +18,4 @@ export 'src/ui/dashboard_cell_list_view.dart';
 export 'src/ui/markdown_widget.dart';
 export 'src/ui/unsupported_cell_widget.dart';
 export 'src/ui/table_widget.dart';
-
+export 'src/ui/variables_form.dart';
