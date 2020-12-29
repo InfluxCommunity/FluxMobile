@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flux_mobile/src/ui/no_data_widget.dart';
 
 import '../api/dashboard.dart';
 import '../api/error.dart';
@@ -91,8 +92,16 @@ class _InfluxDBDashboardCellWidgetState
       return Center(child: CircularProgressIndicator());
     }
 
+
+    // Gaurd against cases where the query didn't return data
     if (allTables.length == 0 && widget.cell.queries.length > 0) {
-      return Center(child: Text("No data for this cell has been retrieved"));
+      return InfluxDBNoDataCellWidget();
+    }
+
+    if(allTables.length > 0) {
+      if(allTables[0].rows.length == 0 && widget.cell.queries.length > 0) {
+        return InfluxDBNoDataCellWidget();
+      }
     }
 
     switch (widget.cell.cellType) {
