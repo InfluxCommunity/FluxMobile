@@ -109,7 +109,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
     }
 
     
-
+    // build the Left axis
     SideTitles leftTitles = SideTitles(
       reservedSize: 40,
       showTitles: true,
@@ -117,6 +117,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
       getTitles: widget.yAxis.getValueAsString,
     );
 
+    // build the bottom axis
     FlTitlesData titlesData = FlTitlesData(
       show: true,
       leftTitles: leftTitles,
@@ -173,7 +174,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                   });
                   
                   t += DateTime.fromMillisecondsSinceEpoch(barSpot.x.toInt()).toString();
-                  Color c = colorScheme.themeColors.elementAt(barSpot.barIndex);
+                  Color c = colorScheme[barSpot.barIndex];
                   return LineTooltipItem(t, TextStyle(color: c, fontSize: 10.0));
                 }).toList();
               },

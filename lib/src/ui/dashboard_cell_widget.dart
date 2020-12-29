@@ -78,7 +78,8 @@ class _InfluxDBDashboardCellWidgetState
     );
   }
 
-  /// Renders the widget to show on the screen. It may be an instance of [InfluxDBLineChartWidget],
+  /// Renders the widget to show on the screen. It may be an instance of [InfluxDBLineChartWidget], an [InfluxDBTableWidget],
+  /// an [InfluxDBMarkDownWidget] widget, or an [InfluxDBUnsupportedCellWidget], 
   /// a [CircularProgressIndicator] while information about cell is being fetched or a [Text] showing an error.
   Widget childWidget() {
     if (errorString != null) {
