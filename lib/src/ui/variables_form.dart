@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/src/api/variables.dart';
 
-/// A wiget for displaying and allowing users to select 
+/// A wiget for displaying and allowing users to select
 /// [InfluxDBVariable]s defined in their InfluxDB account.
 class InfluxDBVariablesForm extends StatefulWidget {
-
   /// A callback function to track when a user has changed the
   /// selection of a variable in the form.
   final Function onChanged;
@@ -46,27 +45,67 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
             );
           });
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Text(widget.variables[index].name + " : "),
-              DropdownButtonHideUnderline(
-                child: DropdownButton(
-                  value: widget.variables[index].selectedArgName,
-                  items: items,
-                  onChanged: (value) {
-                    setState(() {
-                      widget.variables[index].selectedArgName = value;
-                      if (widget.onChanged != null) {
-                        widget.onChanged(widget.variables);
-                      }
-                    });
-                  },
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.variables[index].name,
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ),
-            ],
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.secondary),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(5.0),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: SizedBox(
+                      width: 500.0,
+                      child: DropdownButton(
+                        value: widget.variables[index].selectedArgName,
+                        items: items,
+                        onChanged: (value) {
+                          setState(() {
+                            widget.variables[index].selectedArgName = value;
+                            if (widget.onChanged != null) {
+                              widget.onChanged(widget.variables);
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
+
+          // return Row(
+          //   crossAxisAlignment: CrossAxisAlignment.center,
+          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //   children: [
+          //     Text(widget.variables[index].name + " : "),
+          //     DropdownButtonHideUnderline(
+          //       child: DropdownButton(
+          //         value: widget.variables[index].selectedArgName,
+          //         items: items,
+          //         onChanged: (value) {
+          //           setState(() {
+          //             widget.variables[index].selectedArgName = value;
+          //             if (widget.onChanged != null) {
+          //               widget.onChanged(widget.variables);
+          //             }
+          //           });
+          //         },
+          //       ),
+          //     ),
+          //   ],
+          // );
         });
   }
 }

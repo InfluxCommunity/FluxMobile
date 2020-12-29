@@ -30,13 +30,11 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   Future _resetDashboard() async {
     List<InfluxDBDashboard> dashboards =
         await widget.api.dashboards(label: widget.label, variables: variables);
-    
+
     setState(() {
       this.dashboard = dashboards[0];
     });
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -48,31 +46,45 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
       return Scaffold(
         body: InfluxDBDashboardCellListView(dashboard: this.dashboard),
         floatingActionButton: FloatingActionButton(
-          onPressed: ()  async {
-             await showDialog(
+          onPressed: () async {
+            await showDialog(
               context: context,
               builder: (_) => new SimpleDialog(
                 children: [
                   Container(
-                      height: 300.0,
-                      child: InfluxDBVariablesForm(
-                        variables: variables,
-                        onChanged: (List<InfluxDBVariable> vars) {
-                          setState(() {
-                            variables = vars;
-                          });
-                        },
-                      ))
+                    height: 300.0,
+                    child: InfluxDBVariablesForm(
+                      variables: variables,
+                      onChanged: (List<InfluxDBVariable> vars) {
+                        setState(() {
+                          variables = vars;
+                        });
+                      },
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: RaisedButton(
+                          onPressed: (() {
+                            Navigator.pop(context);
+                            setState(() {
+                              this.dashboard = null;
+                              _resetDashboard();
+                            });
+                          }),
+                          child: Text("Ok"),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
                 title: Text("Variables"),
-                backgroundColor: Colors.green,
               ),
-              barrierDismissible: true,
+              barrierDismissible: false,
             );
-            setState(() {
-              this.dashboard = null;
-              _resetDashboard();
-            });
           },
           child: Icon(Icons.settings),
         ),
