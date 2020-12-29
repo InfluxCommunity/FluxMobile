@@ -15,6 +15,23 @@ class InfluxDBTableWidget extends StatelessWidget {
     List<String> fields = List<String>();
 
     List<dynamic> fieldOptions = properties["fieldOptions"];
+
+    // The API returns all possible fields in fieldOptions, so
+    // we need to prune the ones that aren't used
+    List<dynamic> fieldOptionsToDump = List<dynamic>();
+    fieldOptions.forEach((dynamic fo) {
+      if (tables.length > 0) {
+        List<String> keys = tables[0].rows[0].keys.toList();
+        if (!keys.contains(fo["internalName"])) {
+          fieldOptionsToDump.add(fo);
+        }
+      }
+    });
+
+    fieldOptionsToDump.forEach((fo) {
+      fieldOptions.remove(fo);
+    });
+
     fieldOptions.forEach((dynamic field) {
       if (field["visible"] == true) {
         headers.add(field["displayName"]);
@@ -25,7 +42,15 @@ class InfluxDBTableWidget extends StatelessWidget {
     List<Widget> cellWidgets = List<Widget>();
     headers.forEach((element) {
       cellWidgets.add(
-        Text(element),
+        Center(
+          child: Text(
+            element,
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       );
     });
 
