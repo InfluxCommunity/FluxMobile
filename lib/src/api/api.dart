@@ -188,8 +188,18 @@ class InfluxDBAPI {
     };
   }
 
-  void _addTimeRangeVariables(VariablesList variables) {
-    Map<String, dynamic> startTimeRanges = {
+  Map<String, dynamic> _windowPeriodValue(
+      String name, int magnitude, String unit) {
+    return {
+      "type": "DurationLiteral",
+      "values": [
+        {"magnitude": magnitude, "unit": unit}
+      ]
+    };
+  }
+
+  void _addImplicitVariables(VariablesList variables) {
+    Map<String, dynamic> startTimeRangeArgs = {
       "Past 5m": _timeRangeValue(5, "m"),
       "Past 15m": _timeRangeValue(15, "m"),
       "Past 1h": _timeRangeValue(1, "h"),
@@ -200,24 +210,37 @@ class InfluxDBAPI {
       "Past 7d": _timeRangeValue(7, "d"),
       "Past 30d": _timeRangeValue(30, "d"),
     };
-
-    Map<String, dynamic> stopTimeRanges = Map<String, dynamic>();
-    stopTimeRanges["now"] = {
+    Map<String, dynamic> stopTimeRangeArgs = Map<String, dynamic>();
+    stopTimeRangeArgs["now"] = {
       "type": "CallExpression",
       "callee": {"type": "Identifier", "name": "now"}
     };
-    stopTimeRanges.addAll(startTimeRanges);
-    InfluxDBVariable timeRangeStart = InfluxDBVariable(
-        name: "timeRangeStart", args: startTimeRanges, type: "Identifier");
-    InfluxDBVariable timeRangeStop = InfluxDBVariable(
-        name: "timeRangeStop", args: stopTimeRanges, type: "Identifier");
+    stopTimeRangeArgs.addAll(startTimeRangeArgs);
 
-    variables.addAll([timeRangeStart, timeRangeStop]);
+    Map<String, dynamic> windpwPeriodArgs = {
+      "5s": _windowPeriodValue("5s", 5, "s"),
+      "15s": _windowPeriodValue("15s", 15, "s"),
+      "1m": _windowPeriodValue("1m", 1, "m"),
+      "5m": _windowPeriodValue("5m", 5, "m"),
+      "15m": _windowPeriodValue("15m", 15, "m"),
+      "1h": _windowPeriodValue("1h", 1, "h"),
+      "6h": _windowPeriodValue("6h", 6, "h"),
+      "12h": _windowPeriodValue("12h", 12, "h"),
+      "24h": _windowPeriodValue("24h", 24, "h"),
+    };
+
+    InfluxDBVariable timeRangeStart = InfluxDBVariable(
+        name: "timeRangeStart", args: startTimeRangeArgs, type: "Identifier");
+    InfluxDBVariable timeRangeStop = InfluxDBVariable(
+        name: "timeRangeStop", args: stopTimeRangeArgs, type: "Identifier");
+    InfluxDBVariable windowPeriod = InfluxDBVariable(
+        name: "windowPeriod", args: windpwPeriodArgs, type: "ObjectExpression");
+    variables.addAll([timeRangeStart, timeRangeStop, windowPeriod]);
   }
 
   Future<VariablesList> variables() async {
     VariablesList variables = VariablesList();
-    _addTimeRangeVariables(variables);
+    _addImplicitVariables(variables);
 
     Map<String, dynamic> variablesJson =
         await _getJSONData("/api/v2/variables");
