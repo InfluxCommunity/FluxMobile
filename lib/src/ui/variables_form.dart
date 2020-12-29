@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/src/api/variables.dart';
 
+/// A wiget for displaying and allowing users to select 
+/// [InfluxDBVariable]s defined in their InfluxDB account.
 class InfluxDBVariablesForm extends StatefulWidget {
+
+  /// A callback function to track when a user has changed the
+  /// selection of a variable in the form.
   final Function onChanged;
+
+  /// The variables being displayed and maintained by the widget.
   final InfluxDBVariablesList variables;
 
+  /// Initialize an instance of this form with the [InfluxDBVariablesList]
+  /// to display, and an optional callback to respond to changes.
   const InfluxDBVariablesForm(
       {Key key, this.onChanged, @required this.variables})
       : super(key: key);
