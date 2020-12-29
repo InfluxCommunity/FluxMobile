@@ -76,7 +76,7 @@ class _SimpleQueryChartExampleState extends State<SimpleQueryChartExample> {
     String err = "";
 
     try {
-      InfluxDBQuery query = widget.api.query(textEditingController.text);
+      InfluxDBQuery query = InfluxDBQuery(queryString: textEditingController.text, api: widget.api);
       tables = await query.execute();
     } on InfluxDBAPIHTTPError catch (e) {
       err = e.readableMessage();

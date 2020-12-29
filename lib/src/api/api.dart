@@ -24,23 +24,18 @@ class InfluxDBAPI {
   /// Token to use for API calls.
   final String token;
 
+
+  /// Initializes InfluxDBAPI object by passing in a InfluxDBPersistedAPIArgs object
   InfluxDBAPI.fromPersistedAPIArgs(InfluxDBPersistedAPIArgs args)
       : influxDBUrl = args.baseURL,
         org = args.orgName,
         token = args.token;
 
+  /// Initializes InfluxDBAPI object by passing URL, organization and token.
   InfluxDBAPI(
-
-      /// Initializes InfluxDBAPI object by passing URL, organization and token.
       {@required this.influxDBUrl,
       @required this.org,
       @required this.token});
-
-  /// Runs a query passed as string and returns the [InfluxDBQuery] object
-  InfluxDBQuery query(String queryString, {List<InfluxDBVariable> variables}) {
-    return InfluxDBQuery(
-        api: this, variables: variables, queryString: queryString);
-  }
 
   /// Retrieves raw results of a Flux query using InfluxDB API and returns the output as string
   Future<String> postFluxQuery(String queryString,

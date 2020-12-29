@@ -63,7 +63,8 @@ class InfluxDBQueryVariable implements InfluxDBVariable {
   /// Execute the query for the variable (along with all currently populated
   /// platform variables) and populate the options for the variable
   executeVariableQuery() {
-    InfluxDBQuery q = api.query(this.query, variables: variables);
+    InfluxDBQuery q =
+        InfluxDBQuery(queryString: this.query, api: api, variables: variables);
 
     q.execute().then((tables) {
       _populateArgs(tables);

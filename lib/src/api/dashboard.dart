@@ -320,6 +320,6 @@ class InfluxDBDashboardCellQuery {
   }
 
   InfluxDBQuery query({List<InfluxDBVariable> variables}) {
-    return api.query(queryString, variables: variables);
+    return InfluxDBQuery(queryString: queryString, api: api, variables: variables);
   }
 }
