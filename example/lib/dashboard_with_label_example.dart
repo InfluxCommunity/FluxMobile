@@ -15,7 +15,7 @@ class DashboardWithLabelExample extends StatefulWidget {
 class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
   // initialize cards to null to show the progress indicator until response from server is received
   InfluxDBDashboard dashboard;
-  VariablesList variables;
+  InfluxDBVariablesList variables;
   @override
   void initState() {
     _setDashboard();

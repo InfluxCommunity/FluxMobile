@@ -3,7 +3,7 @@ import 'package:flux_mobile/src/api/variables.dart';
 
 class InfluxDBVariablesForm extends StatefulWidget {
   final Function onChanged;
-  final VariablesList variables;
+  final InfluxDBVariablesList variables;
 
   const InfluxDBVariablesForm(
       {Key key, this.onChanged, @required this.variables})

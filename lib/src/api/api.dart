@@ -11,7 +11,6 @@ import 'package:http/http.dart';
 import 'dashboard.dart';
 import 'error.dart';
 import 'point.dart';
-import 'query.dart';
 
 /// Root class for interacting with InfluxDB 2.0.
 class InfluxDBAPI {
@@ -25,21 +24,22 @@ class InfluxDBAPI {
   final String token;
 
 
-  /// Initializes InfluxDBAPI object by passing in a InfluxDBPersistedAPIArgs object
+  /// Initializes [InfluxDBAPI] object by passing in a [InfluxDBPersistedAPIArgs] object
   InfluxDBAPI.fromPersistedAPIArgs(InfluxDBPersistedAPIArgs args)
       : influxDBUrl = args.baseURL,
         org = args.orgName,
         token = args.token;
 
-  /// Initializes InfluxDBAPI object by passing URL, organization and token.
+  /// Initializes [InfluxDBAPI] object by passing URL, organization and token.
   InfluxDBAPI(
       {@required this.influxDBUrl,
       @required this.org,
       @required this.token});
 
-  /// Retrieves raw results of a Flux query using InfluxDB API and returns the output as string
+  /// Retrieves raw results of a Flux query using [InfluxDBAPI] and returns the output as string
+  /// If you want the processed data, use [InfluxDBQuery.execute]()
   Future<String> postFluxQuery(String queryString,
-      {VariablesList variables}) async {
+      {InfluxDBVariablesList variables}) async {
     Map<String, dynamic> body = Map<String, dynamic>();
     body["query"] = queryString;
     if (variables != null) {
@@ -99,7 +99,7 @@ class InfluxDBAPI {
   /// Retrieves a list of dashboards available for current account and returns a [Future] to [List] of [InfluxDBDashboard] objects.
   /// Option label parameter will filter list to dashboards tagged with the supplied lable
   Future<List<InfluxDBDashboard>> dashboards(
-      {label: String, VariablesList variables}) async {
+      {label: String, InfluxDBVariablesList variables}) async {
     dynamic body = await _getJSONData("/api/v2/dashboards");
     List<InfluxDBDashboard> dashboards = InfluxDBDashboard.fromAPIList(
         api: this, variables: variables, objects: body["dashboards"]);
@@ -193,7 +193,7 @@ class InfluxDBAPI {
     };
   }
 
-  void _addImplicitVariables(VariablesList variables) {
+  void _addImplicitVariables(InfluxDBVariablesList variables) {
     Map<String, dynamic> startTimeRangeArgs = {
       "Past 5m": _timeRangeValue(5, "m"),
       "Past 15m": _timeRangeValue(15, "m"),
@@ -233,8 +233,11 @@ class InfluxDBAPI {
     variables.addAll([timeRangeStart, timeRangeStop, windowPeriod]);
   }
 
-  Future<VariablesList> variables() async {
-    VariablesList variables = VariablesList();
+
+  /// Returns a completed [InfluxDBVarilablesList], including execution
+  /// of all [InfluxDBQueryVariable] objects, and all implicit variables.
+  Future<InfluxDBVariablesList> variables() async {
+    InfluxDBVariablesList variables = InfluxDBVariablesList();
     _addImplicitVariables(variables);
 
     Map<String, dynamic> variablesJson =

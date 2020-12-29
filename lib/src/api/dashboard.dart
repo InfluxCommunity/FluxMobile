@@ -12,7 +12,7 @@ import 'table.dart';
 class InfluxDBDashboard {
   /// Instance of [InfluxDBAPI] that can be used for subsequent API calls.
   final InfluxDBAPI api;
-  final VariablesList variables;
+  final InfluxDBVariablesList variables;
 
   /// Unique identifier of the dashboard.
   String id;
@@ -55,7 +55,7 @@ class InfluxDBDashboard {
   /// Initializes multiple dashboards from parsed JSON data from API call. Returns all items as a list.
   static List<InfluxDBDashboard> fromAPIList(
       {@required InfluxDBAPI api,
-      VariablesList variables,
+      InfluxDBVariablesList variables,
       List<dynamic> objects}) {
     List<InfluxDBDashboard> result = [];
     for (dynamic object in objects) {
