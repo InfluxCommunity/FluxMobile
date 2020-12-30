@@ -44,6 +44,8 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
   InfluxDBLineChartAxis xAxis;
   InfluxDBLineChartAxis yAxis;
 
+  bool dataChartable = true;
+
   @override
   void initState() {
     super.initState();
@@ -85,6 +87,8 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
           spots.add(FlSpot(x, y));
         } catch (e) {
           print("Unable to parse row: " + e.toString());
+          dataChartable = false;
+          break;
         }
       }
 
@@ -107,8 +111,13 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
     if (lines.length == 0) {
       return Center(child: CircularProgressIndicator());
     }
+    if (!dataChartable) {
+      return Center(
+        child: Text(
+            "The data contains strings for _value in at least one returned table, and therefore cannot be displayed in a line graph"),
+      );
+    }
 
-    
     // build the Left axis
     SideTitles leftTitles = SideTitles(
       reservedSize: 40,
@@ -146,7 +155,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                 return spots.map((barSpot) {
                   InfluxDBRow iRow = widget.tables[barSpot.barIndex].rows[0];
                   String t = "";
-                  t+=barSpot.y.toString() + ", ";
+                  t += barSpot.y.toString() + ", ";
                   if (iRow.containsKey("_measurement") &&
                       iRow.containsKey("_field")) {
                     t += "${iRow["_measurement"]}, ${iRow["_field"]}, ";
@@ -173,10 +182,12 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
                       t += "$element : ${iRow[element]} \n";
                     }
                   });
-                  
-                  t += DateTime.fromMillisecondsSinceEpoch(barSpot.x.toInt()).toString();
+
+                  t += DateTime.fromMillisecondsSinceEpoch(barSpot.x.toInt())
+                      .toString();
                   Color c = colorScheme[barSpot.barIndex];
-                  return LineTooltipItem(t, TextStyle(color: c, fontSize: 10.0));
+                  return LineTooltipItem(
+                      t, TextStyle(color: c, fontSize: 10.0));
                 }).toList();
               },
             ),
