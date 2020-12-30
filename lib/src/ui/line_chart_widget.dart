@@ -141,20 +141,21 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
         LineChartData(
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
+              maxContentWidth: 300.0,
               getTooltipItems: (List<LineBarSpot> spots) {
                 return spots.map((barSpot) {
                   InfluxDBRow iRow = widget.tables[barSpot.barIndex].rows[0];
                   String t = "";
-                  t+=barSpot.y.toString() + "\n";
+                  t+=barSpot.y.toString() + ", ";
                   if (iRow.containsKey("_measurement") &&
                       iRow.containsKey("_field")) {
-                    t += "${iRow["_measurement"]}, ${iRow["_field"]}\n";
+                    t += "${iRow["_measurement"]}, ${iRow["_field"]}, ";
                   } else {
                     if (iRow.containsKey("_measurement")) {
-                      t += "${iRow["_measurement"]}\n";
+                      t += "${iRow["_measurement"]}, ";
                     }
                     if (iRow.containsKey("_field")) {
-                      t += "${iRow["_field"]}\n";
+                      t += "${iRow["_field"]}, ";
                     }
                   }
 
@@ -193,7 +194,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
           gridData: FlGridData(
             show: false,
           ),
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.white,
         ),
       ),
     );

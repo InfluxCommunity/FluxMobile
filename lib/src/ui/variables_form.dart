@@ -32,58 +32,59 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
 
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: widget.variables.length,
-        itemBuilder: (BuildContext context, int index) {
-          List<DropdownMenuItem> items = List<DropdownMenuItem>();
+      itemCount: widget.variables.length,
+      itemBuilder: (BuildContext context, int index) {
+        List<DropdownMenuItem> items = List<DropdownMenuItem>();
 
-          widget.variables[index].args.keys.forEach((String str) {
-            items.add(
-              DropdownMenuItem(
-                child: Text(str),
-                value: str,
-              ),
-            );
-          });
-
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.variables[index].name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Theme.of(context).colorScheme.secondary),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(5.0),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: SizedBox(
-                      width: 500.0,
-                      child: DropdownButton(
-                        value: widget.variables[index].selectedArgName,
-                        items: items,
-                        onChanged: (value) {
-                          setState(() {
-                            widget.variables[index].selectedArgName = value;
-                            if (widget.onChanged != null) {
-                              widget.onChanged(widget.variables);
-                            }
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+        widget.variables[index].args.keys.forEach((String str) {
+          items.add(
+            DropdownMenuItem(
+              child: Text(str),
+              value: str,
             ),
           );
         });
+
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.variables[index].name,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.secondary),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5.0),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: SizedBox(
+                    width: 500.0,
+                    child: DropdownButton(
+                      value: widget.variables[index].selectedArgName,
+                      items: items,
+                      onChanged: (value) {
+                        setState(() {
+                          widget.variables[index].selectedArgName = value;
+                          if (widget.onChanged != null) {
+                            widget.onChanged(widget.variables);
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
