@@ -4,6 +4,8 @@ Flutter SDK for InfluxDB 2.0.
 
 **NOTE**: This library is still in early stages of development and there may be incompatible changes until the library achieves version 1.0.
 
+This library is **UNOFFICIAL** community Open Source software. It is not a project formally supported by InfluxData. 
+
 ## Getting Started
 
 This repository contains a library for Dart and Flutter that allows building mobile applications interacting with InfluxDB.
