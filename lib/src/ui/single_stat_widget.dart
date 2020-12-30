@@ -35,26 +35,33 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
   _buildChart() async {
     value = widget.tables[0].rows[0]["_value"];
     List<dynamic> colors = widget.colors;
-    String hex = "#000000";
-    colors.forEach((dynamic color) {
-      if (value > color["value"]) {
-        hex = color["hex"];
-      }
-      hex = hex.replaceAll("#", "");
-      if (hex.length == 6) {
-        hex = "FF" + hex;
-      }
-      if (color["type"] == "text") {
-        fontColor = Color(
-          int.parse("0x$hex"),
-        );
-      } else {
-        backgroundColor = Color(
-          int.parse("0x$hex"),
-        );
-        fontColor = Colors.black;
+
+    // figure out which color to apply
+    dynamic color;
+    colors.forEach((dynamic c) {
+      if (value > c["value"] ) {
+        color = c;
       }
     });
+
+    // apply the color
+    String hex = "#000000";
+    hex = color["hex"];
+
+    hex = hex.replaceAll("#", "");
+    if (hex.length == 6) {
+      hex = "FF" + hex;
+    }
+    if (color["type"] == "text") {
+      fontColor = Color(
+        int.parse("0x$hex"),
+      );
+    } else {
+      backgroundColor = Color(
+        int.parse("0x$hex"),
+      );
+      fontColor = Colors.black;
+    }
 
     setState(() {});
   }
