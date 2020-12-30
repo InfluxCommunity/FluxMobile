@@ -84,28 +84,6 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
               ],
             ),
           );
-
-          // return Row(
-          //   crossAxisAlignment: CrossAxisAlignment.center,
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   children: [
-          //     Text(widget.variables[index].name + " : "),
-          //     DropdownButtonHideUnderline(
-          //       child: DropdownButton(
-          //         value: widget.variables[index].selectedArgName,
-          //         items: items,
-          //         onChanged: (value) {
-          //           setState(() {
-          //             widget.variables[index].selectedArgName = value;
-          //             if (widget.onChanged != null) {
-          //               widget.onChanged(widget.variables);
-          //             }
-          //           });
-          //         },
-          //       ),
-          //     ),
-          //   ],
-          // );
         });
   }
 }
