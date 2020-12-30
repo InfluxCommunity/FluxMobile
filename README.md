@@ -10,18 +10,6 @@ This repository contains a library for Dart and Flutter that allows building mob
 
 The repository also includes examples that show how to use the said components.
 
-To run the example app, simply invoke:
-
-```
-$ ./scripts/run.sh
-```
-
-To build Android APK, run:
-
-```
-$ ./scripts/build.sh apk
-```
-
 ## Examples
 
 ### Main example file
@@ -38,7 +26,7 @@ The `example/dashboard_with_label_example.dart` file shows how to use `InfluxDBA
 
 ### Write example
 
-TODO: describe
+The `example/simple_write_example.dart` shows how to build an `InfluxDBPoint` and write it through the `InlfuxDBAPI` object.
 
 ## SDK overview
 
@@ -58,10 +46,13 @@ InfluxDBAPI api = InfluxDBAPI(
 );
 ```
 
+Optionally, there is a `InfluxDBPersistedAPIArgs` class that automatically saves the necessary data in the device's secure storage, and works in conjunciton with `InfluxDBAPIArgsForm` class to provide a UI for entering and editing the settings.
+
+
 Next, that instance can be used to run queries or retrieve some of the information - such as:
 
 ```
-InfluxDBQuery query = api.query(queryString);
+InfluxDBQuery query = InfluxDBQuery(queryString, api: api);
 tables = await query.execute();
 ```
 
@@ -75,10 +66,6 @@ return dashboards.where((d) => d.labels.where((l) => l.name == "mobile").length 
 ```
 
 The example above retrieves all dashboards and then on the client side limits the result to ones that have a "`mobile`" label.
-
-### Writing data to InfluxDB 2.0
-
-TODO: describe
 
 ### UI components built on top of InfluxDB 2.0 APIs
 
@@ -107,3 +94,11 @@ for (InfluxDBDashboardCell cell in cells) {
 ```
 
 The above creates an instance of `InfluxDBDashboardCellWidget` for each cell in a list of `cells`, that were previously retrieved from an API.
+
+Supported visualizations for InfluxDBDashboardCellWidget are curently:
+ * Markdown
+ * Line Graph
+ * Single Stat
+ * Table
+
+ Dashboards can be easily rendered with the `InfluxDBDashboardCellListView` class.
