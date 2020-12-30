@@ -23,7 +23,8 @@ class InfluxDBSingleStatWidget extends StatefulWidget {
 class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
   /// Color scheme to use.
   dynamic value;
-  Color backgroundColor;
+  Color backgroundColor = Colors.black;
+  Color fontColor = Colors.white;
 
   @override
   void initState() {
@@ -39,14 +40,22 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
       if (value > color["value"]) {
         hex = color["hex"];
       }
+      hex = hex.replaceAll("#", "");
+      if (hex.length == 6) {
+        hex = "FF" + hex;
+      }
+      if (color["type"] == "text") {
+        fontColor = Color(
+          int.parse("0x$hex"),
+        );
+      } else {
+        backgroundColor = Color(
+          int.parse("0x$hex"),
+        );
+        fontColor = Colors.black;
+      }
     });
-    hex = hex.replaceAll("#", "");
-    if (hex.length == 6) {
-      hex = "FF" + hex;
-    }
-    backgroundColor = Color(
-      int.parse("0x$hex"),
-    );
+
     setState(() {});
   }
 
@@ -58,7 +67,7 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
       child: Center(
           child: Text(
         value.toString(),
-        style: TextStyle(fontSize: 100.0),
+        style: TextStyle(fontSize: 100.0, color: fontColor),
       )),
     );
   }
