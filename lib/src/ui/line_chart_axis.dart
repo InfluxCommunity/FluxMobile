@@ -8,15 +8,50 @@ import '../api/dashboard.dart';
 class InfluxDBLineChartAxis {
   /// Minimum value to show for this axis. Can be `null`, in which case there is no minimum set and it could not be determined from reading [InfluxDBTable] data.
   double minimum;
+
   /// Maximum value to show for this axis. Can be `null`, in which case there is no maximum set and it could not be determined from reading [InfluxDBTable] data.
   double maximum;
+
   /// Interval at which the labels should be shown; if `minimum` and `maximum` are not `null`, this is calculated to show 10 labels.
   double interval;
+
   /// specifies number of digits to round to for rendering values, rendering values with at most `roundFractionDigits` digits after `.`.
   int roundFractionDigits;
 
+  /// optionally incude tables to pre-calculate y-axis min and max
+  List<InfluxDBTable> tables;
+
   /// Creates an uninitialized instance of [InfluxDBLineChartAxis]
-  InfluxDBLineChartAxis();
+  InfluxDBLineChartAxis({this.tables}) {
+    if (tables == null) return;
+
+    Map<String, double> minMax = _minMax(tables);
+    minimum = minMax["min"];
+    maximum = minMax["max"];
+
+    initializeValues();
+  }
+
+  static Map<String, double> _minMax(List<InfluxDBTable> tables) {
+    dynamic min;
+    dynamic max;
+    tables.forEach((InfluxDBTable table) {
+      table.rows.forEach((InfluxDBRow row) {
+        dynamic val = row["_value"];
+        if (val.runtimeType == String) {
+          return;
+        }
+        if (min == null) {
+          min = val;
+          max = val;
+        } else {
+          if (val < min) min = val;
+          if (val > max) max = val;
+        }
+      });
+    });
+    return {"min": min.toDouble(), "max": max.toDouble()};
+  }
 
   /// Creates an instance of [InfluxDBLineChartAxis] by retrieving data from [InfluxDBDashboardCellAxis] object.
   static InfluxDBLineChartAxis fromCellAxis(
@@ -35,34 +70,14 @@ class InfluxDBLineChartAxis {
     List<InfluxDBTable> tables,
   ) {
     InfluxDBLineChartAxis axis = InfluxDBLineChartAxis();
+
     axis.minimum = cellAxis.minimum;
     axis.maximum = cellAxis.maximum;
     tables = tables.where((t) => t.rows.length > 0).toList();
     if (tables.length > 0) {
-      if (axis.minimum == null || axis.maximum == null) {
-        double min, max;
-        for (InfluxDBTable table in tables) {
-          for (InfluxDBRow row in table.rows) {
-            try {
-              double v = double.parse(row["_value"].toString());
-              if (min == null || min > v) {
-                min = v;
-              }
-              if (max == null || max < v) {
-                max = v;
-              }
-            } catch (e) {
-              print("Unable to parse row: " + e.toString());
-            }
-          }
-        }
-        if (axis.minimum == null) {
-          axis.minimum = min;
-        }
-        if (axis.maximum == null) {
-          axis.maximum = max;
-        }
-      }
+      Map<String, double> minMax = _minMax(tables);
+      axis.minimum = minMax["min"];
+      axis.maximum = minMax["max"];
     }
     axis.initializeValues();
     return axis;
