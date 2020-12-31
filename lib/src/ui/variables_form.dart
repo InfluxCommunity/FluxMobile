@@ -26,7 +26,9 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
   initState() {
     super.initState();
     widget.variables.onChanged.add(() {
-      setState(() {});
+      if (this.mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -70,12 +72,14 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
                       value: widget.variables[index].selectedArgName,
                       items: items,
                       onChanged: (value) {
-                        setState(() {
-                          widget.variables[index].selectedArgName = value;
-                          if (widget.onChanged != null) {
-                            widget.onChanged(widget.variables);
-                          }
-                        });
+                        if (this.mounted) {
+                          setState(() {
+                            widget.variables[index].selectedArgName = value;
+                            if (widget.onChanged != null) {
+                              widget.onChanged(widget.variables);
+                            }
+                          });
+                        }
                       },
                     ),
                   ),
