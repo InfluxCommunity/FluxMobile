@@ -99,7 +99,7 @@ class InfluxDBAPI {
   /// Retrieves a list of dashboards available for current account and returns a [Future] to [List] of [InfluxDBDashboard] objects.
   /// Option label parameter will filter list to dashboards tagged with the supplied lable
   Future<List<InfluxDBDashboard>> dashboards(
-      {label: String, InfluxDBVariablesList variables}) async {
+      {String label, InfluxDBVariablesList variables}) async {
     dynamic body = await _getJSONData("/api/v2/dashboards");
     List<InfluxDBDashboard> dashboards = InfluxDBDashboard.fromAPIList(
         api: this, variables: variables, objects: body["dashboards"]);
