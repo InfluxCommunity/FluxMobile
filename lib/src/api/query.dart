@@ -60,7 +60,12 @@ class InfluxDBQuery {
           if (row[2] == "table") {
             // when the third position is the string "table" it means
             // we are encountering a new table schema
-            currentKeys = List<String>.from(row);
+            
+            // The first thing positions in the row are not needed, as they are:
+            // [0] blank
+            // [1] the yield name
+            // [2] the table incriment
+            currentKeys = List<String>.from(row.sublist(3));
           }
         } else {
           if (row[2].runtimeType == int) {
@@ -68,7 +73,7 @@ class InfluxDBQuery {
             if (row[2] == currentTable) {
               // when the third position is an integer, it means it is the able id
               // if the row's id matches the currentTable, then it is part of that table
-              currentDataRows.add(row);
+              currentDataRows.add(row.sublist(3));
             } else {
               // if the table id is different, then that means a new table has started, but
               // with the same schema
