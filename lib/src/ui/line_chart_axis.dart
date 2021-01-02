@@ -85,7 +85,8 @@ class InfluxDBLineChartAxis {
 
   /// Initializes additional values for the axis; if `minimum` and `maximum` are set, the `roundFractionDigits` is also initialized.
   void initializeValues() {
-    if (minimum != null && maximum != null) {
+    // gaurd against min/max not being set and that they may be the same
+    if (minimum != null && maximum != null && minimum != maximum) {
       double difference = maximum - minimum;
       double differenceLog10 = log(difference) / ln10;
       interval = difference / 10;
