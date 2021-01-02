@@ -123,7 +123,7 @@ class _InfluxDBDashboardCellWidgetState
       case "single-stat":
         return InfluxDBSingleStatWidget(
           tables: allTables,
-          colors: widget.cell.colors,
+          colorsAPIObj: widget.cell.colors,
         );
       case "markdown":
         return InfluxDBMarkDownWidget(data: widget.cell.properties);

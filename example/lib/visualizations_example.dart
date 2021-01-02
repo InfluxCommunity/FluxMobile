@@ -7,15 +7,50 @@ class VisualizationsListView extends StatelessWidget {
     InfluxDBTable tableTable = InfluxDBTable();
     tableTable.keys = ["one", "two", "three"];
     for (int i = 0; i < 20; i++) {
+      Map<String, dynamic> rowData = {
+        "one": i,
+        "two": i.toDouble(),
+        "three": i.toString() + " str"
+      };
+
       tableTable.rows.add(
-        InfluxDBRow.fromList(
-            fields: [i, i.toDouble(), i.toString() + " str"],
-            keys: tableTable.keys),
+        InfluxDBRow(
+          rowData,
+        ),
       );
     }
+
+    InfluxDBTable singleStatTable = InfluxDBTable();
+    singleStatTable.keys = ["_value"];
+    singleStatTable.rows.add(
+      InfluxDBRow(
+        {"_value": 0.01},
+      ),
+    );
+
     return ListView(
-      // children: [InfluxDBTableWidget(tables: [tableTable],)],
-       children: [Container(color: Colors.pink,)],
+      children: [
+        Container(
+          height: 300.0,
+          child: InfluxDBTableWidget(
+            tables: [tableTable],
+          ),
+        ),
+        Container(
+          height: 300.0,
+          child: InfluxDBSingleStatWidget(
+            tables: [singleStatTable],
+          ),
+        ),
+        Container(
+          height: 300.0,
+          child: InfluxDBSingleStatWidget(
+            tables: [singleStatTable],
+            fontColor: Colors.pink,
+            backgroundColor: Colors.purple,
+          ),
+        ),
+      ],
     );
   }
 }

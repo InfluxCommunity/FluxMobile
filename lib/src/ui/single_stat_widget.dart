@@ -7,13 +7,21 @@ class InfluxDBSingleStatWidget extends StatefulWidget {
   /// [List] of [InfluxDBTable]s that this widget is showing information for.
   final List<InfluxDBTable> tables;
 
-  final dynamic colors;
+  final dynamic colorsAPIObj;
+  final Color fontColor;
+  final Color backgroundColor;
 
-  const InfluxDBSingleStatWidget({
-    Key key,
-    @required this.tables,
-    this.colors,
-  }) : super(key: key);
+  /// Used to create single stat widgets from dashboard data.
+  /// colorsAPIObj is used by the dashboards API to create SingleStatWidgets,
+  /// and is not typically used directly. textColor and backgroundColor are ignored 
+  /// if colorsAPIObj is supplied
+  const InfluxDBSingleStatWidget(
+      {Key key,
+      @required this.tables,
+      this.colorsAPIObj,
+      this.fontColor,
+      this.backgroundColor})
+      : super(key: key);
   @override
   _InfluxDBSingleStatWidgetState createState() =>
       _InfluxDBSingleStatWidgetState();
@@ -28,39 +36,46 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
 
   @override
   void initState() {
+    if(widget.backgroundColor != null){
+      backgroundColor = widget.backgroundColor;
+    }
+    if(widget.fontColor != null){
+      fontColor = widget.fontColor;
+    }
     super.initState();
     _buildChart();
   }
 
   _buildChart() async {
     value = widget.tables[0].rows[0]["_value"];
-    List<dynamic> colors = widget.colors;
-
     // figure out which color to apply
-    dynamic color;
-    colors.forEach((dynamic c) {
-      if (value > c["value"] ) {
-        color = c;
+
+    if (widget.colorsAPIObj != null) {
+      dynamic color;
+      widget.colorsAPIObj.forEach((dynamic c) {
+        if (value > c["value"]) {
+          color = c;
+        }
+      });
+
+      // apply the color
+      String hex = "#000000";
+      hex = color["hex"];
+
+      hex = hex.replaceAll("#", "");
+      if (hex.length == 6) {
+        hex = "FF" + hex;
       }
-    });
-
-    // apply the color
-    String hex = "#000000";
-    hex = color["hex"];
-
-    hex = hex.replaceAll("#", "");
-    if (hex.length == 6) {
-      hex = "FF" + hex;
-    }
-    if (color["type"] == "text") {
-      fontColor = Color(
-        int.parse("0x$hex"),
-      );
-    } else {
-      backgroundColor = Color(
-        int.parse("0x$hex"),
-      );
-      fontColor = Colors.black;
+      if (color["type"] == "text") {
+        fontColor = Color(
+          int.parse("0x$hex"),
+        );
+      } else {
+        backgroundColor = Color(
+          int.parse("0x$hex"),
+        );
+        fontColor = Colors.black;
+      }
     }
 
     setState(() {});
