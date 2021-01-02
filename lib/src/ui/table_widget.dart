@@ -6,29 +6,29 @@ class InfluxDBTableWidget extends StatelessWidget {
   final Map<String, dynamic> properties;
   final List<InfluxDBTable> tables;
 
-  const InfluxDBTableWidget({Key key, this.properties, this.tables})
+  const InfluxDBTableWidget.fromAPI({Key key, this.properties, this.tables})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    List<String> headers = List<String>();
-    List<String> fields = List<String>();
+    List<String> headers = [];
+    List<String> fields = [];
 
     List<dynamic> fieldOptions = properties["fieldOptions"];
 
     // The API returns all possible fields in fieldOptions, so
     // we need to prune the ones that aren't used
-    List<dynamic> fieldOptionsToDump = List<dynamic>();
+    List<dynamic> _fieldOptionsToDump = [];
     fieldOptions.forEach((dynamic fo) {
       if (tables.length > 0) {
         List<String> keys = tables[0].rows[0].keys.toList();
         if (!keys.contains(fo["internalName"])) {
-          fieldOptionsToDump.add(fo);
+          _fieldOptionsToDump.add(fo);
         }
       }
     });
 
-    fieldOptionsToDump.forEach((fo) {
+    _fieldOptionsToDump.forEach((fo) {
       fieldOptions.remove(fo);
     });
 
@@ -39,7 +39,7 @@ class InfluxDBTableWidget extends StatelessWidget {
       }
     });
 
-    List<Widget> cellWidgets = List<Widget>();
+    List<Widget> cellWidgets = [];
     headers.forEach((element) {
       cellWidgets.add(
         Center(

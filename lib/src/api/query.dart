@@ -37,10 +37,10 @@ class InfluxDBQuery {
     String body = await api.postFluxQuery(queryString, variables: variables);
 
     // Track the current set of keys for the columns of each table
-    List<String> currentKeys = List<String>();
+    List<String> currentKeys = [];
 
     // Keep a list of rows for each table encountered
-    List<List<dynamic>> currentDataRows = List<List<dynamic>>();
+    List<List<dynamic>> currentDataRows = [];
     int currentTable = 0; // counter to track the current table
 
     // use the csv library to convert each row into a List (a list of lists)

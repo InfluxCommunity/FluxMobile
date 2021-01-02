@@ -22,12 +22,12 @@ class InfluxDBQueryVariable implements InfluxDBVariable {
 
   /// List of callbacks to trigger when the query first completes.
   /// Typically used only by parent variables.
-  final List<Function> onHydrated = List<Function>();
+  final List<Function> onHydrated = [];
 
   /// List of callbacks to trigger when a new arguments is selected.
   /// Typically used by parent variables to know when to re-execute their queries
   /// and an [InfluxDBVariablesList] to let the UI know to repaint.
-  final List<Function> onChanged = List<Function>();
+  final List<Function> onChanged = [];
 
   /// The list of Platform Variables for the InfluxDB account.
   /// The [InfluxDBQueryVariable] will add itself when its query has executed
@@ -146,7 +146,7 @@ class InfluxDBQueryVariable implements InfluxDBVariable {
     List<String> subVars = [];
     RegExp exp = RegExp(r'v(\.([\w]+))|(\["(\w)"\])');
     Iterable<RegExpMatch> regExMatches = exp.allMatches(query);
-    List<String> subVariableNames = List<String>();
+    List<String> subVariableNames = [];
 
     // if it does have a variable
     // foreach variable in the query, check if it's been hydrated
@@ -185,7 +185,7 @@ class InfluxDBVariable {
   final Map<String, dynamic> args;
   final String type;
   String selectedArgName;
-  List<Function> onChanged = List<Function>();
+  List<Function> onChanged = [];
 
   // The currently selected value, which is a data structred
   // used in the api.postFluxQuery() funtions
@@ -203,12 +203,12 @@ class InfluxDBVariable {
 /// A List that specifically manages all of the variables defined for
 /// an InfluxDB account. Typically provided by a call to [InfluxDBAPI.variables]().
 class InfluxDBVariablesList extends ListBase<InfluxDBVariable> {
-  List<InfluxDBVariable> _variables = List<InfluxDBVariable>();
+  List<InfluxDBVariable> _variables = [];
 
   /// Add a function call back to onChanged to track when a user
   /// variables have changed. This typically occurs when an [InfluxDBQueryVariable]
   /// is re-executed because a sub-variable selection has been changed.
-  List<Function> onChanged = List<Function>();
+  List<Function> onChanged = [];
 
   int get length => _variables.length;
 

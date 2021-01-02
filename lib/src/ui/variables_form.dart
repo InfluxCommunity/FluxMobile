@@ -36,7 +36,7 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
     return ListView.builder(
       itemCount: widget.variables.length,
       itemBuilder: (BuildContext context, int index) {
-        List<DropdownMenuItem> items = List<DropdownMenuItem>();
+        List<DropdownMenuItem> items = [];
 
         widget.variables[index].args.keys.forEach((String str) {
           items.add(

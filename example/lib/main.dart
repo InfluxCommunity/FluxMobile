@@ -1,4 +1,5 @@
 import 'package:example/dashboard_list_example.dart';
+import 'package:example/visualizations_example.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_mobile/influxDB.dart';
 import './dashboard_with_label_example.dart';
@@ -46,12 +47,18 @@ class _ExampleTabsState extends State<ExampleTabs> {
     InfluxDBAPI api = getApi();
 
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: Text("Examples"),
           bottom: TabBar(
-            tabs: <Widget>[Text("Query"), Text("Board"), Text("DB List"), Text("Write")],
+            tabs: <Widget>[
+              Text("Query"),
+              Text("Board"),
+              Text("DB List"),
+              Text("Viz"),
+              Text("Write")
+            ],
           ),
           actions: <Widget>[
             IconButton(
@@ -92,6 +99,11 @@ class _ExampleTabsState extends State<ExampleTabs> {
                 ? DashboardListExample(
                     api: api,
                   )
+                : Center(
+                    child: Text("Need to log in ..."),
+                  )),
+            ((api != null)
+                ? VisualizationsListView()
                 : Center(
                     child: Text("Need to log in ..."),
                   )),

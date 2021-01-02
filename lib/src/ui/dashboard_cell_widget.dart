@@ -128,7 +128,7 @@ class _InfluxDBDashboardCellWidgetState
       case "markdown":
         return InfluxDBMarkDownWidget(data: widget.cell.properties);
       case "table":
-        return InfluxDBTableWidget(properties: widget.cell.properties, tables: allTables);
+        return InfluxDBTableWidget.fromAPI(properties: widget.cell.properties, tables: allTables);
       default:
       return InfluxDBUnsupportedCellWidget(cellType: widget.cell.cellType);
     }

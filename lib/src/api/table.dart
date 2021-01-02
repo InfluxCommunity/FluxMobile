@@ -8,6 +8,8 @@ class InfluxDBTable {
   /// Resulting rows for this table.
   List<InfluxDBRow> rows = [];
 
+  InfluxDBTable();
+
   /// Creates an instance of [InfluxDBTable] from raw CSV string returned by the query API call.
   InfluxDBTable.fromCSV(List<List<dynamic>> dataRows, this.keys) {
  

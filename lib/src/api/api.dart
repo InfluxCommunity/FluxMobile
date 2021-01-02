@@ -47,7 +47,7 @@ class InfluxDBAPI {
       body["extern"]["type"] = "File";
       body["extern"]["package"] = null;
       body["extern"]["imports"] = null;
-      body["extern"]["body"] = List<Map<String, dynamic>>();
+      body["extern"]["body"] = [];
       Map<String, dynamic> externBodyElement = Map<String, dynamic>();
       externBodyElement["type"] = "OptionStatement";
       externBodyElement["assignment"] = Map<String, dynamic>();
@@ -58,7 +58,7 @@ class InfluxDBAPI {
       externBodyElement["assignment"]["init"]["type"] = "ObjectExpression";
 
       List<Map<String, dynamic>> formattedVariables =
-          List<Map<String, dynamic>>();
+          [];
       variables.forEach((InfluxDBVariable variable) {
         formattedVariables.add({
           "type": "Property",

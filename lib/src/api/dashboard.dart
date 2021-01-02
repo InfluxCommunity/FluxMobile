@@ -210,7 +210,7 @@ class InfluxDBDashboardCell {
     }
 
     if (properties["queries"] == null) {
-      queries = List<InfluxDBDashboardCellQuery>();
+      queries = [];
     } else {
       queries = InfluxDBDashboardCellQuery.fromAPIList(
           cell: this,
