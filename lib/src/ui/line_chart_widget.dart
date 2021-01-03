@@ -94,10 +94,11 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
 
       //format each line
       LineChartBarData lineData = LineChartBarData(
+        isStrokeCapRound: true,
         spots: spots,
         dotData: FlDotData(show: false),
         colors: [colorScheme[i]],
-        barWidth: 0.5,
+        barWidth: 3.0,
       );
 
       lines.add(lineData);
