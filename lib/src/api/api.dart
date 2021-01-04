@@ -23,7 +23,6 @@ class InfluxDBAPI {
   /// Token to use for API calls.
   final String token;
 
-
   /// Initializes [InfluxDBAPI] object by passing in a [InfluxDBPersistedAPIArgs] object
   InfluxDBAPI.fromPersistedAPIArgs(InfluxDBPersistedAPIArgs args)
       : influxDBUrl = args.baseURL,
@@ -32,9 +31,7 @@ class InfluxDBAPI {
 
   /// Initializes [InfluxDBAPI] object by passing URL, organization and token.
   InfluxDBAPI(
-      {@required this.influxDBUrl,
-      @required this.org,
-      @required this.token});
+      {@required this.influxDBUrl, @required this.org, @required this.token});
 
   /// Retrieves raw results of a Flux query using [InfluxDBAPI] and returns the output as string
   /// If you want the processed data, use [InfluxDBQuery.execute]()
@@ -57,8 +54,7 @@ class InfluxDBAPI {
       externBodyElement["assignment"]["init"] = Map<String, dynamic>();
       externBodyElement["assignment"]["init"]["type"] = "ObjectExpression";
 
-      List<Map<String, dynamic>> formattedVariables =
-          [];
+      List<Map<String, dynamic>> formattedVariables = [];
       variables.forEach((InfluxDBVariable variable) {
         formattedVariables.add({
           "type": "Property",
@@ -80,7 +76,7 @@ class InfluxDBAPI {
     }
 
     Response response = await post(
-      _getURI("/api/v2/query"),
+      getURI("/api/v2/query"),
       headers: {
         "Authorization": "Token $token",
         "Accept": "application/csv",
@@ -90,7 +86,7 @@ class InfluxDBAPI {
     );
 
     if (response.statusCode != 200) {
-      _handleError(response);
+      handleError(response);
     }
 
     return response.body;
@@ -121,7 +117,7 @@ class InfluxDBAPI {
   }
 
   Future write({@required InfluxDBPoint point, @required String bucket}) async {
-    Uri uri = _getURI("/api/v2/write",
+    Uri uri = getURI("/api/v2/write",
         additionalQueryParams: {"bucket": bucket, "precision": "ns"});
     Response response = await post(
       uri,
@@ -129,15 +125,15 @@ class InfluxDBAPI {
       body: point.lineProtocol,
     );
     if (response.statusCode != 204) {
-      _handleError(response);
+      handleError(response);
     }
   }
 
-  Uri _getURI(
+  Uri getURI(
     urlSuffix, {
     Map<String, String> additionalQueryParams,
   }) {
-    Map<String, String> queryParams = {"org": org};
+    Map<String, String> queryParams = {"orgID": org};
     if (additionalQueryParams != null) {
       queryParams.addAll(additionalQueryParams);
     }
@@ -148,24 +144,71 @@ class InfluxDBAPI {
     return Uri.https(url, urlSuffix, queryParams);
   }
 
+  /// get a list of InfluxDBTask objects
+  Future<List<InfluxDBTask>> tasks() async {
+    List<InfluxDBTask> influxDBTasks = [];
+    dynamic objs = await _getJSONData("/api/v2/tasks");
+
+    List<dynamic> taskObjs = objs["tasks"];
+    taskObjs.forEach((dynamic obj) {
+      TaskSuccess taskSuccess;
+      switch (obj["lastRunStatus"]) {
+        case "failed":
+          taskSuccess = TaskSuccess.Failed;
+          break;
+        case "success":
+          taskSuccess = TaskSuccess.Succeeded;
+          break;
+        case "canceled":
+          taskSuccess = TaskSuccess.Canceled;
+          break;
+
+        default:
+          taskSuccess = null;
+      }
+      influxDBTasks.add(
+        InfluxDBTask(
+            api: this,
+            name: obj["name"],
+            id: obj["id"],
+            description: obj["description"],
+            active: obj["status"] == "active" ? true : false,
+            errorString: obj["lastRunError"],
+            queryString: obj["flux"],
+            lastRunSucceeded: taskSuccess,
+            latestCompleted: obj["latestCompleted"] != null
+                ? DateTime.parse(obj["latestCompleted"])
+                : null,
+            createdAt: obj["createdAt"] != null
+                ? DateTime.parse(obj["createdAt"])
+                : null,
+            updatedAt: obj["updatedAt"] != null
+                ? DateTime.parse(obj["updatedAt"])
+                : null),
+      );
+    });
+
+    return influxDBTasks;
+  }
+
   /// Parses JSON output or throw appropriate error based on the response
   Future<dynamic> _getJSONData(urlSuffix) async {
     Response response = await get(
-      _getURI(urlSuffix),
+      getURI(urlSuffix),
       headers: {
         "Authorization": "Token $token",
         "Content-type": "application/json",
       },
     );
-    if (response.statusCode == 200) {
+    if (response.statusCode < 300) {
       dynamic body = json.decode(response.body);
       return body;
     } else {
-      _handleError(response);
+      handleError(response);
     }
   }
 
-  _handleError(Response response) {
+  handleError(Response response) {
     print("HTTP ERROR: ${response.body}");
     throw InfluxDBAPIHTTPError.fromResponse(response);
   }
@@ -232,7 +275,6 @@ class InfluxDBAPI {
         name: "windowPeriod", args: windpwPeriodArgs, type: "ObjectExpression");
     variables.addAll([timeRangeStart, timeRangeStop, windowPeriod]);
   }
-
 
   /// Returns a completed [InfluxDBVarilablesList], including execution
   /// of all [InfluxDBQueryVariable] objects, and all implicit variables.
