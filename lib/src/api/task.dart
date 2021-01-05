@@ -5,8 +5,8 @@ import 'package:flux_mobile/influxDB.dart';
 import 'package:http/http.dart';
 
 class InfluxDBTask {
-  final String name;
-  final String id;
+  String name;
+  String id;
   String description;
   bool active;
   TaskSuccess lastRunSucceeded;
@@ -16,10 +16,14 @@ class InfluxDBTask {
   DateTime createdAt;
   DateTime updatedAt;
   InfluxDBAPI api;
+  String every;
+  String offset;
+  String type;
+  String cron;
 
   InfluxDBTask(
-      {@required this.name,
-      @required this.id,
+      {this.name,
+      this.id,
       this.description,
       this.active,
       this.lastRunSucceeded,
@@ -28,7 +32,14 @@ class InfluxDBTask {
       this.latestCompleted,
       this.createdAt,
       this.updatedAt,
-      this.api});
+      @required this.api,
+      this.every,
+      this.offset});
+    
+  InfluxDBTask.fromAPI({@required this.api, Map<dynamic, dynamic> apiObj}){
+    setPropertiesFromAPIObj(apiObj);
+
+  }
 
   /// set the task to enabled by setting enabled to true or
   /// disabled by setting enabled to false.
@@ -50,6 +61,57 @@ class InfluxDBTask {
     Map<dynamic, dynamic> responseObj = json.decode(response.body);
     this.active = responseObj["status"] == "active";
     return (responseObj["status"] == "active");
+  }
+
+  Future refresh() async {
+    Response response = await get(
+      api.getURI("/api/v2/tasks/${this.id}"),
+      headers: {
+        "Authorization": "Token ${api.token.toString()}",
+        "Content-type": "application/json",
+      },
+    );
+    if (response.statusCode != 200) {
+      api.handleError(response);
+    }
+    setPropertiesFromAPIObj(json.decode(response.body),);
+  }
+
+  setPropertiesFromAPIObj(Map<dynamic, dynamic> apiObj) {
+    TaskSuccess taskSuccess;
+    switch (apiObj["lastRunStatus"]) {
+      case "failed":
+        taskSuccess = TaskSuccess.Failed;
+        break;
+      case "success":
+        taskSuccess = TaskSuccess.Succeeded;
+        break;
+      case "canceled":
+        taskSuccess = TaskSuccess.Canceled;
+        break;
+
+      default:
+        taskSuccess = null;
+    }
+
+    name = apiObj["name"];
+    id = apiObj["id"];
+    description = apiObj["description"];
+    active = apiObj["status"] == "active" ? true : false;
+    errorString = apiObj["lastRunError"];
+    queryString = apiObj["flux"];
+    lastRunSucceeded = taskSuccess;
+    latestCompleted = apiObj["latestCompleted"] != null
+        ? DateTime.parse(apiObj["latestCompleted"])
+        : null;
+    createdAt =
+        apiObj["createdAt"] != null ? DateTime.parse(apiObj["createdAt"]) : null;
+    updatedAt =
+        apiObj["updatedAt"] != null ? DateTime.parse(apiObj["updatedAt"]) : null;
+    every = apiObj["every"];
+    offset = apiObj["offset"];
+    type = apiObj["type"];
+    cron = apiObj["cron"];
   }
 }
 

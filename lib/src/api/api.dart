@@ -151,40 +151,11 @@ class InfluxDBAPI {
 
     List<dynamic> taskObjs = objs["tasks"];
     taskObjs.forEach((dynamic obj) {
-      TaskSuccess taskSuccess;
-      switch (obj["lastRunStatus"]) {
-        case "failed":
-          taskSuccess = TaskSuccess.Failed;
-          break;
-        case "success":
-          taskSuccess = TaskSuccess.Succeeded;
-          break;
-        case "canceled":
-          taskSuccess = TaskSuccess.Canceled;
-          break;
-
-        default:
-          taskSuccess = null;
-      }
       influxDBTasks.add(
-        InfluxDBTask(
-            api: this,
-            name: obj["name"],
-            id: obj["id"],
-            description: obj["description"],
-            active: obj["status"] == "active" ? true : false,
-            errorString: obj["lastRunError"],
-            queryString: obj["flux"],
-            lastRunSucceeded: taskSuccess,
-            latestCompleted: obj["latestCompleted"] != null
-                ? DateTime.parse(obj["latestCompleted"])
-                : null,
-            createdAt: obj["createdAt"] != null
-                ? DateTime.parse(obj["createdAt"])
-                : null,
-            updatedAt: obj["updatedAt"] != null
-                ? DateTime.parse(obj["updatedAt"])
-                : null),
+        InfluxDBTask.fromAPI(
+          api: this,
+          apiObj: obj,
+        ),
       );
     });
 

@@ -73,65 +73,71 @@ class _TaskScaffoldState extends State<TaskScaffold> {
           ],
         ),
       ),
-      body: ListView(
-        children: [
-          SwitchListTile(
-            value: widget.task.active,
-            onChanged: (bool newValue) {
-              widget.task.setEnabled(enabled: newValue).then((bool val) {
-                setState(() {});
-              });
-            },
-            title: Text("Enabled"),
-          ),
-          ListTile(
-            title: Text(widget.task.description == null
-                ? "No Description"
-                : widget.task.description),
-          ),
-          Container(
-            decoration: BoxDecoration(border: Border.all()),
-            height: 100.0,
-            child: Text(widget.task.queryString),
-          ),
-          Container(
-            decoration: BoxDecoration(border: Border.all()),
-            height: 100.0,
-            child: Text(widget.task.errorString == null
-                ? "No Errors"
-                : widget.task.errorString),
-          ),
-          ListTile(
-            title: Text(
-              widget.task.latestCompleted == null
-                  ? ""
-                  : widget.task.latestCompleted.toString(),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await widget.task.refresh();
+          setState(() {});
+        },
+        child: ListView(
+          children: [
+            SwitchListTile(
+              value: widget.task.active,
+              onChanged: (bool newValue) {
+                widget.task.setEnabled(enabled: newValue).then((bool val) {
+                  setState(() {});
+                });
+              },
+              title: Text("Enabled"),
             ),
-            subtitle: Text(
-              "Last Successful Run",
+            ListTile(
+              title: Text(widget.task.description == null
+                  ? "No Description"
+                  : widget.task.description),
             ),
-          ),
-          ListTile(
-            title: Text(
-              widget.task.createdAt == null
-                  ? ""
-                  : widget.task.createdAt.toString(),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 100.0,
+              child: Text(widget.task.queryString),
             ),
-            subtitle: Text(
-              "Creation Date",
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 100.0,
+              child: Text(widget.task.errorString == null
+                  ? "No Errors"
+                  : widget.task.errorString),
             ),
-          ),
-          ListTile(
-            title: Text(
-              widget.task.updatedAt == null
-                  ? ""
-                  : widget.task.updatedAt.toString(),
+            ListTile(
+              title: Text(
+                widget.task.latestCompleted == null
+                    ? ""
+                    : widget.task.latestCompleted.toString(),
+              ),
+              subtitle: Text(
+                "Last Successful Run",
+              ),
             ),
-            subtitle: Text(
-              "Last Updated On",
+            ListTile(
+              title: Text(
+                widget.task.createdAt == null
+                    ? ""
+                    : widget.task.createdAt.toString(),
+              ),
+              subtitle: Text(
+                "Creation Date",
+              ),
             ),
-          ),
-        ],
+            ListTile(
+              title: Text(
+                widget.task.updatedAt == null
+                    ? ""
+                    : widget.task.updatedAt.toString(),
+              ),
+              subtitle: Text(
+                "Last Updated On",
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
