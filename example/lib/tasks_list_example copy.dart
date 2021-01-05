@@ -79,9 +79,7 @@ class _TaskScaffoldState extends State<TaskScaffold> {
             value: widget.task.active,
             onChanged: (bool newValue) {
               widget.task.setEnabled(enabled: newValue).then((bool val) {
-                setState(() {
-                  widget.task.active = val;
-                });
+                setState(() {});
               });
             },
             title: Text("Enabled"),

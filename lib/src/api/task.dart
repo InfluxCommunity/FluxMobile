@@ -48,7 +48,7 @@ class InfluxDBTask {
       api.handleError(response);
     }
     Map<dynamic, dynamic> responseObj = json.decode(response.body);
-
+    this.active = responseObj["status"] == "active";
     return (responseObj["status"] == "active");
   }
 }
