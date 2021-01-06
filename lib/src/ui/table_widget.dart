@@ -51,55 +51,36 @@ class InfluxDBTableWidget extends StatelessWidget {
       });
     }
 
-    // workaround for https://gitlab.com/rickspencer3/flux-mobile/-/issues/42
-    // Remove extra header and row which should not be added in the first place
-    // This kludge should not break even if #42 core bug gets fixed
-    headers.remove("");
-    tables[0].rows.forEach((InfluxDBRow row) {
-      row.remove("");
-    });
-
-
-
-    List<Widget> cellWidgets = [];
-    headers.forEach((element) {
-      cellWidgets.add(
-        Center(
-          child: Text(
-            element,
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              fontWeight: FontWeight.bold,
-            ),
+    return SingleChildScrollView(
+      child: Flexible(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columns: headers.map((String key) {
+              return DataColumn(
+                label: Text(key),
+              );
+            }).toList(),
+            rows: tables[0].rows.map((InfluxDBRow row) {
+              return DataRow(
+                cells: fields.map((String key) {
+                  return DataCell(
+                    Text(
+                      row[key].toString(),
+                    ),
+                  );
+                }).toList(),
+              );
+            }).toList(),
           ),
         ),
-      );
-    });
-
-    tables.forEach((InfluxDBTable table) {
-      table.rows.forEach((InfluxDBRow row) {
-        fields.forEach((String key) {
-          if (key != "") {
-            cellWidgets.add(
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                ),
-                child: Center(
-                  child: Tooltip(
-                      message: "${row[key]}", child: Text("${row[key]}")),
-                ),
-              ),
-            );
-          }
-        });
-      });
-    });
-
-    return GridView.count(
-      crossAxisCount: headers.length,
-      children: cellWidgets,
-      childAspectRatio: 3,
+      ),
     );
+
+    // return GridView.count(
+    //   crossAxisCount: headers.length,
+    //   children: cellWidgets,
+    //   childAspectRatio: 3,
+    // );
   }
 }
