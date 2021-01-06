@@ -52,35 +52,27 @@ class InfluxDBTableWidget extends StatelessWidget {
     }
 
     return SingleChildScrollView(
-      child: Flexible(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: headers.map((String key) {
-              return DataColumn(
-                label: Text(key),
-              );
-            }).toList(),
-            rows: tables[0].rows.map((InfluxDBRow row) {
-              return DataRow(
-                cells: fields.map((String key) {
-                  return DataCell(
-                    Text(
-                      row[key].toString(),
-                    ),
-                  );
-                }).toList(),
-              );
-            }).toList(),
-          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+          columns: headers.map((String key) {
+            return DataColumn(
+              label: Text(key),
+            );
+          }).toList(),
+          rows: tables[0].rows.map((InfluxDBRow row) {
+            return DataRow(
+              cells: fields.map((String key) {
+                return DataCell(
+                  Text(
+                    row[key].toString(),
+                  ),
+                );
+              }).toList(),
+            );
+          }).toList(),
         ),
       ),
     );
-
-    // return GridView.count(
-    //   crossAxisCount: headers.length,
-    //   children: cellWidgets,
-    //   childAspectRatio: 3,
-    // );
   }
 }
