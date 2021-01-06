@@ -336,4 +336,18 @@ class InfluxDBAPI {
 
     return variables;
   }
+
+  Future<List<InfluxDBBucket>> buckets() async {
+    List<InfluxDBBucket> buckets = [];
+
+    Map<String, dynamic> apiObj = await _getJSONData("/api/v2/buckets");
+    List<dynamic> bucketObjs = apiObj["buckets"];
+    bucketObjs.forEach((dynamic bucketObj) {
+      buckets.add(
+        InfluxDBBucket.fromAPI(api: this, apiObj: bucketObj),
+      );
+    });
+
+    return buckets;
+  }
 }

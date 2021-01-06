@@ -5,6 +5,7 @@ import 'package:flux_mobile/influxDB.dart';
 import 'package:http/http.dart';
 
 class InfluxDBTask {
+  InfluxDBAPI api;
   String name;
   String id;
   String description;
@@ -15,7 +16,6 @@ class InfluxDBTask {
   DateTime latestCompleted;
   DateTime createdAt;
   DateTime updatedAt;
-  InfluxDBAPI api;
   String every;
   String offset;
   String type;
