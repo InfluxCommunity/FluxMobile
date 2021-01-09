@@ -60,7 +60,7 @@ class InfluxDBQuery {
           if (row[2] == "table") {
             // when the third position is the string "table" it means
             // we are encountering a new table schema
-            
+
             // The first thing positions in the row are not needed, as they are:
             // [0] blank
             // [1] the yield name
@@ -78,11 +78,13 @@ class InfluxDBQuery {
               // if the table id is different, then that means a new table has started, but
               // with the same schema
 
-              currentTable = row[2]; // increment the table id
-
-              // add the existing rows to a table
+              // create a mew table with the accumulated rows
               tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+
+              // flush and start accumulating again for the next table
+              currentTable = row[2]; // increment the table id
               currentDataRows.clear();
+              currentDataRows.add(row.sublist(3));
             }
           }
         }
