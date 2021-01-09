@@ -17,11 +17,14 @@ class InfluxDBBucket {
   DateTime mostRecentWrite;
   int cardinality;
   InfluxDBTable mostRecentRecord;
+  Function onLoadComplete;
 
   InfluxDBBucket({@required this.api, this.name});
 
   InfluxDBBucket.fromAPI(
-      {@required this.api, @required Map<dynamic, dynamic> apiObj}) {
+      {@required this.api,
+      @required Map<dynamic, dynamic> apiObj,
+      this.onLoadComplete}) {
     setPropertiesFromAPIObj(apiObj);
   }
   setPropertiesFromAPIObj(Map<dynamic, dynamic> apiObj) async {
@@ -41,6 +44,7 @@ class InfluxDBBucket {
       setRecentWrite(),
       setCardinality(),
     ]);
+    if(onLoadComplete != null) onLoadComplete();
   }
 
   Future setRecentWrite() async {
@@ -67,7 +71,7 @@ class InfluxDBBucket {
     }
   }
 
-    Future refresh() async {
+  Future refresh() async {
     Response response = await get(
       api.getURI("/api/v2/buckets/${this.id}"),
       headers: {
@@ -78,7 +82,9 @@ class InfluxDBBucket {
     if (response.statusCode != 200) {
       api.handleError(response);
     }
-    setPropertiesFromAPIObj(json.decode(response.body),);
+    setPropertiesFromAPIObj(
+      json.decode(response.body),
+    );
   }
 }
 
