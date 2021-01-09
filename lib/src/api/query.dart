@@ -85,11 +85,17 @@ class InfluxDBQuery {
               // if the row's id matches the currentTable, then it is part of that table
               currentDataRows.add(row.sublist(3));
             } else {
+              // The row is the first row (and possibly only) row of a new table
+              // that has the same schema as the previous table
+
+              // if there is existing data from previous rows, then create a new table
+              // with that data and start accumulating new rows
               if(currentDataRows.length > 0){
                 tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
                 currentDataRows.clear();
               }
 
+              // accumulate new rows for the current table
               currentDataRows.add(row.sublist(3));
               currentTable = row[2]; // increment the table id
               
