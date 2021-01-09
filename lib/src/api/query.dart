@@ -30,6 +30,16 @@ class InfluxDBQuery {
 
   /// Executes the query and returns a [Future] to [List] of [InfluxDBTable] objects.
   Future<List<InfluxDBTable>> execute() async {
+    // The Gestalt of this function is that it retrieves CSV fot the query.
+    // The function then parses each row of CSV and checks:
+    // 1. should the row be thrown away?
+    // 2. does the row define a newly encountered schema?
+    // 3. does the row define boundaries between tables?
+    // 4. is the row?
+    // The function accumulates data until it determines there is a new table starting,
+    // at which point it saves all previously accumulated data and creates a table
+    // from it. Then continues to accumulate data for the next table.
+
     // clear out the tables from previous runs
     tables = [];
 
@@ -78,13 +88,13 @@ class InfluxDBQuery {
               // if the table id is different, then that means a new table has started, but
               // with the same schema
 
-              // create a mew table with the accumulated rows
-              tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
-
               // flush and start accumulating again for the next table
               currentTable = row[2]; // increment the table id
               currentDataRows.clear();
               currentDataRows.add(row.sublist(3));
+
+              // create a mew table with the accumulated rows
+              tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
             }
           }
         }

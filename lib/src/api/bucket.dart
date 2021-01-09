@@ -16,7 +16,7 @@ class InfluxDBBucket {
   bool hasRetentionPolicy;
   DateTime mostRecentWrite;
   int cardinality;
-  InfluxDBTable mostRecentRecord;
+  List<InfluxDBTable> mostRecentRecords;
   Function onLoadComplete;
 
   InfluxDBBucket({@required this.api, this.name});
@@ -49,12 +49,12 @@ class InfluxDBBucket {
 
   Future setRecentWrite() async {
     String flux =
-        "from(bucket: \"$name\") |> range(start: -100y) |> group() |> last() |> drop(columns: [\"_start\",\"_stop\",])";
+        "from(bucket: \"$name\") |> range(start: -100y) |> last() |> drop(columns: [\"_start\",\"_stop\",])";
     InfluxDBQuery query = InfluxDBQuery(api: api, queryString: flux);
     List<InfluxDBTable> tables = await query.execute();
+    mostRecentRecords = tables;
     if (tables[0].rows.length > 0) {
       mostRecentWrite = DateTime.parse(tables[0].rows[0]["_time"]);
-      mostRecentRecord = tables[0];
     }
   }
 
