@@ -14,9 +14,9 @@ class InfluxDBBucket {
   DateTime updatedAt;
   int retentionSeconds;
   bool hasRetentionPolicy;
-  DateTime mostRecentWrite;
   int cardinality;
   List<InfluxDBTable> mostRecentRecords;
+  DateTime mostRecentWrite;
   Function onLoadComplete;
 
   InfluxDBBucket({@required this.api, this.name});
@@ -41,19 +41,23 @@ class InfluxDBBucket {
       retentionSeconds = apiObj["retentionRules"][0]["everySeconds"];
     }
     await Future.wait<void>([
-      setRecentWrite(),
+      setRecentWrites(),
       setCardinality(),
     ]);
-    if(onLoadComplete != null) onLoadComplete();
+    if (onLoadComplete != null) onLoadComplete();
   }
 
-  Future setRecentWrite() async {
+  Future setRecentWrites() async {
     String flux =
         "from(bucket: \"$name\") |> range(start: -100y) |> last() |> drop(columns: [\"_start\",\"_stop\",])";
     InfluxDBQuery query = InfluxDBQuery(api: api, queryString: flux);
     List<InfluxDBTable> tables = await query.execute();
+    tables.sort((a, b) {
+      return DateTime.parse(b.rows[0]["_time"])
+          .compareTo(DateTime.parse(a.rows[0]["_time"]));
+    });
     mostRecentRecords = tables;
-    if (tables[0].rows.length > 0) {
+    if (tables[0].rows != null && tables[0].rows.length > 0) {
       mostRecentWrite = DateTime.parse(tables[0].rows[0]["_time"]);
     }
   }
