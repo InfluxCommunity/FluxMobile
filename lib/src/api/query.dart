@@ -85,16 +85,14 @@ class InfluxDBQuery {
               // if the row's id matches the currentTable, then it is part of that table
               currentDataRows.add(row.sublist(3));
             } else {
-              // if the table id is different, then that means a new table has started, but
-              // with the same schema
+              if(currentDataRows.length > 0){
+                tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+                currentDataRows.clear();
+              }
 
-              // flush and start accumulating again for the next table
-              currentTable = row[2]; // increment the table id
-              currentDataRows.clear();
               currentDataRows.add(row.sublist(3));
-
-              // create a mew table with the accumulated rows
-              tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+              currentTable = row[2]; // increment the table id
+              
             }
           }
         }
