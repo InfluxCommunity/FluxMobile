@@ -55,6 +55,7 @@ class _DashboardWithLabelExampleState extends State<DashboardWithLabelExample> {
                     height: 300.0,
                     child: InfluxDBVariablesForm(
                       variables: variables,
+                      referencedVariables: dashboard.referencedVariableNames,
                       onChanged: (List<InfluxDBVariable> vars) {
                         setState(() {
                           variables = vars;

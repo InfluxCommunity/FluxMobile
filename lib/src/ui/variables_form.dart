@@ -11,10 +11,15 @@ class InfluxDBVariablesForm extends StatefulWidget {
   /// The variables being displayed and maintained by the widget.
   final InfluxDBVariablesList variables;
 
+  final List<String> referencedVariables;
+
   /// Initialize an instance of this form with the [InfluxDBVariablesList]
   /// to display, and an optional callback to respond to changes.
   const InfluxDBVariablesForm(
-      {Key key, this.onChanged, @required this.variables})
+      {Key key,
+      this.onChanged,
+      @required this.variables,
+      this.referencedVariables})
       : super(key: key);
 
   @override
@@ -22,23 +27,33 @@ class InfluxDBVariablesForm extends StatefulWidget {
 }
 
 class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
+  InfluxDBVariablesList _variables;
   @override
   initState() {
-    super.initState();
+    if (widget.referencedVariables == null) {
+      _variables = widget.variables;
+    } else {
+      _variables = InfluxDBVariablesList();
+      widget.variables.where(
+          (element) => widget.referencedVariables.contains(element.name)).toList().forEach((InfluxDBVariable v) {
+            _variables.add(v);
+          });
+    }
     widget.variables.onChanged.add(() {
       if (this.mounted) {
         setState(() {});
       }
     });
+    super.initState();
   }
 
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: widget.variables.length,
+      itemCount: _variables.length,
       itemBuilder: (BuildContext context, int index) {
         List<DropdownMenuItem> items = [];
 
-        widget.variables[index].args.keys.forEach((String str) {
+        _variables[index].args.keys.forEach((String str) {
           items.add(
             DropdownMenuItem(
               child: Text(str),
@@ -53,7 +68,7 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.variables[index].name,
+                _variables[index].name,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Container(
@@ -69,14 +84,14 @@ class _InfluxDBVariablesFormState extends State<InfluxDBVariablesForm> {
                   child: SizedBox(
                     width: 500.0,
                     child: DropdownButton(
-                      value: widget.variables[index].selectedArgName,
+                      value: _variables[index].selectedArgName,
                       items: items,
                       onChanged: (value) {
                         if (this.mounted) {
                           setState(() {
-                            widget.variables[index].selectedArgName = value;
+                            _variables[index].selectedArgName = value;
                             if (widget.onChanged != null) {
-                              widget.onChanged(widget.variables);
+                              widget.onChanged(_variables);
                             }
                           });
                         }
