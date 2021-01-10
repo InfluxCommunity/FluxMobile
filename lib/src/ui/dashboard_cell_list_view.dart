@@ -31,6 +31,9 @@ class _InfluxDBDashboardCellListViewState
         cell: cell,
       ));
     });
+    if (widget.dashboard.onCellsUpdated != null) {
+      widget.dashboard.onCellsUpdated();
+    }
     setState(() {});
   }
 
