@@ -29,6 +29,10 @@ class InfluxDBDashboard {
   /// List of all cells that are part of this dashboard.
   List<InfluxDBDashboardCellInfo> cellInfos;
 
+  List<String> referencedVariableNames = [];
+
+  Function onCellsUpdated;
+
   /// Create an instance of [InfluxDBDashboard] from parsed JSON data from API call.
   InfluxDBDashboard.fromAPI({@required this.api, this.variables, object}) {
     id = object["id"];
@@ -49,7 +53,74 @@ class InfluxDBDashboard {
     for (Future<InfluxDBDashboardCell> future in futures) {
       result.add(await future);
     }
+    result.forEach((InfluxDBDashboardCell c) {
+      c.queries.forEach((InfluxDBDashboardCellQuery q) {
+        // find all the variables used by the cell, and add them to the dashboard's like
+        // of referenced variables
+
+        List<String> referencedVars = _referencedVariables(q.queryString);
+        referencedVars.forEach((String varName) {
+          if (!referencedVariableNames.contains(varName)) {
+            referencedVariableNames.add(varName);
+          }
+          _addSubVars(
+            variableName: varName,
+          );
+        });
+      });
+    });
     return result;
+  }
+
+  _addSubVars({String variableName}) {
+    // get the variable from the list of variables
+    List<InfluxDBVariable> vars = variables
+        .where((InfluxDBVariable v) => v.name == variableName)
+        .toList();
+    if (vars.length > 0) {
+      if (vars[0].type == "query") {
+        InfluxDBQueryVariable qv = vars[0];
+        qv.subVariables.forEach((String sv) {
+          if (!referencedVariableNames.contains(sv)) {
+            referencedVariableNames.add(
+                sv); // add subvariables to the list of referenced variables
+          }
+          _addSubVars(
+            //check if the referenced variable itself has referenced variabels
+            variableName: sv,
+          );
+        });
+      }
+    }
+  }
+
+  List<String> _referencedVariables(String queryString) {
+    List<String> subVars = [];
+    RegExp exp = RegExp(r'v(\.([\w]+))|(\["(\w)"\])');
+    Iterable<RegExpMatch> regExMatches = exp.allMatches(queryString);
+    List<String> subVariableNames = [];
+
+    // if it does have a variable
+    // foreach variable in the query, check if it's been hydrated
+    regExMatches.forEach((match) {
+      subVariableNames.add(queryString.substring(match.start, match.end));
+    });
+
+    // filter out duplicate usages
+    subVariableNames = subVariableNames.toSet().toList();
+
+    subVariableNames.forEach((String variableName) {
+      String vn = "";
+      if (variableName.startsWith("v.")) {
+        vn = variableName.substring(2);
+      }
+      if (variableName.contains("[")) {
+        vn = variableName.replaceAll("v[\"", "");
+        vn = variableName.replaceAll("\"]", "");
+      }
+      subVars.add(vn);
+    });
+    return subVars.toSet().toList();
   }
 
   /// Initializes multiple dashboards from parsed JSON data from API call. Returns all items as a list.
@@ -128,7 +199,7 @@ class InfluxDBDashboardCellInfo {
 
   /// Retrieves detailed information about the specific cell. Returns a [Future] to [InfluxDBDashboardCell].
   Future<InfluxDBDashboardCell> cell({List<InfluxDBVariable> variables}) {
-    return api.dashboardCell(this,variables: variables);
+    return api.dashboardCell(this, variables: variables);
   }
 
   /// Creates an instance of [InfluxDBDashboardCellInfo] from parsed JSON data from API call.
@@ -320,6 +391,7 @@ class InfluxDBDashboardCellQuery {
   }
 
   InfluxDBQuery query({List<InfluxDBVariable> variables}) {
-    return InfluxDBQuery(queryString: queryString, api: api, variables: variables);
+    return InfluxDBQuery(
+        queryString: queryString, api: api, variables: variables);
   }
 }

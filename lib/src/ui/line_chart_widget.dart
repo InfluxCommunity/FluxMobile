@@ -86,7 +86,7 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
           }
           spots.add(FlSpot(x, y));
         } catch (e) {
-          print("Unable to parse row: " + e.toString());
+          print("Unable to parse row (value: ${row["_value"]}): " + e.toString());
           dataChartable = false;
           break;
         }
