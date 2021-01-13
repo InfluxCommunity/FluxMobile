@@ -10,6 +10,7 @@ export './src/api/row.dart';
 export './src/api/variables.dart';
 export './src/api/task.dart';
 export './src/api/bucket.dart';
+export './src/api/notification.dart';
 
 export './src/ui/color_scheme.dart';
 export 'src/ui/line_chart_axis.dart';

@@ -92,6 +92,18 @@ class InfluxDBAPI {
     return response.body;
   }
 
+  Future<List<InfluxDBNotification>> notifications() async {
+    List<InfluxDBNotification> notifications = [];
+    dynamic body = await _getJSONData("/api/v2/notificationRules");
+
+    List<dynamic> nrObjs = body["notificationRules"];
+
+    notifications = nrObjs.map((dynamic apiObj) {
+      return InfluxDBNotification.fromAPI(api: this, apiObj: apiObj);
+    }).toList();
+    return notifications;
+  }
+
   /// Retrieves a list of dashboards available for current account and returns a [Future] to [List] of [InfluxDBDashboard] objects.
   /// Option label parameter will filter list to dashboards tagged with the supplied lable
   Future<List<InfluxDBDashboard>> dashboards(
