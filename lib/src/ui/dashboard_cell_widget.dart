@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flux_mobile/src/api/variables.dart';
+import 'package:flux_mobile/src/ui/line_plus_single_stat_widget.dart';
 import 'package:flux_mobile/src/ui/no_data_widget.dart';
 
 import '../api/dashboard.dart';
@@ -64,8 +66,9 @@ class _InfluxDBDashboardCellWidgetState
   @override
   Widget build(BuildContext context) {
     //Trap unnamed cells
-    String cellName = widget.cell.name == "Name this Cell" ? "Dashboard Cell" : widget.cell.name;
-
+    String cellName = widget.cell.name == "Name this Cell"
+        ? "Dashboard Cell"
+        : widget.cell.name;
 
     return Column(
       children: <Widget>[
@@ -80,7 +83,7 @@ class _InfluxDBDashboardCellWidgetState
   }
 
   /// Renders the widget to show on the screen. It may be an instance of [InfluxDBLineChartWidget], an [InfluxDBTableWidget],
-  /// an [InfluxDBMarkDownWidget] widget, or an [InfluxDBUnsupportedCellWidget], 
+  /// an [InfluxDBMarkDownWidget] widget, or an [InfluxDBUnsupportedCellWidget],
   /// a [CircularProgressIndicator] while information about cell is being fetched or a [Text] showing an error.
   Widget childWidget() {
     if (errorString != null) {
@@ -92,45 +95,54 @@ class _InfluxDBDashboardCellWidgetState
       return Center(child: CircularProgressIndicator());
     }
 
-
     // Gaurd against cases where the query didn't return data
     if (allTables.length == 0 && widget.cell.queries.length > 0) {
       return InfluxDBNoDataCellWidget();
     }
 
-    if(allTables.length > 0) {
-      if(allTables[0].rows.length == 0 && widget.cell.queries.length > 0) {
+    if (allTables.length > 0) {
+      if (allTables[0].rows.length == 0 && widget.cell.queries.length > 0) {
         return InfluxDBNoDataCellWidget();
       }
     }
 
     switch (widget.cell.cellType) {
       case "xy":
-        InfluxDBLineChartAxis xAxis =
-            InfluxDBLineChartAxis.fromCellAxis(widget.cell.xAxis);
-
-        InfluxDBLineChartAxis yAxis =
-            InfluxDBLineChartAxis.fromCellAxisAndTables(
-                widget.cell.yAxis, allTables);
-
-        return InfluxDBLineChartWidget(
-          tables: allTables,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          colorScheme: InfluxDBColorScheme.fromAPIData(
-              colorData: widget.cell.colors, size: allTables.length),
-        );
+        return _createLineGraphFromAPI();
       case "single-stat":
         return InfluxDBSingleStatWidget(
           tables: allTables,
           colorsAPIObj: widget.cell.colors,
         );
+      case "line-plus-single-stat":
+        return InfluxDBLinePlusSingleStateWidget(
+          tables: allTables,
+          colorsAPIObj: widget.cell.colors, lineChartWidget: _createLineGraphFromAPI(),
+        );
       case "markdown":
         return InfluxDBMarkDownWidget(data: widget.cell.properties);
       case "table":
-        return InfluxDBTableWidget.fromAPI(properties: widget.cell.properties, tables: allTables);
+        return InfluxDBTableWidget.fromAPI(
+            properties: widget.cell.properties, tables: allTables);
       default:
-      return InfluxDBUnsupportedCellWidget(cellType: widget.cell.cellType);
+        return InfluxDBUnsupportedCellWidget(cellType: widget.cell.cellType);
     }
+  }
+
+  InfluxDBLineChartWidget _createLineGraphFromAPI() {
+    InfluxDBLineChartAxis xAxis =
+        InfluxDBLineChartAxis.fromCellAxis(widget.cell.xAxis);
+    
+    InfluxDBLineChartAxis yAxis =
+        InfluxDBLineChartAxis.fromCellAxisAndTables(
+            widget.cell.yAxis, allTables);
+    
+    return InfluxDBLineChartWidget(
+      tables: allTables,
+      xAxis: xAxis,
+      yAxis: yAxis,
+      colorScheme: InfluxDBColorScheme.fromAPIData(
+          colorData: widget.cell.colors, size: allTables.length),
+    );
   }
 }
