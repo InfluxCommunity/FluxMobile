@@ -31,7 +31,7 @@ class InfluxDBSingleStatWidget extends StatefulWidget {
 class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
   /// Color scheme to use.
   dynamic value;
-  Color backgroundColor = Colors.black;
+  Color backgroundColor = Colors.yellow;
   Color fontColor = Colors.white;
 
   @override
