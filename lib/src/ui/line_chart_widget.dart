@@ -74,19 +74,23 @@ class _InfluxDBLineChartWidgetState extends State<InfluxDBLineChartWidget> {
       List<FlSpot> spots = [];
       for (InfluxDBRow row in table.rows) {
         try {
-          double x = row.millisecondsSinceEpoch.toDouble();
-          double y = double.parse(row["_value"].toString());
+          // don't add rows if the value is not plotable
+          if (num.tryParse(row["_value"].toString()) != null) {
+            double x = row.millisecondsSinceEpoch.toDouble();
+            double y = double.parse(row["_value"].toString());
 
-          // clipToBorder should handle this, but does not, so need must handle bounds
-          if (widget.yAxis.maximum != null && y > widget.yAxis.maximum) {
-            y = widget.yAxis.maximum;
+            // clipToBorder should handle this, but does not, so need must handle bounds
+            if (widget.yAxis.maximum != null && y > widget.yAxis.maximum) {
+              y = widget.yAxis.maximum;
+            }
+            if (widget.yAxis.minimum != null && y < widget.yAxis.minimum) {
+              y = widget.yAxis.minimum;
+            }
+            spots.add(FlSpot(x, y));
           }
-          if (widget.yAxis.minimum != null && y < widget.yAxis.minimum) {
-            y = widget.yAxis.minimum;
-          }
-          spots.add(FlSpot(x, y));
         } catch (e) {
-          print("Unable to parse row (value: ${row["_value"]}): " + e.toString());
+          print(
+              "Unable to parse row (value: ${row["_value"]}): " + e.toString());
           dataChartable = false;
           break;
         }
