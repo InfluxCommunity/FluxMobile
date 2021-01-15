@@ -10,17 +10,19 @@ class InfluxDBSingleStatWidget extends StatefulWidget {
   final dynamic colorsAPIObj;
   final Color fontColor;
   final Color backgroundColor;
+  final int decimalPlaces;
 
   /// Used to create single stat widgets from dashboard data.
   /// colorsAPIObj is used by the dashboards API to create SingleStatWidgets,
-  /// and is not typically used directly. textColor and backgroundColor are ignored 
+  /// and is not typically used directly. textColor and backgroundColor are ignored
   /// if colorsAPIObj is supplied
   const InfluxDBSingleStatWidget(
       {Key key,
       @required this.tables,
       this.colorsAPIObj,
       this.fontColor,
-      this.backgroundColor})
+      this.backgroundColor,
+      this.decimalPlaces})
       : super(key: key);
   @override
   _InfluxDBSingleStatWidgetState createState() =>
@@ -36,10 +38,10 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
 
   @override
   void initState() {
-    if(widget.backgroundColor != null){
+    if (widget.backgroundColor != null) {
       backgroundColor = widget.backgroundColor;
     }
-    if(widget.fontColor != null){
+    if (widget.fontColor != null) {
       fontColor = widget.fontColor;
     }
     super.initState();
@@ -83,6 +85,9 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if(num.tryParse(value.toString()) != null && widget.decimalPlaces != null){
+      value = double.parse(value.toString()).toStringAsFixed(widget.decimalPlaces);
+    }
     return Container(
       constraints: BoxConstraints.expand(),
       color: backgroundColor,

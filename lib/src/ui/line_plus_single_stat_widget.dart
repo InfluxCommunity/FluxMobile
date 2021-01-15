@@ -5,13 +5,15 @@ import 'package:flux_mobile/influxDB.dart';
 class InfluxDBLinePlusSingleStateWidget extends StatelessWidget {
   final List<InfluxDBTable> tables;
   final InfluxDBLineChartWidget lineChartWidget;
-  final colorsAPIObj;
+  final dynamic colorsAPIObj;
+  final int decimalPlaces;
 
   const InfluxDBLinePlusSingleStateWidget(
       {Key key,
       @required this.tables,
       this.colorsAPIObj,
-      @required this.lineChartWidget})
+      @required this.lineChartWidget,
+      this.decimalPlaces})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class InfluxDBLinePlusSingleStateWidget extends StatelessWidget {
               tables: [lilTable],
               fontColor: Colors.black,
               backgroundColor: Colors.white.withOpacity(0.0),
+              decimalPlaces: decimalPlaces,
             ),
           );
         }),

@@ -105,6 +105,12 @@ class _InfluxDBDashboardCellWidgetState
         return InfluxDBNoDataCellWidget();
       }
     }
+    int decimalPlaces;
+
+    if (widget.cell.properties["decimalPlaces"] != null &&
+        widget.cell.properties["decimalPlaces"]["isEnforced"]) {
+      decimalPlaces = widget.cell.properties["decimalPlaces"]["digits"];
+    }
 
     switch (widget.cell.cellType) {
       case "xy":
@@ -113,6 +119,7 @@ class _InfluxDBDashboardCellWidgetState
         return InfluxDBSingleStatWidget(
           tables: allTables,
           colorsAPIObj: widget.cell.colors,
+          decimalPlaces: decimalPlaces,
         );
       case "line-plus-single-stat":
         List<dynamic> singleStatColors = [];
@@ -124,7 +131,9 @@ class _InfluxDBDashboardCellWidgetState
         });
         return InfluxDBLinePlusSingleStateWidget(
           tables: allTables,
-          colorsAPIObj: singleStatColors, lineChartWidget: _createLineGraphFromAPI(),
+          colorsAPIObj: singleStatColors,
+          lineChartWidget: _createLineGraphFromAPI(),
+          decimalPlaces: decimalPlaces,
         );
       case "markdown":
         return InfluxDBMarkDownWidget(data: widget.cell.properties);
@@ -139,11 +148,10 @@ class _InfluxDBDashboardCellWidgetState
   InfluxDBLineChartWidget _createLineGraphFromAPI() {
     InfluxDBLineChartAxis xAxis =
         InfluxDBLineChartAxis.fromCellAxis(widget.cell.xAxis);
-    
-    InfluxDBLineChartAxis yAxis =
-        InfluxDBLineChartAxis.fromCellAxisAndTables(
-            widget.cell.yAxis, allTables);
-    
+
+    InfluxDBLineChartAxis yAxis = InfluxDBLineChartAxis.fromCellAxisAndTables(
+        widget.cell.yAxis, allTables);
+
     return InfluxDBLineChartWidget(
       tables: allTables,
       xAxis: xAxis,
