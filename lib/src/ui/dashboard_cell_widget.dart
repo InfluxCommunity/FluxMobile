@@ -115,9 +115,16 @@ class _InfluxDBDashboardCellWidgetState
           colorsAPIObj: widget.cell.colors,
         );
       case "line-plus-single-stat":
+        List<dynamic> singleStatColors = [];
+        widget.cell.colors.forEach((dynamic c) { 
+          if(c["type"] == "text") {
+            singleStatColors.add(c);
+          }
+
+        });
         return InfluxDBLinePlusSingleStateWidget(
           tables: allTables,
-          colorsAPIObj: widget.cell.colors, lineChartWidget: _createLineGraphFromAPI(),
+          colorsAPIObj: singleStatColors, lineChartWidget: _createLineGraphFromAPI(),
         );
       case "markdown":
         return InfluxDBMarkDownWidget(data: widget.cell.properties);
