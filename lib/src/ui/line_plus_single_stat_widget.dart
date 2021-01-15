@@ -8,7 +8,10 @@ class InfluxDBLinePlusSingleStateWidget extends StatelessWidget {
   final colorsAPIObj;
 
   const InfluxDBLinePlusSingleStateWidget(
-      {Key key, @required this.tables, this.colorsAPIObj, @required this.lineChartWidget})
+      {Key key,
+      @required this.tables,
+      this.colorsAPIObj,
+      @required this.lineChartWidget})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -22,15 +25,16 @@ class InfluxDBLinePlusSingleStateWidget extends StatelessWidget {
           InfluxDBRow row = lilTable.rows.last;
           lilTable.rows.clear();
           lilTable.rows.add(row);
-          return InfluxDBSingleStatWidget(
-            colorsAPIObj: colorsAPIObj,
-            tables: [lilTable],
-            fontColor: Colors.black,
-            backgroundColor: Colors.white.withOpacity(0.0),
+          return IgnorePointer(
+            child: InfluxDBSingleStatWidget(
+              colorsAPIObj: colorsAPIObj,
+              tables: [lilTable],
+              fontColor: Colors.black,
+              backgroundColor: Colors.white.withOpacity(0.0),
+            ),
           );
         }),
       ],
     );
-    // return Overlay(initialEntries: [OverlayEntry(InfluxDBLineChartWidget(tables: tables, xAxis: InfluxDBLineChartAxis(), yAxis: InfluxDBLineChartAxis(),), builder: (BuildContext context) {  },), ]);
   }
 }
