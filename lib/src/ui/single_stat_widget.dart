@@ -49,7 +49,7 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
   }
 
   _buildChart() async {
-    value = widget.tables[0].rows[0]["_value"];
+    value = widget.tables[0].rows.last["_value"];
     // figure out which color to apply
 
     if (widget.colorsAPIObj != null) {
@@ -94,7 +94,8 @@ class _InfluxDBSingleStatWidgetState extends State<InfluxDBSingleStatWidget> {
       child: Center(
           child: Text(
         value.toString(),
-        style: TextStyle(fontSize: 100.0, color: fontColor),
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 100.0, color: fontColor,),
       )),
     );
   }

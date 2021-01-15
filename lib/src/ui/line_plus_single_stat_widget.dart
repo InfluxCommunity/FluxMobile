@@ -23,14 +23,11 @@ class InfluxDBLinePlusSingleStateWidget extends StatelessWidget {
           return lineChartWidget;
         }),
         OverlayEntry(builder: (BuildContext context) {
-          InfluxDBTable lilTable = tables[0];
-          InfluxDBRow row = lilTable.rows.last;
-          lilTable.rows.clear();
-          lilTable.rows.add(row);
+     
           return IgnorePointer(
             child: InfluxDBSingleStatWidget(
               colorsAPIObj: colorsAPIObj,
-              tables: [lilTable],
+              tables: tables,
               fontColor: Colors.black,
               backgroundColor: Colors.white.withOpacity(0.0),
               decimalPlaces: decimalPlaces,
