@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flux_mobile/src/api/variables.dart';
 import 'package:flux_mobile/src/ui/line_plus_single_stat_widget.dart';
 import 'package:flux_mobile/src/ui/no_data_widget.dart';
 
