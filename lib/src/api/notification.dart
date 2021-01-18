@@ -95,7 +95,7 @@ class InfluxDBNotificationRule {
 
   setRecentNotification() async {
     String flux = """
-from(bucket: "_monitoring") |> range(start: -100y)
+from(bucket: "_monitoring") |> range(start: -234)
 |> filter(fn: (r) => r._measurement == "notifications")
 |> filter(fn: (r) => r._notification_rule_id == "$id")
 |> filter(fn: (r) => r._field == "_message")
