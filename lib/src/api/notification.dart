@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import '../../influxDB.dart';
 
-class InfluxDBNotification {
+class InfluxDBNotificationRule {
   InfluxDBAPI api;
   String name;
   String description;
@@ -18,12 +18,12 @@ class InfluxDBNotification {
   DateTime updatedAt;
   TaskSuccess lastRunSucceeded;
   String errorString;
-  List<InfluxDBTable> recentStatuses;
-  InfluxDBTable mostRecentNotification;
+  List<InfluxDBCheckStatus> recentStatuses = [];
+  List<InfluxDBINotification> recentNotifications = [];
   List<dynamic> _tagRules;
   Function onLoadComplete;
 
-  InfluxDBNotification.fromAPI(
+  InfluxDBNotificationRule.fromAPI(
       {@required this.api, Map<dynamic, dynamic> apiObj}) {
     setPropertertiesFromAPIObj(apiObj);
   }
@@ -95,22 +95,47 @@ class InfluxDBNotification {
 
   setRecentNotification() async {
     String flux = """
-from(bucket: "_monitoring") |> range(start: -1h)
+from(bucket: "_monitoring") |> range(start: -100y)
 |> filter(fn: (r) => r._measurement == "notifications")
 |> filter(fn: (r) => r._notification_rule_id == "$id")
 |> filter(fn: (r) => r._field == "_message")
-|> last()
     """;
     InfluxDBQuery query = InfluxDBQuery(api: api, queryString: flux);
     List<InfluxDBTable> tables = await query.execute();
     if (tables.length > 0) {
-      mostRecentNotification = tables[0];
+      tables.forEach((InfluxDBTable table) {
+        table.rows.forEach((InfluxDBRow row) {
+          InfluxDBINotification notification = InfluxDBINotification(
+              time: DateTime.parse(row["_time"]),
+              message: row["_value"],
+              checkName: row["_check_name"],
+              level: InfluxDBNotificationLevels[row["_level"]],
+              notificationEndPoint: row["_notification_endpoint_name"],
+              sent: row["_sent"] == "true",
+              type: row["_type"]);
+          notification.additionalInfo = _additionalInfo(table: table, row: row);
+          recentNotifications.add(notification);
+        });
+      });
     }
+  }
+
+  Map<String, String> _additionalInfo({InfluxDBTable table, InfluxDBRow row}) {
+    Map<String, String> additionalInfo = {};
+    List<String> tagRuleKeys = _tagRules.map((dynamic rule) {
+      return rule["key"].toString();
+    }).toList();
+    table.keys.forEach((String key) {
+      if (!key.startsWith("_") && !tagRuleKeys.contains(key)) {
+        additionalInfo[key] = row[key];
+      }
+    });
+    return additionalInfo;
   }
 
   setStatuses() async {
     String flux = """
-from(bucket: "_monitoring") |> range(start: -1h) 
+from(bucket: "_monitoring") |> range(start: -24h) 
 |> filter(fn: (r) => r._measurement == "statuses")
 |> filter(fn: (r) => r._field == "_message")""";
     _tagRules.forEach((dynamic tagRule) {
@@ -122,7 +147,24 @@ from(bucket: "_monitoring") |> range(start: -1h)
       api: api,
       queryString: flux,
     );
-    recentStatuses = await query.execute();
+    List<InfluxDBTable> results = await query.execute();
+    results.forEach((InfluxDBTable table) {
+      if (table.rows.length > 0) {
+        InfluxDBRow row = table.rows[0];
+
+        InfluxDBCheckStatus status = InfluxDBCheckStatus(
+          level: InfluxDBNotificationLevels[row["_level"]],
+          message: row["_value"],
+          time: DateTime.parse(
+            row["_time"],
+          ),
+          type: row["_type"],
+          checkName: row["_checkName"],
+        );
+        status.additionalInfo = _additionalInfo(table: table, row: row);
+        recentStatuses.add(status);
+      }
+    });
   }
 
   Future refresh() async {
@@ -141,6 +183,51 @@ from(bucket: "_monitoring") |> range(start: -1h)
     );
   }
 }
+
+class InfluxDBINotification {
+  int level;
+  DateTime time;
+  String message;
+  String checkName;
+  String notificationEndPoint;
+  bool sent;
+  String type;
+  Map<String, String> additionalInfo;
+
+  InfluxDBINotification(
+      {this.level,
+      this.time,
+      this.message,
+      this.checkName,
+      this.notificationEndPoint,
+      this.sent,
+      this.type,
+      this.additionalInfo});
+}
+
+class InfluxDBCheckStatus {
+  int level;
+  DateTime time;
+  String message;
+  String checkName;
+  String type;
+  Map<String, String> additionalInfo;
+
+  InfluxDBCheckStatus(
+      {this.level,
+      this.time,
+      this.message,
+      this.checkName,
+      this.type,
+      this.additionalInfo});
+}
+
+const Map<String, int> InfluxDBNotificationLevels = {
+  "ok": 0,
+  "info": 1,
+  "warn": 2,
+  "crit": 3
+};
 
 // 1. Query for all checks
 // 2. For each notification rule, iterate through it's tag rules, extracting key/value tags

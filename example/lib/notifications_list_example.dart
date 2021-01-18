@@ -13,7 +13,7 @@ class NotificationsListExample extends StatefulWidget {
 }
 
 class _NotificationsListExampleState extends State<NotificationsListExample> {
-  List<InfluxDBNotification> _notifications;
+  List<InfluxDBNotificationRule> _notifications;
 
   @override
   void initState() {
