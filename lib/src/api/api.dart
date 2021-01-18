@@ -92,14 +92,14 @@ class InfluxDBAPI {
     return response.body;
   }
 
-  Future<List<InfluxDBNotification>> notifications() async {
-    List<InfluxDBNotification> notifications = [];
+  Future<List<InfluxDBNotificationRule>> notifications() async {
+    List<InfluxDBNotificationRule> notifications = [];
     dynamic body = await _getJSONData("/api/v2/notificationRules");
 
     List<dynamic> nrObjs = body["notificationRules"];
 
     notifications = nrObjs.map((dynamic apiObj) {
-      return InfluxDBNotification.fromAPI(api: this, apiObj: apiObj);
+      return InfluxDBNotificationRule.fromAPI(api: this, apiObj: apiObj);
     }).toList();
     return notifications;
   }
