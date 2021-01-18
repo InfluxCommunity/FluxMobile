@@ -19,7 +19,7 @@ class InfluxDBNotificationRule {
   TaskSuccess lastRunSucceeded;
   String errorString;
   List<InfluxDBCheckStatus> recentStatuses = [];
-  List<InfluxDBINotification> recentNotifications = [];
+  List<InfluxDBNotification> recentNotifications = [];
   List<dynamic> _tagRules;
   Function onLoadComplete;
 
@@ -95,7 +95,7 @@ class InfluxDBNotificationRule {
 
   setRecentNotification() async {
     String flux = """
-from(bucket: "_monitoring") |> range(start: -234)
+from(bucket: "_monitoring") |> range(start: -24h)
 |> filter(fn: (r) => r._measurement == "notifications")
 |> filter(fn: (r) => r._notification_rule_id == "$id")
 |> filter(fn: (r) => r._field == "_message")
@@ -105,7 +105,7 @@ from(bucket: "_monitoring") |> range(start: -234)
     if (tables.length > 0) {
       tables.forEach((InfluxDBTable table) {
         table.rows.forEach((InfluxDBRow row) {
-          InfluxDBINotification notification = InfluxDBINotification(
+          InfluxDBNotification notification = InfluxDBNotification(
               time: DateTime.parse(row["_time"]),
               message: row["_value"],
               checkName: row["_check_name"],
@@ -184,7 +184,7 @@ from(bucket: "_monitoring") |> range(start: -24h)
   }
 }
 
-class InfluxDBINotification {
+class InfluxDBNotification implements InfluxDBCheckStatus{
   int level;
   DateTime time;
   String message;
@@ -194,7 +194,7 @@ class InfluxDBINotification {
   String type;
   Map<String, String> additionalInfo;
 
-  InfluxDBINotification(
+  InfluxDBNotification(
       {this.level,
       this.time,
       this.message,
