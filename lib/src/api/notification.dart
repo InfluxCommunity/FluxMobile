@@ -94,6 +94,7 @@ class InfluxDBNotificationRule {
   }
 
   setRecentNotification() async {
+    recentNotifications.clear();
     String flux = """
 from(bucket: "_monitoring") |> range(start: -24h)
 |> filter(fn: (r) => r._measurement == "notifications")
@@ -134,6 +135,7 @@ from(bucket: "_monitoring") |> range(start: -24h)
   }
 
   setStatuses() async {
+    recentStatuses.clear();
     String flux = """
 from(bucket: "_monitoring") |> range(start: -24h) 
 |> filter(fn: (r) => r._measurement == "statuses")
