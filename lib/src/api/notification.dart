@@ -67,6 +67,7 @@ class InfluxDBNotificationRule {
     lastRunSucceeded = _getTaskSuccess(apiObj);
     errorString = apiObj["lastRunError"];
     _tagRules = apiObj["tagRules"];
+    if(_tagRules == null) _tagRules = [];
     await Future.wait<void>([
       setRecentNotification(),
       setStatuses(),
