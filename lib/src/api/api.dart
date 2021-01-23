@@ -7,6 +7,7 @@ import 'package:flux_mobile/influxDB.dart';
 import 'package:flux_mobile/src/api/variables.dart';
 import 'package:flux_mobile/src/ui/user_info_form.dart';
 import 'package:http/http.dart';
+import 'package:version/version.dart';
 
 import 'dashboard.dart';
 import 'error.dart';
@@ -32,6 +33,25 @@ class InfluxDBAPI {
   /// Initializes [InfluxDBAPI] object by passing URL, organization and token.
   InfluxDBAPI(
       {@required this.influxDBUrl, @required this.org, @required this.token});
+
+  Future<Version> fluxVersion() async {
+    String flux = """
+    import "runtime"
+import "csv"
+csvData = \"#datatype,string,long,string
+#group,false,false,false
+#default,,,
+,result,table,_value
+,,0,\${runtime.version()}\"
+csv.from(csv:csvData)""";
+    InfluxDBQuery query = InfluxDBQuery(api: this, queryString: flux);
+    List<InfluxDBTable> tables = await query.execute();
+    String versionString = tables[0].rows[0]["_value"].toString();
+    versionString = versionString.substring(1);
+    Version v = Version.parse(versionString);
+
+    return v;
+  }
 
   /// Retrieves raw results of a Flux query using [InfluxDBAPI] and returns the output as string
   /// If you want the processed data, use [InfluxDBQuery.execute]()
@@ -160,7 +180,8 @@ class InfluxDBAPI {
       if (url.endsWith("/")) url = url.substring(0, url.length - 1);
       return Uri.http(url, urlSuffix, queryParams);
     } else {
-      throw FormatException("no supported protocol (http/https) specified in account url");
+      throw FormatException(
+          "no supported protocol (http/https) specified in account url");
     }
   }
 
@@ -357,7 +378,8 @@ class InfluxDBAPI {
     return variables;
   }
 
-  Future<List<InfluxDBBucket>> buckets({Function onLoadComplete}) async {
+  Future<List<InfluxDBBucket>> buckets(
+      {Function onLoadComplete, bool includeExtendedProperties = true}) async {
     List<InfluxDBBucket> buckets = [];
 
     Map<String, dynamic> apiObj = await _getJSONData("/api/v2/buckets");
@@ -365,7 +387,10 @@ class InfluxDBAPI {
     bucketObjs.forEach((dynamic bucketObj) {
       buckets.add(
         InfluxDBBucket.fromAPI(
-            api: this, apiObj: bucketObj, onLoadComplete: onLoadComplete),
+            api: this,
+            apiObj: bucketObj,
+            onLoadComplete: onLoadComplete,
+            includeExtendedProperties: includeExtendedProperties),
       );
     });
 

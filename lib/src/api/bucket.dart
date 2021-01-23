@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flux_mobile/influxDB.dart';
 import 'package:http/http.dart';
 
-/// Represent a bucket in InfluxDB 2.0. 
+/// Represent a bucket in InfluxDB 2.0.
 class InfluxDBBucket {
   /// Required API object for fetching bucket data
   InfluxDBAPI api;
@@ -27,7 +27,7 @@ class InfluxDBBucket {
   /// The retention period in seconds, if any
   int retentionSeconds;
 
-  /// If false, then the bucket has an infinite retention policy. 
+  /// If false, then the bucket has an infinite retention policy.
   bool hasRetentionPolicy;
 
   /// Cardinality for all of the data in the bucket. Note that this property is set
@@ -50,9 +50,13 @@ class InfluxDBBucket {
   Function onLoadComplete;
 
   /// Creates a bucket. However, this constructor will not populate the properteies of the object.
-  /// Typically, use InfluxDBBucket.fromAPI() via the InfluxDBAPI.buckets() 
+  /// Typically, use InfluxDBBucket.fromAPI() via the InfluxDBAPI.buckets()
   /// function in order to create an instance of a bucket.
   InfluxDBBucket({@required this.api, this.name});
+
+  /// If true, extra properties such as  carinality, mostRecentRecords, and mostRecentWrite
+  /// will be fetched asynronously. Setting to false is useful for instances running older Flux versions.
+  bool includeExtendedProperties = true;
 
   /// Creates and returns a bucket based on JSON returned by the InfluxDB REST API.
   /// Note that some properties will be set asyncronously (after this function returns).
@@ -60,7 +64,8 @@ class InfluxDBBucket {
   InfluxDBBucket.fromAPI(
       {@required this.api,
       @required Map<dynamic, dynamic> apiObj,
-      this.onLoadComplete}) {
+      this.onLoadComplete,
+      this.includeExtendedProperties}) {
     setPropertiesFromAPIObj(apiObj);
   }
 
@@ -80,10 +85,12 @@ class InfluxDBBucket {
       hasRetentionPolicy = true;
       retentionSeconds = apiObj["retentionRules"][0]["everySeconds"];
     }
-    await Future.wait<void>([
-      _setRecentWrites(),
-      _setCardinality(),
-    ]);
+    if (includeExtendedProperties) {
+      await Future.wait<void>([
+        _setRecentWrites(),
+        _setCardinality(),
+      ]);
+    }
     if (onLoadComplete != null) onLoadComplete();
   }
 
@@ -115,7 +122,7 @@ class InfluxDBBucket {
     }
   }
 
-  /// Resets all of the properties for an existing bucket object. 
+  /// Resets all of the properties for an existing bucket object.
   /// Note that some properties will be set asyncronously (after this function returns).
   /// Set the onLoadComplete function to respond when those properties are set.
   Future refresh() async {
