@@ -151,9 +151,17 @@ class InfluxDBAPI {
     }
 
     String url = influxDBUrl;
-    if (url.startsWith("https://")) url = url.replaceFirst("https://", "");
-    if (url.endsWith("/")) url = url.substring(0, url.length - 1);
-    return Uri.https(url, urlSuffix, queryParams);
+    if (url.startsWith("https://")) {
+      url = url.replaceFirst("https://", "");
+      if (url.endsWith("/")) url = url.substring(0, url.length - 1);
+      return Uri.https(url, urlSuffix, queryParams);
+    } else if (url.startsWith("http://")) {
+      url = url.replaceFirst("http://", "");
+      if (url.endsWith("/")) url = url.substring(0, url.length - 1);
+      return Uri.http(url, urlSuffix, queryParams);
+    } else {
+      throw FormatException("no supported protocol (http/https) specified in account url");
+    }
   }
 
   /// get a list of InfluxDBTask objects
