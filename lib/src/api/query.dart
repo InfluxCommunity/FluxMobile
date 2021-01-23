@@ -47,11 +47,23 @@ class InfluxDBQuery {
     String body = await api.postFluxQuery(queryString, variables: variables);
 
     // Track the current set of keys for the columns of each table
+    return _tablesFromCSVString(body);
+  }
+
+  @visibleForTesting
+  List<InfluxDBTable> tablesFromCSVString(String body) {
+    return _tablesFromCSVString(body);
+  }
+
+  List<InfluxDBTable> _tablesFromCSVString(String body) {
+    // Track the current set of keys for the columns of each table
     List<String> currentKeys = [];
 
     // Keep a list of rows for each table encountered
     List<List<dynamic>> currentDataRows = [];
     int currentTable = 0; // counter to track the current table
+
+    String currentYieldName;
 
     // use the csv library to convert each row into a List (a list of lists)
     List<List<dynamic>> allRows = converter.convert(body);
@@ -61,7 +73,10 @@ class InfluxDBQuery {
         // The row length is 1 when changine between tables in different yield
         // statements from a query, so this is always between tables
 
-        tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+        tables.add(InfluxDBTable.fromCSV(
+            dataRows: currentDataRows,
+            keys: currentKeys,
+            yieldName: currentYieldName));
 
         currentDataRows.clear();
       } else {
@@ -79,9 +94,19 @@ class InfluxDBQuery {
           }
         } else {
           if (row[2].runtimeType == int) {
+            // find the yieldName
+            String yn = row[1].toString();
+
+            // if this is the first line of data, then set
+            // the current yeild name
+            if (currentYieldName == null) {
+              currentYieldName = yn;
+            }
+
             // ignore: unrelated_type_equality_checks
-            if (row[2] == currentTable) {
+            if (row[2] == currentTable && yn == currentYieldName) {
               // when the third position is an integer, it means it is the able id
+              // if this is not a new yield statement and
               // if the row's id matches the currentTable, then it is part of that table
               currentDataRows.add(row.sublist(3));
             } else {
@@ -90,22 +115,28 @@ class InfluxDBQuery {
 
               // if there is existing data from previous rows, then create a new table
               // with that data and start accumulating new rows
-              if(currentDataRows.length > 0){
-                tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+              if (currentDataRows.length > 0) {
+                tables.add(InfluxDBTable.fromCSV(
+                    dataRows: currentDataRows,
+                    keys: currentKeys,
+                    yieldName: currentYieldName));
                 currentDataRows.clear();
               }
 
               // accumulate new rows for the current table
               currentDataRows.add(row.sublist(3));
               currentTable = row[2]; // increment the table id
-              
+              currentYieldName = yn;
             }
           }
         }
       }
     });
     if (currentDataRows.length > 0) {
-      tables.add(InfluxDBTable.fromCSV(currentDataRows, currentKeys));
+      tables.add(InfluxDBTable.fromCSV(
+          dataRows: currentDataRows,
+          keys: currentKeys,
+          yieldName: currentYieldName));
     }
     return tables;
   }
