@@ -1,5 +1,6 @@
 import 'package:example/dashboard_list_example.dart';
 import 'package:example/notifications_list_example.dart';
+import 'package:example/status_example.dart';
 import 'package:example/tasks_list_example%20copy.dart';
 import 'package:example/version_example.dart';
 import 'package:example/visualizations_example.dart';
@@ -51,7 +52,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
     InfluxDBAPI api = getApi();
 
     return DefaultTabController(
-      length: 9,
+      length: 10,
       child: Scaffold(
         appBar: AppBar(
           title: Text("Examples"),
@@ -66,6 +67,7 @@ class _ExampleTabsState extends State<ExampleTabs> {
               Text("Ntf"),
               Text("Wrt"),
               Text("V"),
+              Text("S")
             ],
           ),
           actions: <Widget>[
@@ -143,6 +145,13 @@ class _ExampleTabsState extends State<ExampleTabs> {
                   )),
             ((api != null)
                 ? VersionExample(
+                    api: api,
+                  )
+                : Center(
+                    child: Text("Need to log in ..."),
+                  )),
+            ((api != null)
+                ? StatusExample(
                     api: api,
                   )
                 : Center(

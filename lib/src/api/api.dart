@@ -112,6 +112,57 @@ csv.from(csv:csvData)""";
     return response.body;
   }
 
+  /// Get a list of Statuses.
+  /// If lastOnly is true (defaults to false) only the last status from each series will be returned.
+  /// timeRangeStart can be set by passing a valid duration string, almost always in the past, so
+  /// in the form of "-1d","-1h","-5m", etc... defaults to -24h
+  Future<List<InfluxDBCheckStatus>> status(
+      {bool lastOnly = false, String timeRangeStart = "-24h"}) async {
+    String flux = """
+from(bucket: "_monitoring") |> range(start: $timeRangeStart) 
+|> filter(fn: (r) => r._measurement == "statuses")
+|> filter(fn: (r) => r._field == "_message")
+""";
+    if (lastOnly) {
+      flux += "\n |> last()";
+    }
+    InfluxDBQuery query = InfluxDBQuery(
+      api: this,
+      queryString: flux,
+    );
+    List<InfluxDBCheckStatus> statuses = [];
+    List<InfluxDBTable> results = await query.execute();
+    results.forEach((InfluxDBTable table) {
+      if (table.rows.length > 0) {
+        table.rows.forEach((InfluxDBRow row) {
+          InfluxDBCheckStatus status = InfluxDBCheckStatus(
+            level: InfluxDBNotificationLevels[row["_level"]],
+            message: row["_value"],
+            time: DateTime.parse(
+              row["_time"],
+            ),
+            type: row["_type"],
+            checkName: row["_check_name"],
+          );
+          status.additionalInfo = _additionalInfo(table: table, row: row);
+          statuses.add(status);
+        });
+      }
+    });
+
+    return statuses;
+  }
+
+  Map<String, String> _additionalInfo({InfluxDBTable table, InfluxDBRow row}) {
+    Map<String, String> additionalInfo = {};
+    table.keys.forEach((String key) {
+      if (!key.startsWith("_")) {
+        additionalInfo[key] = row[key];
+      }
+    });
+    return additionalInfo;
+  }
+
   Future<List<InfluxDBNotificationRule>> notifications() async {
     List<InfluxDBNotificationRule> notifications = [];
     dynamic body = await _getJSONData("/api/v2/notificationRules");
